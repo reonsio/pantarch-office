@@ -3,12 +3,10 @@
 const KINDS={
   BRAND:{tabs:[['calendar','CALENDAR'],['library','LIBRARY'],['queue','POST QUEUE'],['insights','INSIGHTS']]},
   PRODUCT:{tabs:[['milestones','MILESTONES'],['docs','DOCS'],['builds','BUILDS']]},
+  SERVICE:{tabs:[['milestones','MILESTONES'],['docs','DOCS']]},
 };
-const BIZLIST=[
-  {id:'kkumi',kind:'BRAND',name:'꾸미',desc:'반려견 성장기 콘텐츠 · 인스타그램',col:'#E08A5A',media:'workspace/kkumi/media/',dir:'workspace/kkumi/'},
-  {id:'game',kind:'PRODUCT',name:'게임 개발',desc:'1인 개발 게임 · 방향 정하는 중',col:'#7DB79A',dir:'workspace/game/'},
-];
-const PF={biz:'kkumi',tab:{kkumi:'calendar',game:'milestones'},tree:null,folder:'all',sel:null,doc:null};
+function bizList(){return (S.bus||[]).map(b=>({...b,col:b.color||KCOL[b.kind],media:`workspace/${b.id}/media/`,dir:`workspace/${b.id}/`}));}
+const PF={biz:null,tab:{},tree:null,folder:'all',sel:null,doc:null};
 const BLOB={};
 
 async function loadTree(){
@@ -35,23 +33,25 @@ function lazy(root){root.querySelectorAll('[data-path]').forEach(el=>io.observe(
 window.renderPortfolio=async function(soft){
   const root=$('#portfolio');
   if(!PF.tree||!soft){try{await loadTree();}catch(e){toast('저장소 목록을 못 읽었습니다');}}
-  const b=BIZLIST.find(x=>x.id===PF.biz);
-  const side=BIZLIST.map(x=>{let s='';
+  const BL=bizList();if(!BL.length){root.innerHTML='<div class="empty">사업 목록을 불러오는 중…</div>';return;}
+  const b=BL.find(x=>x.id===PF.biz)||BL[0];PF.biz=b.id;
+  const side=BL.map(x=>{let s='';
     if(x.kind==='BRAND'){const ps=posts(x.id);s=`자료 ${mediaFiles(x).length} · 게시 결재 ${ps.filter(i=>i.state==='open'&&statusOf(i)==='REVIEW').length}`;}
     else{const t=S.issues.filter(i=>has(i,'task')&&bizOf(i)===x.id);s=`업무 ${t.filter(i=>i.state==='open').length} 진행 · ${t.filter(i=>i.state==='closed').length} 완료`;}
     return `<div class="bz${x.id===PF.biz?' on':''}" data-bz="${x.id}"><div class="bar" style="background:${x.col}"></div><div><div class="k" style="color:${x.col}">${x.kind}</div><div class="n">${esc(x.name)}</div><div class="s">${esc(s)}</div></div></div>`;}).join('');
-  const tabs=KINDS[b.kind].tabs, cur=PF.tab[b.id];
+  const tabs=(KINDS[b.kind]||KINDS.SERVICE).tabs;if(!PF.tab[b.id]||!tabs.some(t=>t[0]===PF.tab[b.id]))PF.tab[b.id]=tabs[0][0];const cur=PF.tab[b.id];
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column">
-    <div class="ph"><span class="cap">PORTFOLIO</span><span class="mono mu" style="font-size:10px">${BIZLIST.length} BUSINESS</span></div>
+    <div class="ph"><span class="cap">PORTFOLIO</span><span class="mono mu" style="font-size:10px">${BL.length} BUSINESS</span></div>
     <div class="scroll">${side}</div>
-    <div style="padding:6px 8px;border-top:1px solid #3A2A1F"><button class="btn" style="width:100%" disabled title="다음 단계에서 붙입니다">＋ 사업 추가</button></div>
+    <div style="padding:6px 8px;border-top:1px solid #3A2A1F"><button class="btn" style="width:100%" id="pAddBiz">＋ 사업 추가</button></div>
   </section>
   <section class="pnl" data-nofold style="display:flex;flex-direction:column;min-height:0">
     <div class="ph" style="height:40px"><span style="display:flex;align-items:baseline;gap:10px"><span class="mono" style="font-size:11px;letter-spacing:1.4px;color:${b.col}">${b.kind}</span><span style="font-size:16px;font-weight:600;color:#F4E6CF">${esc(b.name)}</span><span class="mu" style="font-size:12px">${esc(b.desc)}</span></span>
     <span class="tabs" style="grid-template-columns:repeat(${tabs.length},120px)">${tabs.map(([k,l])=>`<button class="btn${k===cur?' on':''}" data-tab="${k}">${l}</button>`).join('')}</span></div>
     <div id="pfBody" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
   </section>`;
-  root.querySelectorAll('[data-bz]').forEach(el=>el.onclick=()=>{PF.biz=el.dataset.bz;renderPortfolio(true);});
+  root.querySelectorAll('[data-bz]').forEach(el=>el.onclick=()=>{PF.biz=el.dataset.bz;PF.folder='all';PF.doc=null;renderPortfolio(true);});
+  $('#pAddBiz').onclick=openAddBiz;
   root.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{PF.tab[b.id]=el.dataset.tab;renderPortfolio(true);});
   const body=$('#pfBody');
   ({calendar:pCalendar,library:pLibrary,queue:pQueue,insights:pInsights,milestones:pMilestones,docs:pDocs,builds:pBuilds})[cur](body,b);
@@ -143,9 +143,9 @@ function pDocs(body,b){
   body.querySelectorAll('[data-doc]').forEach(el=>el.onclick=()=>show(el.dataset.doc));
   if(PF.doc&&files.some(f=>f.path===PF.doc))show(PF.doc);
 }
-function pBuilds(body){
+function pBuilds(body,b){
   body.innerHTML=`<div class="ph"><span class="cap">BUILDS</span><span class="mono mu" style="font-size:10px">0 BUILDS</span></div>
-  <div class="note">아직 빌드가 없습니다. 시제품 코드가 <code>workspace/game/</code>에 생기면 여기서 버전별 플레이 링크와 변경점을 보여줍니다.</div>`;
+  <div class="note">아직 빌드가 없습니다. 시제품 코드가 <code>${b.dir}</code>에 생기면 여기서 버전별 플레이 링크와 변경점을 보여줍니다.</div>`;
 }
 
 /* ---------- media: preview, upload, composer ---------- */
@@ -178,22 +178,22 @@ async function upload(b,files){
     const base=f.name.replace(/\.[^.]+$/,'').replace(/[^\w가-힣\-]+/g,'-').slice(0,40)||'file';
     const path=`${b.media}uploads/${ym}/${Date.now().toString(36)}-${base}.${ext}`;
     try{await gh('/contents/'+path.split('/').map(encodeURIComponent).join('/'),{method:'PUT',body:{message:`꾸미 자료 올림: ${f.name}`,content:await toB64(blob),branch:'main'}});ok++;}
-    catch(e){toast(`${f.name} 실패: ${e.message.slice(0,50)}`);}
+    catch(e){toast(e.status===403?'올리기 권한 없음: 접근키의 Contents 권한을 Read and write로 바꿔 주세요':`${f.name} 실패: ${e.message.slice(0,50)}`);if(e.status===403)break;}
   }
   toast(`${ok}개 올렸습니다`);PF.folder='uploads';await loadTree();renderPortfolio(true);
 }
 function openComposer(b,path){
   let m=$('#mPost');
   if(!m){m=document.createElement('div');m.className='mask';m.id='mPost';
-    m.innerHTML=`<div class="fm" style="width:560px"><div class="ph"><span class="cap">NEW POST · 꾸미</span></div><div class="bd">
+    m.innerHTML=`<div class="fm" style="width:560px"><div class="ph"><span class="cap" id="cpTitle">NEW POST</span></div><div class="bd">
     <div style="display:grid;grid-template-columns:140px minmax(0,1fr);gap:10px"><div class="tile" id="cpMedia" style="cursor:default"></div>
     <div style="display:grid;gap:8px"><label>형식<select id="cpKind"><option>사진</option><option>영상</option><option>캐러셀</option></select></label><label>게시 시각<input type="datetime-local" id="cpWhen"></label></div></div>
     <label>캡션 (한 줄 드립)<textarea id="cpCap" rows="3"></textarea></label>
     <label>해시태그 (첫 댓글)<input id="cpTags" value="#꾸미일기 #강아지 #반려견 #댕스타그램"></label>
     <div class="err" id="cpErr"></div>
-    <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="cpSave">결재 올리기</button></div></div></div>`;
+    <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="cpSave">게시 대기열에 넣기</button></div></div></div>`;
     $('#stage').append(m);m.querySelector('[data-close]').onclick=()=>m.classList.remove('show');}
-  PF.sel=path;const mt=$('#cpMedia');
+  $('#cpTitle').textContent='NEW POST · '+b.name;PF.sel=path;const mt=$('#cpMedia');
   mt.innerHTML=path?(isImg(path)?`<img data-path="${esc(path)}" alt="">`:'<span class="vb">VIDEO</span>')+`<span class="cap2">${esc(path.split('/').pop())}</span>`:'<div class="empty">LIBRARY에서 자료를 고르면 여기에 붙습니다</div>';lazy(mt);
   $('#cpKind').value=path&&isVid(path)?'영상':'사진';
   const d=new Date();d.setDate(d.getDate()+1);d.setHours(18,0,0,0);$('#cpWhen').value=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);
@@ -203,7 +203,31 @@ function openComposer(b,path){
     const blk=`[[POST]]\n형식: ${kind}\n파일: ${PF.sel||''}\n캡션:\n${cap}\n해시태그: ${tags}\n추천 시각: ${when}\n[[/POST]]`;
     const mm={kind,media:PF.sel||'',caption:cap,hashtags:tags,when};
     $('#cpSave').disabled=true;
-    try{const r=await gh('/issues',{method:'POST',body:{title:'게시 · '+cap.split('\n')[0].slice(0,24),body:blk+'\n\n```json meta\n'+JSON.stringify(mm)+'\n```',labels:['post','status:review','biz:'+b.id]}});
-      m.classList.remove('show');toast(`P-${String(r.number).padStart(3,'0')} 결재 대기에 올렸습니다`);PF.tab[b.id]='queue';setTimeout(sync,1200);}
+    try{const r=await gh('/issues',{method:'POST',body:{title:'게시 · '+cap.split('\n')[0].slice(0,24),body:blk+'\n\n```json meta\n'+JSON.stringify(mm)+'\n```',labels:['post','status:approved','biz:'+b.id]}});
+      m.classList.remove('show');toast(`P-${String(r.number).padStart(3,'0')} 게시 대기열에 넣었습니다(대표님 작성분은 바로 승인)`);PF.tab[b.id]='queue';setTimeout(sync,1200);}
     catch(e){$('#cpErr').textContent='실패: '+e.message.slice(0,80);}finally{$('#cpSave').disabled=false;}};
+}
+
+/* ---------- 새 사업 등록 ---------- */
+function openAddBiz(){
+  let m=$('#mBiz');
+  if(!m){m=document.createElement('div');m.className='mask';m.id='mBiz';
+    m.innerHTML=`<div class="fm"><div class="ph"><span class="cap">NEW BUSINESS</span></div><div class="bd">
+    <div class="row"><label>사업 이름<input id="bzName" maxlength="30" placeholder="예: 동네 카페"></label><label>영문 코드<input id="bzId" maxlength="20" placeholder="예: cafe"></label></div>
+    <label>유형<select id="bzKind"><option value="BRAND">BRAND · 콘텐츠·SNS 브랜드 (캘린더·자료실·게시)</option><option value="PRODUCT">PRODUCT · 만드는 제품 (마일스톤·문서·빌드)</option><option value="SERVICE">SERVICE · 운영·서비스 (마일스톤·문서)</option></select></label>
+    <label>한 줄 설명<input id="bzDesc" maxlength="60"></label>
+    <label>첫 미션 (선택)<textarea id="bzMission" rows="4" placeholder="적으면 등록과 동시에 TOM이 업무로 나눕니다"></textarea></label>
+    <div class="err" id="bzErr"></div>
+    <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="bzSave">사업 등록</button></div></div></div>`;
+    $('#stage').append(m);m.querySelector('[data-close]').onclick=()=>m.classList.remove('show');}
+  ['bzName','bzId','bzDesc','bzMission'].forEach(k=>$('#'+k).value='');$('#bzErr').textContent='';m.classList.add('show');
+  $('#bzSave').onclick=async()=>{const name=$('#bzName').value.trim(),id=$('#bzId').value.trim().toLowerCase();
+    if(!name){$('#bzErr').textContent='사업 이름을 적어 주세요.';return;}
+    if(!/^[a-z][a-z0-9-]{1,19}$/.test(id)){$('#bzErr').textContent='영문 코드는 영문 소문자로 시작하고 영문·숫자·하이픈만 씁니다.';return;}
+    if((S.bus||[]).some(b=>b.id===id)){$('#bzErr').textContent='이미 있는 코드입니다.';return;}
+    const meta={id,name,kind:$('#bzKind').value,desc:$('#bzDesc').value.trim(),mission:$('#bzMission').value.trim()};
+    $('#bzSave').disabled=true;
+    try{await gh('/issues',{method:'POST',body:{title:'사업 등록: '+name,body:`${meta.kind} · ${name}\n${meta.desc}\n\n\`\`\`json meta\n${JSON.stringify(meta)}\n\`\`\``,labels:['business']}});
+      m.classList.remove('show');toast(`${name} 등록 요청 · 엔진이 1~2분 안에 사업 목록에 넣습니다`);setTimeout(sync,1500);}
+    catch(e){$('#bzErr').textContent='실패: '+e.message.slice(0,80);}finally{$('#bzSave').disabled=false;}};
 }

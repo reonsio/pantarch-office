@@ -106,7 +106,7 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 .bz .n{font-size:14px;font-weight:600;color:#F4E6CF;margin:1px 0}
 .bz .s{font:10px 'IBM Plex Mono',monospace;color:#A08A72}
 .tabs{display:grid;grid-template-columns:repeat(4,120px);gap:4px}
-.tabs .btn{height:24px}
+.tabs .btn{height:24px;font:500 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px}
 .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;padding:10px;align-content:start}
 .tile{position:relative;aspect-ratio:1;background:#17110D;border:1px solid #3A2A1F;cursor:pointer;overflow:hidden}
 .tile img,.tile video{width:100%;height:100%;object-fit:cover}
@@ -146,6 +146,65 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 .pnl.folded>:not(.ph){display:none!important}
 .ms.folded .tr{display:none}
 .ms .mh{cursor:pointer}
+
+/* ---------- mobile ---------- */
+#mtab{display:none}
+body.m{overflow:auto}
+body.m #stage{position:relative;left:0!important;top:0!important;transform:none!important;width:100%;height:100dvh;grid-template-rows:44px minmax(0,1fr) 56px}
+body.m header{grid-template-columns:minmax(0,1fr) auto;padding:0 10px}
+body.m header nav{display:none}
+body.m header>div:last-child{grid-template-columns:repeat(3,64px)}
+body.m header>div:last-child .btn{height:28px;font-size:11px;padding:0}
+body.m #hqSub{display:none}
+body.m main{display:flex;flex-direction:column;gap:8px;overflow:auto;padding:8px;-webkit-overflow-scrolling:touch}
+body.m main>aside,body.m main>.col{display:contents}
+body.m main .pnl{display:none!important}
+body.m main .pnl.mon{display:flex!important;flex-direction:column;flex:none!important;height:auto!important;max-height:none!important}
+body.m main .pnl.mon.folded>:not(.ph){display:none!important}
+body.m main .pnl.mon .scroll{overflow:visible;flex:none}
+body.m .plan{display:block}
+body.m #pPlan{order:-1}
+body.m #legend{display:none!important}
+body.m main .ph{height:auto;min-height:34px;flex-wrap:wrap;row-gap:4px;padding:5px 8px}
+body.m .ag{width:18px;height:18px;margin:-9px 0 0 -9px}
+body.m .ag img{width:18px;height:18px}
+body.m .tg{font-size:7px;line-height:9px;padding:0 2px}
+body.m .bb{font-size:8px;line-height:10px;max-width:90px;padding:0 3px}
+body.m .rl{font-size:7px;line-height:10px;padding:0 3px}
+body.m .rl span,body.m .rl em{display:none}
+body.m .seat{width:12px;height:12px;margin:-6px 0 0 -6px;font-size:8px;line-height:10px}
+body.m .card{left:6px;right:6px;bottom:6px;width:auto}
+body.m .th{display:none}
+body.m .tr{grid-template-columns:52px minmax(0,1fr) 46px 78px;height:auto;min-height:36px;padding:6px 10px}
+body.m .tr>:nth-child(2),body.m .tr>:nth-child(4),body.m .tr>:nth-child(6),body.m .tr>:nth-child(8),body.m .tr>:nth-child(9),body.m .tr>:nth-child(10){display:none}
+body.m .tr>.ell:nth-child(3){white-space:normal}
+body.m .btn{height:34px;font-size:12px}
+body.m .sbtn{height:26px}
+body.m .ap .t{white-space:normal}
+body.m .mask .fm{width:94vw!important;max-height:90dvh;overflow:auto}
+body.m footer{display:none}
+body.m #mtab{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #3A2A1F;background:#1E1611}
+#mtab button{background:none;border:0;border-top:2px solid transparent;color:#A08A72;font:600 11px 'IBM Plex Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
+#mtab button b{font:10px 'IBM Plex Mono',monospace;letter-spacing:1px;font-weight:400}
+#mtab button.on{color:#F4E6CF;border-top-color:#D9A441}
+#mtab button .nb{color:#E2704F}
+body.m #portfolio{grid-template-columns:1fr;overflow:auto;padding:8px}
+body.m #portfolio>section:first-child{max-height:none}
+body.m #portfolio .bz{height:52px}
+body.m #portfolio .ph{height:auto!important;min-height:34px;flex-wrap:wrap;gap:6px;padding:6px 8px}
+body.m #portfolio .tabs{grid-template-columns:repeat(4,1fr)!important;width:100%}
+body.m .cal{grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:18px repeat(2,minmax(84px,auto));gap:2px;padding:6px}
+body.m .day{min-height:84px;padding:3px}
+body.m .day .dn{font-size:9px}
+body.m .pc{grid-template-columns:1fr}
+body.m .pc img{width:100%;height:auto;aspect-ratio:1}
+body.m .pc span{font-size:9px}
+body.m .pqh{display:none}
+body.m .pq{grid-template-columns:64px minmax(0,1fr);grid-template-areas:"m c" "w s" "d d";row-gap:6px}
+body.m .pq>:nth-child(1){grid-area:m}body.m .pq>:nth-child(2){grid-area:c}body.m .pq>:nth-child(3){grid-area:w}body.m .pq>:nth-child(4){grid-area:s}body.m .pq>:nth-child(5){grid-area:d}
+body.m .grid{grid-template-columns:repeat(3,1fr);gap:4px;padding:6px}
+body.m .doc{grid-template-columns:1fr}
+body.m .doc .ls{max-height:200px;border-right:0;border-bottom:1px solid #3A2A1F}
 /* modal */
 .mask{position:absolute;inset:0;background:rgba(10,7,5,.72);display:none;align-items:center;justify-content:center;z-index:20}
 .mask.show{display:flex}
@@ -181,12 +240,12 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 
 <main>
 <aside>
-<section class="pnl" style="display:flex;flex-direction:column;flex:1">
+<section class="pnl" data-m="office" style="display:flex;flex-direction:column;flex:1">
 <div class="ph"><span class="cap" id="pplCap">PEOPLE</span><span class="mono mu" style="font-size:10px" id="seatCap"></span></div>
 <div class="scroll" id="roster"></div>
 <div style="padding:6px 8px;display:grid;grid-template-columns:repeat(2,1fr);gap:4px;border-top:1px solid #3A2A1F"><button class="btn" id="bHire">＋ 채용 제안</button><button class="btn" id="bMission2">＋ 미션</button></div>
 </section>
-<section class="pnl">
+<section class="pnl" data-m="office">
 <div class="ph"><span class="cap">COMPANY METRICS</span><span class="mono mu" style="font-size:10px">14D</span></div>
 <div class="kp" id="kpis"></div>
 </section>
@@ -197,11 +256,11 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 </aside>
 
 <div class="col">
-<section class="pnl" style="flex:none">
-<div class="ph"><span class="cap">FLOOR PLAN · 3F · LIVE</span><span class="mono" style="font-size:9px;color:#8E7861;display:flex;gap:10px"><span><i class="d" style="background:#E2B04A"></i>RUNNING</span><span><i class="d" style="background:#E2704F"></i>REVIEW</span><span><i class="d" style="background:#79B8C9"></i>MEETING</span><span><i class="d" style="background:#9C8670"></i>QUEUED</span><span><i class="d" style="background:#7A6654"></i>IDLE</span><span style="color:#E08A5A">■ CLAUDE</span><span style="color:#7DB79A">■ GPT</span><span style="color:#A3ACDB">■ GROK</span></span></div>
+<section class="pnl" id="pPlan" data-m="office" style="flex:none">
+<div class="ph"><span class="cap">FLOOR PLAN · 3F · LIVE</span><span class="mono" id="legend" style="font-size:9px;color:#8E7861;display:flex;gap:10px"><span><i class="d" style="background:#E2B04A"></i>RUNNING</span><span><i class="d" style="background:#E2704F"></i>REVIEW</span><span><i class="d" style="background:#79B8C9"></i>MEETING</span><span><i class="d" style="background:#9C8670"></i>QUEUED</span><span><i class="d" style="background:#7A6654"></i>IDLE</span><span style="color:#E08A5A">■ CLAUDE</span><span style="color:#7DB79A">■ GPT</span><span style="color:#A3ACDB">■ GROK</span></span></div>
 <div class="plan" id="plan"><div class="card" id="card"></div></div>
 </section>
-<section class="pnl" style="display:flex;flex-direction:column;flex:1">
+<section class="pnl" data-m="board" style="display:flex;flex-direction:column;flex:1">
 <div class="ph"><span style="display:flex;gap:10px;align-items:center"><span class="cap">MISSION BOARD</span><span class="mono mu" style="font-size:10px" id="boardSum"></span></span><button class="btn sbtn pri" id="bMission" style="width:64px">＋ 미션</button></div>
 <div class="th"><span>#</span><span>BUSINESS</span><span>TASK</span><span>MISSION</span><span>OWNER</span><span>MODEL</span><span>STATUS</span><span class="r">QA</span><span class="r">DEPS</span><span class="r">UPD</span></div>
 <div class="scroll" id="board"></div>
@@ -209,17 +268,17 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 </div>
 
 <aside>
-<section class="pnl" style="display:flex;flex-direction:column;max-height:330px">
+<section class="pnl" data-m="approve" style="display:flex;flex-direction:column;max-height:330px">
 <div class="ph"><span class="cap">APPROVALS</span><span class="mono" style="font-size:10px;color:#E2704F" id="apCap"></span></div>
 <div class="scroll" id="approvals"></div>
 </section>
-<section class="pnl" style="display:flex;flex-direction:column;flex:1">
+<section class="pnl" data-m="meet" style="display:flex;flex-direction:column;flex:1">
 <div class="ph"><span class="cap">MEETING ROOM</span><span class="mono" style="font-size:9px" id="mtCap"></span></div>
 <div style="padding:6px 10px;font-size:12px;color:#D8C7AB;border-bottom:1px solid #2C2018" class="ell" id="mtTitle"></div>
 <div class="scroll" id="talk"></div>
 <div style="padding:6px 8px;border-top:1px solid #3A2A1F;display:grid;grid-template-columns:repeat(2,1fr);gap:4px"><button class="btn pri" id="bMeet">＋ 회의 소집</button><button class="btn" id="bMinutes">회의록</button></div>
 </section>
-<section class="pnl" style="display:flex;flex-direction:column;height:200px;flex:none">
+<section class="pnl" data-m="meet" style="display:flex;flex-direction:column;height:200px;flex:none">
 <div class="ph"><span class="cap">ACTIVITY LOG</span><span class="mono mu" style="font-size:10px">LIVE</span></div>
 <div class="scroll" id="log" style="padding-top:2px"></div>
 </section>
@@ -245,7 +304,7 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 <li><a style="color:#D9A441" href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com/settings/personal-access-tokens/new</a> 열기</li>
 <li>Token name <code>pantarch-office</code>, Expiration <code>90 days</code></li>
 <li>Repository access: <code>Only select repositories</code> → <code>pantarch-hq</code></li>
-<li>Permissions: <code>Issues</code> Read and write · <code>Contents</code> Read-only · <code>Actions</code> Read and write</li>
+<li>Permissions: <code>Issues</code> Read and write · <code>Contents</code> Read and write · <code>Actions</code> Read and write</li>
 <li>Generate token → 복사해서 아래에 붙여넣기</li>
 </ol>
 <label>GitHub 접근키<input type="password" id="iKey" autocomplete="off" placeholder="github_pat_…"></label>
@@ -256,7 +315,7 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 <div class="mask" id="mMission"><div class="fm">
 <div class="ph"><span class="cap" id="msCap">NEW MISSION</span></div>
 <div class="bd">
-<label>사업<select id="iBiz"><option value="kkumi">BRAND · 꾸미</option><option value="game">PRODUCT · 게임 개발</option><option value="">회사 공통</option></select></label>
+<label>사업<select id="iBiz"></select></label>
 <label>미션 제목<input id="iMTitle" maxlength="80"></label>
 <label>지시 내용<textarea id="iMBody" rows="6"></textarea></label>
 <div class="err" id="eMission"></div>
@@ -266,6 +325,7 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 <div class="mask" id="mMeet"><div class="fm">
 <div class="ph"><span class="cap">CALL A MEETING</span></div>
 <div class="bd">
+<label>사업<select id="iTBiz"></select></label>
 <label>안건<input id="iTTitle" maxlength="80"></label>
 <label>배경·질문<textarea id="iTBody" rows="4"></textarea></label>
 <div style="font-size:10px;color:#A38C72">참석자</div>
@@ -274,6 +334,9 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="bMeetSave">회의 소집</button></div>
 </div></div></div>
 
+<nav id="mtab" aria-label="모바일 메뉴">
+<button data-m="office" class="on"><b>OFFICE</b>오피스</button><button data-m="approve"><b>DECIDE</b>결재<span class="nb" id="mtabN"></span></button><button data-m="board"><b>TASKS</b>업무</button><button data-m="meet"><b>MEET</b>회의</button><button data-m="biz"><b>BIZ</b>사업</button>
+</nav>
 <div class="toast" id="toast"></div>
 </div>
 
@@ -287,8 +350,12 @@ const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
 /* ---------- stage scaling ---------- */
-function fit(){const s=Math.min(innerWidth/1440,innerHeight/960);const st=$('#stage');st.style.transform=`scale(${s})`;st.style.left=Math.max(0,(innerWidth-1440*s)/2)+'px';st.style.top=Math.max(0,(innerHeight-960*s)/2)+'px';}
-addEventListener('resize',fit);fit();
+let MOB=false,MPANE='office';
+function mpane(p){MPANE=p;document.querySelectorAll('#mtab button').forEach(b=>b.classList.toggle('on',b.dataset.m===p));
+  if(p==='biz'){setView('portfolio');return;}setView('office');document.querySelectorAll('main .pnl[data-m]').forEach(x=>x.classList.toggle('mon',x.dataset.m===p));$('main').scrollTop=0;}
+const MQ=matchMedia('(max-width: 760px)');MQ.addEventListener&&MQ.addEventListener('change',()=>fit());
+function fit(){const mob=MQ.matches;if(mob!==MOB){MOB=mob;document.body.classList.toggle('m',mob);if(mob)setTimeout(()=>mpane(MPANE));}if(mob)return;const s=Math.min(innerWidth/1440,innerHeight/960);const st=$('#stage');st.style.transform=`scale(${s})`;st.style.left=Math.max(0,(innerWidth-1440*s)/2)+'px';st.style.top=Math.max(0,(innerHeight-960*s)/2)+'px';}
+addEventListener('resize',()=>fit());
 
 /* ---------- map geometry (plan source units) ---------- */
 const P=(x,y)=>[(x-47)/1910*100,(y-25)/1025*100];
@@ -346,7 +413,8 @@ function bizOf(it){
   const b=lab(it,'biz:'); if(b) return b;
   const m=meta(it); if(m.mission){const p=S.issues.find(x=>x.number===m.mission); if(p&&p!==it){const pb=lab(p,'biz:'); if(pb) return pb;}}
   const t=(it.title||'')+' '+(it.body||'').slice(0,300);
-  if(/게임/.test(t)) return 'game'; if(/꾸미/.test(t)) return 'kkumi'; return '';
+  for(const b of (S.bus||[])){if(b.name&&t.includes(b.name))return b.id;}
+  if(/게임/.test(t)&&BIZ.game) return 'game'; return '';
 }
 const PFX={task:'T',mission:'M',meeting:'MT',post:'P',hire:'H'};
 function code(i){if(!i)return '';const k=Object.keys(PFX).find(l=>has(i,l));return (PFX[k]||'#')+'-'+String(i.number).padStart(3,'0');}
@@ -373,7 +441,9 @@ function homes(){ // id -> {room,pos}
     if(!ROOMS[team]||!ROOMS[team].pod){ids.forEach(i=>i===lead?out[i]={room:'MEETING',pos:MEET_SEATS[0]}:extra.push(i));continue;}
     ids.forEach((id,k)=>{if(k<4){const [cx,cy]=ROOMS[team].pod;out[id]={room:team,pos:[cx+OFF[k][0],cy+OFF[k][1]]};}else extra.push(id);});
   }
-  extra.forEach((id,k)=>out[id]={room:'LOUNGE',pos:BREAK.LOUNGE[k%BREAK.LOUNGE.length]});
+  const used=new Set(Object.values(out).map(h=>h.pos.join()));const free=[];
+  for(const [t,r] of Object.entries(ROOMS)) if(r.pod) OFF.forEach(o=>{const p=[r.pod[0]+o[0],r.pod[1]+o[1]];if(!used.has(p.join()))free.push({room:t,pos:p});});
+  extra.forEach((id,k)=>out[id]=free.shift()||{room:'LOUNGE',pos:BREAK.LOUNGE[k%BREAK.LOUNGE.length]});
   return out;
 }
 
@@ -518,7 +588,9 @@ function renderRoster(){
   $('#fC').textContent=`CLAUDE · ${c.claude}`;$('#fG').textContent=`GPT · ${c.gpt}`;$('#fX').textContent=`GROK · ${c.grok}`;
 }
 $('#roster').addEventListener('click',e=>{const r=e.target.closest('[data-ag]');if(r)showCard(r.dataset.ag);});
-const BIZ={kkumi:{kind:'BRAND',name:'꾸미',col:'#E08A5A'},game:{kind:'PRODUCT',name:'게임 개발',col:'#7DB79A'}};
+let BIZ={kkumi:{kind:'BRAND',name:'꾸미',col:'#E08A5A'},game:{kind:'PRODUCT',name:'게임 개발',col:'#7DB79A'}};
+const KCOL={BRAND:'#E08A5A',PRODUCT:'#7DB79A',SERVICE:'#A3ACDB'};
+function bizOptions(sel){return (S.bus||[]).map(b=>`<option value="${b.id}"${b.id===sel?' selected':''}>${b.kind} · ${esc(b.name)}</option>`).join('')+`<option value=""${sel===''?' selected':''}>회사 공통</option>`;}
 function bizTag(b){const z=BIZ[b];return z?`<span class="mono" style="font-size:10px;color:${z.col}">${z.kind}</span> <span style="font-size:11px">${z.name}</span>`:'<span class="mu">공통</span>';}
 function renderBoard(){
   const tasks=S.issues.filter(i=>has(i,'task'));
@@ -543,11 +615,13 @@ function renderKpis(){
   $('#kpis').innerHTML=k.map(([a,b,c])=>`<div><span>${a}</span><b${c?` style="color:${c}"`:''}>${b}</b></div>`).join('');
 }
 function renderApprovals(){
-  const rv=S.issues.filter(i=>i.state==='open'&&(has(i,'task')||has(i,'post'))&&statusOf(i)==='REVIEW');
+  if(document.querySelector('#approvals .ap.op'))return; // 의견을 쓰는 중이면 새로고침으로 지우지 않는다
+  const rv=S.issues.filter(i=>i.state==='open'&&(has(i,'task')||has(i,'post'))&&(statusOf(i)==='REVIEW'||statusOf(i)==='BLOCKED'));
   const hires=S.issues.filter(i=>i.state==='open'&&has(i,'hire'));
-  $('#apCap').textContent=`${rv.length+hires.length} PENDING`;
+  $('#apCap').textContent=`${rv.length+hires.length} PENDING`;const nb=$('#mtabN');if(nb)nb.textContent=rv.length+hires.length?` ${rv.length+hires.length}`:'';
   const card=(i,kind)=>{const m=meta(i);let head,who,b;
     if(kind==='hire'){const a=m.agent||{};head=`<span style="color:${MC[(a.model||'').toLowerCase()]||'#A3ACDB'}">HIRE · ${esc((a.model||'').toUpperCase())}</span>`;who=esc(a.team||'');b=[['승인','채용'],['','의견'],['거절','보류']];}
+    else if(statusOf(i)==='BLOCKED'){const aid=lab(i,'agent:');const a=S.team.agents[aid]||{};head=`<span style="color:#E2704F">BLOCKED · 멈춤</span>`;who=esc(a.name||aid||'');b=[['다시','다시 시도'],['','의견'],['기각','중단']];}
     else if(has(i,'post')){head=`<span style="color:#E08A5A">POST · ${esc(BIZ[bizOf(i)]?BIZ[bizOf(i)].name:'')}</span>`;who=esc(m.when||'');b=[['승인','게시 승인'],['','의견'],['기각','기각']];}
     else{const aid=lab(i,'agent:');const a=S.team.agents[aid]||{};head=`<span style="color:#E2704F">TASK · QA ${m.score??'—'}</span>`;who=esc(a.name||aid||'');b=[['승인','승인'],['','의견'],['기각','기각']];}
     return `<div class="ap" data-n="${i.number}"><div class="h">${head}<span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${who}</span></div><div class="t ell" data-url="${i.html_url}" title="GitHub에서 열기">${esc(i.title)}</div>
@@ -613,12 +687,15 @@ async function sync(){
   if(!TOKEN||syncing)return;syncing=true;
   try{
     const team=await gh('/contents/config/team.json',{raw:true});S.team=typeof team==='string'?JSON.parse(team):team;
-    const iss=await gh('/issues?state=all&per_page=100&sort=updated&direction=desc');S.issues=(iss||[]).filter(i=>!i.pull_request);
+    try{const bj=await gh('/contents/config/business.json',{raw:true});S.bus=(typeof bj==='string'?JSON.parse(bj):bj).businesses||[];}catch{S.bus=S.bus||[{id:'kkumi',kind:'BRAND',name:'꾸미',color:'#E08A5A'},{id:'game',kind:'PRODUCT',name:'게임 개발',color:'#7DB79A'}];}
+    BIZ={};S.bus.forEach(b=>BIZ[b.id]={kind:b.kind,name:b.name,col:b.color||KCOL[b.kind]||'#A08A72',desc:b.desc||''});
+    const iss=await gh('/issues?state=all&per_page=100&sort=updated&direction=desc');S.issues=(iss||[]).filter(i=>!i.pull_request&&i.state_reason!=='not_planned');
     S.comments=await gh('/issues/comments?sort=created&direction=desc&per_page=40')||[];
     try{const r=await gh('/actions/workflows/engine.yml/runs?per_page=1');S.runs=r&&r.workflow_runs;}catch{}
     S.lastSync=Date.now();
     renderPlan();events();renderRoster();renderBoard();renderKpis();renderApprovals();renderLog();renderFooter();await renderMeeting();
-    if($('#portfolio').style.display!=='none'&&window.renderPortfolio)renderPortfolio(true);
+    const sig=S.issues.map(i=>i.number+':'+i.updated_at).join()+'|'+(S.bus||[]).length;
+    if(sig!==S.sig){S.sig=sig;if($('#portfolio').style.display!=='none'&&window.renderPortfolio&&!document.querySelector('.mask.show'))renderPortfolio(true);}
   }catch(e){
     if(e.status===401||e.status===403||e.status===404){toast('GitHub 키를 확인해 주세요');showKey('연결이 거부됐습니다('+e.status+'). 키 권한과 저장소 선택을 확인해 주세요.');}
     else toast('동기화 실패 · 잠시 후 다시 시도합니다');
@@ -643,7 +720,7 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.m
 let missionFor=null;
 window.openMission=function(agentId,hire){
   missionFor=agentId||null;$('#eMission').textContent='';
-  $('#iBiz').value='kkumi';
+  $('#iBiz').innerHTML=bizOptions((S.bus&&S.bus[0]||{}).id);
   const a=agentId&&S.team.agents[agentId];
   $('#msCap').textContent=hire?'HIRE REQUEST':(a?`ASSIGN · ${a.name}`:'NEW MISSION');
   $('#iMTitle').value=hire?'채용 제안: ':'';$('#iMBody').value=hire?'어떤 일이 막히는지, 어떤 사람이 필요한지 적어 주세요. TOM이 검토해서 채용 결재를 올립니다.\n\n':(a?`${a.name}에게 맡깁니다.\n\n`:'');
@@ -657,14 +734,14 @@ $('#bMissionSave').onclick=async()=>{
   const lbl=['mission'];if(biz)lbl.push('biz:'+biz);
   const extra=missionFor?`\n\n담당 지정: ${missionFor} (${S.team.agents[missionFor].name})`:'';
   $('#bMissionSave').disabled=true;
-  try{const r=await gh('/issues',{method:'POST',body:{title,body:`사업: ${biz||'공통'}\n\n${body}${extra}`,labels:lbl}});$('#mMission').classList.remove('show');toast(`M-${String(r.number).padStart(3,'0')} 등록 · TOM이 곧 업무로 나눕니다`);setTimeout(sync,1500);}
+  try{const r=await gh('/issues',{method:'POST',body:{title,body:`사업: ${BIZ[biz]?BIZ[biz].kind+' · '+BIZ[biz].name:'회사 공통'}\n\n${body}${extra}`,labels:lbl}});$('#mMission').classList.remove('show');toast(`M-${String(r.number).padStart(3,'0')} 등록 · TOM이 곧 업무로 나눕니다`);setTimeout(sync,1500);}
   catch(e){$('#eMission').textContent='등록 실패: '+e.message.slice(0,80);}
   finally{$('#bMissionSave').disabled=false;}
 };
 $('#bMeet').onclick=()=>{
   const list=agents();const def=['tom','jake','emma','max'];
   $('#iPpl').innerHTML=list.map(a=>`<label><input type="checkbox" value="${a.id}" ${def.includes(a.id)?'checked':''}>${esc(a.name)}</label>`).join('');
-  $('#iTTitle').value='';$('#iTBody').value='';$('#eMeet').textContent='';$('#mMeet').classList.add('show');setTimeout(()=>$('#iTTitle').focus(),50);
+  $('#iTBiz').innerHTML=bizOptions('');$('#iTTitle').value='';$('#iTBody').value='';$('#eMeet').textContent='';$('#mMeet').classList.add('show');setTimeout(()=>$('#iTTitle').focus(),50);
 };
 $('#bMeetSave').onclick=async()=>{
   const title=$('#iTTitle').value.trim();const ppl=[...document.querySelectorAll('#iPpl input:checked')].map(x=>x.value);
@@ -672,14 +749,14 @@ $('#bMeetSave').onclick=async()=>{
   if(ppl.length<2){$('#eMeet').textContent='참석자를 2명 이상 골라 주세요.';return;}
   if(ppl.length>6){$('#eMeet').textContent='6명까지만 부를 수 있습니다(호출 비용).';return;}
   $('#bMeetSave').disabled=true;
-  try{const r=await gh('/issues',{method:'POST',body:{title,body:`참석: ${ppl.join(', ')}\n\n${$('#iTBody').value.trim()}`,labels:['meeting']}});$('#mMeet').classList.remove('show');toast(`MT-${String(r.number).padStart(3,'0')} 소집 · 엔진이 시작하면 회의실로 모입니다`);setTimeout(sync,1500);}
+  try{const r=await gh('/issues',{method:'POST',body:{title,body:`참석: ${ppl.join(', ')}\n\n${$('#iTBody').value.trim()}`,labels:['meeting'].concat($('#iTBiz').value?['biz:'+$('#iTBiz').value]:[])}});$('#mMeet').classList.remove('show');toast(`MT-${String(r.number).padStart(3,'0')} 소집 · 엔진이 시작하면 회의실로 모입니다`);setTimeout(sync,1500);}
   catch(e){$('#eMeet').textContent='소집 실패: '+e.message.slice(0,80);}
   finally{$('#bMeetSave').disabled=false;}
 };
 $('#bMinutes').onclick=()=>{if(S.meetNum)open(`https://github.com/${REPO}/issues/${S.meetNum}`,'_blank','noopener');};
 $('#bSync').onclick=()=>{sync();toast('새로고침');};
 $('#bWake').onclick=async()=>{try{await gh('/actions/workflows/engine.yml/dispatches',{method:'POST',body:{ref:'main'}});toast('엔진을 깨웠습니다');setTimeout(sync,4000);}catch(e){toast('실패: Actions 권한을 확인해 주세요');}};
-function setView(v){document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('on',x.dataset.go===v));$('main').style.display=v==='office'?'':'none';$('#portfolio').style.display=v==='portfolio'?'grid':'none';if(v==='portfolio'&&window.renderPortfolio)renderPortfolio();}
+function setView(v){document.querySelectorAll('header nav a').forEach(x=>x.classList.toggle('on',x.dataset.go===v));$('main').style.display=v==='office'?'':'none';$('#portfolio').style.display=v==='portfolio'?'grid':'none';if(v==='portfolio'&&window.renderPortfolio)renderPortfolio();}
 document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>{const go=a.dataset.go;
   if(go==='office'||go==='portfolio'){setView(go);return;}
   const url={missions:`issues?q=is%3Aissue+label%3Amission`,meetings:`issues?q=is%3Aissue+label%3Ameeting`,people:`blob/main/config/team.json`,ledger:`actions`}[go];
@@ -701,6 +778,8 @@ function foldable(root){
     w.append(b);});
 }
 foldable($('main'));
+document.querySelectorAll('#mtab button').forEach(b=>b.onclick=()=>mpane(b.dataset.m));
+fit();
 if(TOKEN) sync(); else showKey('');
 </script>
 <script src="portfolio.js"></script>
