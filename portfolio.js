@@ -24,7 +24,16 @@ async function textOf(path){
   if(!r.ok) throw new Error(r.status);return r.text();
 }
 const isImg=p=>/\.(jpe?g|png|gif|webp|heic)$/i.test(p), isVid=p=>/\.(mp4|mov|m4v|webm)$/i.test(p);
-function mediaFiles(b){return (PF.tree||[]).filter(f=>f.type==='blob'&&f.path.startsWith(b.media)&&(isImg(f.path)||isVid(f.path)));}
+function mediaFiles(b){return (PF.tree||[]).filter(f=>f.type==='blob'&&f.path.startsWith(b.media)&&!f.path.includes('/.thumbs/')&&(isImg(f.path)||isVid(f.path)));}
+const CAT={};
+async function loadCatalog(b){const f=(PF.tree||[]).find(x=>x.path===b.media+'catalog.json');if(!f){CAT[b.id]={sha:null,items:[]};return CAT[b.id];}
+  if(CAT[b.id]&&CAT[b.id].sha===f.sha)return CAT[b.id];
+  try{const t=await textOf(f.path);CAT[b.id]={sha:f.sha,items:(JSON.parse(t).items||[])};}catch{CAT[b.id]={sha:f.sha,items:[]};}return CAT[b.id];}
+function libItems(b){const cat=(CAT[b.id]||{items:[]}).items;const by={};cat.forEach(it=>by[it.path]=it);
+  const out=mediaFiles(b).map(f=>by[f.path]?{...by[f.path],size:f.size}:{path:f.path,kind:isVid(f.path)?'video':'image',date:dateFromName(f.path),size:f.size,pending:true});
+  const parts=(PF.tree||[]).filter(f=>f.path.startsWith(b.media)&&/\.parts\.json$/.test(f.path)).map(f=>({path:f.path.replace(/\.parts\.json$/,''),kind:'video',parts:true,size:0,date:dateFromName(f.path),pending:true}));
+  return out.concat(parts);}
+function dateFromName(p){const m=/(20\d{2})[-_.]?(\d{2})[-_.]?(\d{2})(?:[-_ T]?(\d{2})[-_:]?(\d{2}))?/.exec(p.split('/').pop());return m?`${m[1]}-${m[2]}-${m[3]} ${m[4]||'00'}:${m[5]||'00'}`:'';}
 function posts(bizId){return S.issues.filter(i=>has(i,'post')&&bizOf(i)===bizId);}
 const io=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target;io.unobserve(el);
   blobUrl(el.dataset.path).then(u=>{if(el.tagName==='IMG')el.src=u;else{el.src=u;}}).catch(()=>{el.alt='불러오기 실패';});}),{rootMargin:'200px'});
@@ -84,16 +93,21 @@ function pCalendar(body,b){
   body.querySelectorAll('[data-url]').forEach(el=>el.onclick=()=>open(el.dataset.url,'_blank','noopener'));
   $('#pNew').onclick=()=>openComposer(b,null);lazy(body);
 }
-function pLibrary(body,b){
-  const files=mediaFiles(b);
-  const folders=['all',...new Set(files.map(f=>f.path.slice(b.media.length).split('/')[0]))];
-  const shown=files.filter(f=>PF.folder==='all'||f.path.slice(b.media.length).startsWith(PF.folder+'/')).sort((a,c)=>c.path.localeCompare(a.path));
-  const label={all:'전체',photos:'사진',posts:'게시 이미지',uploads:'새로 올린 것'};
-  body.innerHTML=`<div class="ph"><span class="chips">${folders.map(f=>`<button class="btn sbtn${f===PF.folder?' on':''}" data-f="${f}" style="width:92px">${label[f]||f}</button>`).join('')}</span>
-  <span style="display:flex;gap:8px;align-items:center"><span class="mono mu" style="font-size:10px">${shown.length} FILES · ${(shown.reduce((s,f)=>s+(f.size||0),0)/1048576).toFixed(1)} MB</span><label class="btn sbtn pri" style="width:84px">올리기<input type="file" id="pUp" multiple accept="image/*,video/*" style="display:none"></label></span></div>
-  <div class="scroll"><div class="grid">${shown.map(f=>{const n=f.path.split('/').pop();
-    return `<div class="tile" data-p="${esc(f.path)}">${isImg(f.path)?`<img data-path="${esc(f.path)}" alt="${esc(n)}">`:`<div style="display:flex;align-items:center;justify-content:center;height:100%;color:#A08A72" class="mono">VIDEO</div>`}${isVid(f.path)?'<span class="vb">VIDEO</span>':''}<span class="cap2">${esc(n)}</span></div>`;}).join('')||'<div class="empty">아직 자료가 없습니다. 올리기로 사진·영상을 넣어 주세요.</div>'}</div></div>`;
+async function pLibrary(body,b){
+  await loadCatalog(b);
+  const all=libItems(b);
+  const cnt={all:all.length,image:all.filter(x=>x.kind==='image').length,video:all.filter(x=>x.kind==='video').length,todo:all.filter(x=>!x.analyzed).length};
+  const f=PF.folder in cnt?PF.folder:'all';
+  const shown=all.filter(x=>f==='all'||(f==='todo'?!x.analyzed:x.kind===f)).sort((a,c)=>PF.asc?(a.date||'').localeCompare(c.date||''):(c.date||'').localeCompare(a.date||''));
+  const lab={all:'전체',image:'사진',video:'영상',todo:'미분석'};
+  body.innerHTML=`<div class="ph"><span class="chips">${Object.keys(lab).map(k=>`<button class="btn sbtn${k===f?' on':''}" data-f="${k}" style="width:80px">${lab[k]} ${cnt[k]}</button>`).join('')}<button class="btn sbtn" id="pSort" style="width:80px">${PF.asc?'오래된순':'최신순'}</button></span>
+  <span style="display:flex;gap:6px;align-items:center"><button class="btn sbtn" id="pAna" style="width:120px"${cnt.todo?'':' disabled'}>미분석 ${cnt.todo}개 분석</button><label class="btn sbtn pri" style="width:96px">사진·영상 올리기<input type="file" id="pUp" multiple accept="image/*,video/*" style="display:none"></label></span></div>
+  <div class="libnote">${esc(b.name)} 폴더에 보관합니다. 올리면 엔진이 사진은 한 장씩, 영상은 장면 3컷을 Claude가 직접 보고 시기·장면·표정·스토리 포인트를 기록하고, 찍은 날짜(사진 정보·파일 날짜)순으로 정렬합니다. 40MB 넘는 영상은 나눠 올린 뒤 자동으로 합치고 1080p로 줄입니다. 미션에 이 사업을 지정하면 모든 직원이 이 목록을 보고 일하고, 그림도 직접 봅니다.<span id="upStat" class="upstat">${esc(PF.upStat||'')}</span></div>
+  <div class="scroll"><div class="grid">${shown.map(x=>{const th=(x.thumbs||[])[0];const d=x.desc||{};const cap=(x.date||'').slice(0,10)+(d.period?' · '+d.period:x.pending?' · '+(x.parts?'합치는 중':'분석 대기'):'');
+    return `<div class="tile${x.analyzed?'':' todo'}" data-p="${esc(x.path)}" title="${esc([d.scene,d.expression,d.story].filter(Boolean).join(' / '))}">${th?`<img data-path="${esc(th)}" alt="">`:(x.kind==='image'?`<img data-path="${esc(x.path)}" alt="">`:'<div class="vph mono">VIDEO</div>')}${x.kind==='video'?`<span class="vb">${x.duration?Math.round(x.duration)+'s':'VIDEO'}</span>`:''}<span class="cap2">${esc(cap)}</span></div>`;}).join('')||'<div class="empty">아직 자료가 없습니다. 사진·영상 올리기로 넣어 주세요.</div>'}</div></div>`;
   body.querySelectorAll('[data-f]').forEach(el=>el.onclick=()=>{PF.folder=el.dataset.f;renderPortfolio(true);});
+  $('#pSort').onclick=()=>{PF.asc=!PF.asc;renderPortfolio(true);};
+  $('#pAna').onclick=async()=>{try{await gh('/actions/workflows/media.yml/dispatches',{method:'POST',body:{ref:'main'}});PF.upStat='분석을 시작했습니다. 몇 분 뒤 설명이 붙습니다.';$('#upStat').textContent=PF.upStat;}catch{toast('실패: 접근키 Actions 권한을 확인해 주세요');}};
   body.querySelectorAll('[data-p]').forEach(el=>el.onclick=()=>preview(b,el.dataset.p));
   $('#pUp').onchange=e=>upload(b,[...e.target.files]);
   lazy(body);
@@ -156,12 +170,29 @@ function ensureModal(){
   $('#stage').append(d);d.querySelector('[data-close]').onclick=()=>d.classList.remove('show');
 }
 async function preview(b,path){
-  ensureModal();const m=$('#mPv');$('#pvCap').textContent=path.slice(b.media.length);m.classList.add('show');
+  ensureModal();const m=$('#mPv');const it=libItems(b).find(x=>x.path===path)||{path,kind:isVid(path)?'video':'image'};const d=it.desc||{};
+  $('#pvCap').textContent=(it.date||'').slice(0,16)+' · '+path.split('/').pop();m.classList.add('show');
   $('#pvMedia').innerHTML='<div class="empty">불러오는 중…</div>';
-  try{const u=await blobUrl(path);$('#pvMedia').innerHTML=isImg(path)?`<img src="${u}" alt="">`:`<video src="${u}" controls playsinline></video>`;}catch{$('#pvMedia').innerHTML='<div class="empty">불러오기 실패</div>';}
-  $('#pvBody').innerHTML=`<div class="row"><a class="btn" href="https://github.com/${REPO}/blob/main/${encodeURI(path)}" target="_blank" rel="noopener">GitHub에서 보기</a><button class="btn pri" id="pvUse">이 자료로 게시물 만들기</button></div>`;
+  try{const u=await blobUrl(path);$('#pvMedia').innerHTML=it.kind==='image'?`<img src="${u}" alt="">`:`<video src="${u}" controls playsinline></video>`;}catch{$('#pvMedia').innerHTML='<div class="empty">불러오기 실패</div>';}
+  $('#pvBody').innerHTML=`${it.analyzed?`<div class="ana"><b>시기</b><span>${esc(d.period)}</span><b>장면</b><span>${esc(d.scene)}</span><b>표정</b><span>${esc(d.expression)}</span><b>스토리</b><span>${esc(d.story)}</span>${(it.tags||[]).length?`<b>태그</b><span>${it.tags.map(esc).join(' · ')}</span>`:''}</div>`:'<div class="mu" style="font-size:12px">아직 분석 전입니다. 엔진이 곧 설명을 붙입니다.</div>'}
+  <div class="row"><a class="btn" href="https://github.com/${REPO}/blob/main/${encodeURI(path)}" target="_blank" rel="noopener">GitHub에서 보기</a><button class="btn pri" id="pvUse">이 자료로 게시물 만들기</button></div>`;
   $('#pvUse').onclick=()=>{m.classList.remove('show');openComposer(b,path);};
 }
+async function exifDate(file){
+  try{if(!/jpe?g/i.test(file.type))return null;const buf=new DataView(await file.slice(0,262144).arrayBuffer());
+    if(buf.getUint16(0)!==0xFFD8)return null;let o=2;
+    while(o<buf.byteLength-4){const mk=buf.getUint16(o),len=buf.getUint16(o+2);
+      if(mk===0xFFE1&&buf.getUint32(o+4)===0x45786966){const t=o+10;const le=buf.getUint16(t)===0x4949;const u16=x=>buf.getUint16(x,le),u32=x=>buf.getUint32(x,le);
+        const ifd=(start,want)=>{const n=u16(start);for(let i=0;i<n;i++){const e=start+2+i*12;if(u16(e)===want)return e;}return 0;};
+        const i0=t+u32(t+4);let e=ifd(i0,0x8769);let str=0;
+        if(e){const ex=t+u32(e+8);const d=ifd(ex,0x9003);if(d)str=t+u32(d+8);}
+        if(!str){const d=ifd(i0,0x0132);if(d)str=t+u32(d+8);}
+        if(!str)return null;let s='';for(let i=0;i<19;i++)s+=String.fromCharCode(buf.getUint8(str+i));
+        const m=/(\d{4}):(\d{2}):(\d{2}) (\d{2}):(\d{2})/.exec(s);return m?`${m[1]}${m[2]}${m[3]}-${m[4]}${m[5]}`:null;}
+      o+=2+len;}
+  }catch{}return null;
+}
+const stamp=d=>{const z=n=>String(n).padStart(2,'0');return `${d.getFullYear()}${z(d.getMonth()+1)}${z(d.getDate())}-${z(d.getHours())}${z(d.getMinutes())}`;};
 function toB64(blob){return new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(String(r.result).split(',')[1]);r.onerror=no;r.readAsDataURL(blob);});}
 async function shrink(file){
   if(!/^image\/(jpeg|png|webp|heic|heif)/.test(file.type)) return file;
@@ -169,18 +200,26 @@ async function shrink(file){
     const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
     return await new Promise(r=>c.toBlob(r,'image/jpeg',.9));}catch{return file;}
 }
+function setUp(t){PF.upStat=t;const e=$('#upStat');if(e)e.textContent=t;}
+async function putFile(path,blob,msg){return gh('/contents/'+path.split('/').map(encodeURIComponent).join('/'),{method:'PUT',body:{message:msg,content:await toB64(blob),branch:'main'}});}
 async function upload(b,files){
-  if(!files.length)return;const ym=new Date().toISOString().slice(0,7);let ok=0;
+  if(!files.length)return;const ym=new Date().toISOString().slice(0,7);let ok=0;const fails=[];const PART=20*1048576;
   for(const [k,f] of files.entries()){
-    if(/^video/.test(f.type)&&f.size>45*1048576){toast(`${f.name}: 45MB가 넘어 건너뜀 (휴대폰에서 줄여서 올려 주세요)`);continue;}
-    toast(`올리는 중 ${k+1}/${files.length} · ${f.name}`);
-    const blob=await shrink(f);const ext=blob===f?(f.name.split('.').pop()||'bin').toLowerCase():'jpg';
+    const when=(await exifDate(f))||stamp(new Date(f.lastModified||Date.now()));
     const base=f.name.replace(/\.[^.]+$/,'').replace(/[^\w가-힣\-]+/g,'-').slice(0,40)||'file';
-    const path=`${b.media}uploads/${ym}/${Date.now().toString(36)}-${base}.${ext}`;
-    try{await gh('/contents/'+path.split('/').map(encodeURIComponent).join('/'),{method:'PUT',body:{message:`꾸미 자료 올림: ${f.name}`,content:await toB64(blob),branch:'main'}});ok++;}
-    catch(e){toast(e.status===403?'올리기 권한 없음: 접근키의 Contents 권한을 Read and write로 바꿔 주세요':`${f.name} 실패: ${e.message.slice(0,50)}`);if(e.status===403)break;}
+    try{
+      if(/^image/.test(f.type)){setUp(`올리는 중 ${k+1}/${files.length} · ${f.name}`);const blob=await shrink(f);const ext=blob===f?(f.name.split('.').pop()||'jpg').toLowerCase():'jpg';
+        await putFile(`${b.media}uploads/${ym}/${when}-${base}.${ext}`,blob,`${b.name} 자료: ${f.name}`);}
+      else{const ext=(f.name.split('.').pop()||'mp4').toLowerCase();const path=`${b.media}uploads/${ym}/${when}-${base}.${ext}`;
+        if(f.size<=40*1048576){setUp(`영상 올리는 중 ${k+1}/${files.length} · ${f.name}`);await putFile(path,f,`${b.name} 자료: ${f.name}`);}
+        else{const n=Math.ceil(f.size/PART);
+          for(let i=0;i<n;i++){setUp(`큰 영상 나눠 올리는 중 ${i+1}/${n} · ${f.name}`);await putFile(`${path}.part${String(i+1).padStart(3,'0')}`,f.slice(i*PART,(i+1)*PART),`${b.name} 자료 조각 ${i+1}/${n}: ${f.name}`);}
+          await putFile(`${path}.parts.json`,new Blob([JSON.stringify({name:f.name,total:n,size:f.size})]),`${b.name} 자료 조각 완료: ${f.name}`);}}
+      ok++;
+    }catch(e){fails.push(`${f.name} — ${e.status===403?'접근키 Contents 권한이 읽기 전용':e.message.slice(0,60)}`);if(e.status===403)break;}
   }
-  toast(`${ok}개 올렸습니다`);PF.folder='uploads';await loadTree();renderPortfolio(true);
+  setUp(`${ok}개 올렸어요. 엔진이 몇 분 안에 합치기·분석을 끝냅니다.${fails.length?` 실패 ${fails.length}개: ${fails.join(' / ')}`:''}`);
+  PF.folder='all';await loadTree();renderPortfolio(true);
 }
 function openComposer(b,path){
   let m=$('#mPost');
@@ -193,8 +232,8 @@ function openComposer(b,path){
     <div class="err" id="cpErr"></div>
     <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="cpSave">게시 대기열에 넣기</button></div></div></div>`;
     $('#stage').append(m);m.querySelector('[data-close]').onclick=()=>m.classList.remove('show');}
-  $('#cpTitle').textContent='NEW POST · '+b.name;PF.sel=path;const mt=$('#cpMedia');
-  mt.innerHTML=path?(isImg(path)?`<img data-path="${esc(path)}" alt="">`:'<span class="vb">VIDEO</span>')+`<span class="cap2">${esc(path.split('/').pop())}</span>`:'<div class="empty">LIBRARY에서 자료를 고르면 여기에 붙습니다</div>';lazy(mt);
+  $('#cpTitle').textContent='NEW POST · '+b.name;PF.sel=path;const mt=$('#cpMedia');const it0=path&&libItems(b).find(x=>x.path===path);const th0=it0&&(it0.thumbs||[])[0];
+  mt.innerHTML=path?(th0||isImg(path)?`<img data-path="${esc(th0||path)}" alt="">`:'<span class="vb">VIDEO</span>')+`<span class="cap2">${esc(path.split('/').pop())}</span>`:'<div class="empty">LIBRARY에서 자료를 고르면 여기에 붙습니다</div>';lazy(mt);
   $('#cpKind').value=path&&isVid(path)?'영상':'사진';
   const d=new Date();d.setDate(d.getDate()+1);d.setHours(18,0,0,0);$('#cpWhen').value=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);
   $('#cpCap').value='';$('#cpErr').textContent='';m.classList.add('show');

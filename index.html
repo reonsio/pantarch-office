@@ -225,6 +225,46 @@ html.m .doc{grid-template-columns:1fr}
 html.m .doc .ls{max-height:200px;border-right:0;border-bottom:1px solid #3A2A1F}
 /* 아이폰은 16px보다 작은 입력칸을 누르면 화면을 확대해 버린다 */
 html.m input,html.m textarea,html.m select{font-size:16px!important}
+
+/* library */
+.libnote{padding:8px 10px;font-size:11px;line-height:1.6;color:#B9A285;border-bottom:1px solid #2C2018}
+.upstat{display:block;color:#D9A441;margin-top:2px}
+.tile.todo{border-style:dashed}
+.vph{display:flex;align-items:center;justify-content:center;height:100%;color:#A08A72}
+.ana{display:grid;grid-template-columns:52px minmax(0,1fr);gap:4px 10px;font-size:12px;line-height:1.5;color:#E6D6BC}
+.ana b{font:600 10px 'IBM Plex Mono',monospace;color:#D9A441;letter-spacing:1px;padding-top:2px}
+/* views */
+.vw{grid-template-columns:minmax(0,1fr);gap:8px;padding:8px;min-height:0}
+#vOutputs{grid-template-columns:360px minmax(0,1fr)}
+#vMissions,#vPlaybook,#vConn{grid-template-columns:minmax(0,1fr)}
+.msn{border-bottom:1px solid #2C2018;padding:8px 10px}
+.msn .mh2{display:grid;grid-template-columns:14px 58px minmax(0,1fr) auto 92px 44px;gap:8px;align-items:center;cursor:pointer}
+.msn .mh2>*{white-space:nowrap}
+.msn .b3{display:grid;gap:4px}
+.msn .tw{color:#A08A72}
+.msn .mb{display:none;padding:6px 0 0 22px}
+.msn.op .mb{display:block}
+.msn .bar2{height:4px;background:#2A1F17;margin:6px 0 0 22px}.msn .bar2 i{display:block;height:100%;background:#7DB79A}
+.sum{font-size:12px;line-height:1.6;color:#E0CFB4;white-space:pre-wrap;padding:6px 8px;background:#1B1410;border-left:2px solid #D9A441;margin-bottom:6px}
+.oi{padding:8px 10px;border-bottom:1px solid #2C2018;cursor:pointer}.oi:hover,.oi.on{background:#2A1F17}
+.doc2{padding:12px 14px;font-size:12px;line-height:1.75;color:#E6D6BC;white-space:pre-wrap;word-break:break-word}
+.doc2 .h1,.doc2 .h2,.doc2 .h3{color:#F4E6CF;font-size:13px}.doc2 .h1{font-size:15px}
+.doc2 code{background:#17110D;color:#D9A441;padding:0 3px;font-family:'IBM Plex Mono',monospace;font-size:11px}
+.cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:10px}
+.cn{background:#1B1410;border:1px solid #33251B;padding:10px;min-height:88px}
+#bWork.paused{border-color:#E2704F;color:#E2704F}
+#morePanel{position:absolute;left:8px;right:8px;bottom:64px;z-index:25;background:#211812;border:1px solid #5A4130;display:none;grid-template-columns:repeat(2,1fr);gap:6px;padding:8px}
+#morePanel.show{display:grid}
+html.m .vw{grid-template-columns:minmax(0,1fr)!important;overflow:auto;padding:8px}
+html.m .vw .pnl{min-height:auto}
+html.m .vw .scroll{overflow:visible;flex:none}
+html.m .cgrid{grid-template-columns:1fr}
+html.m .msn .mh2{grid-template-columns:12px 50px minmax(0,1fr) 70px;row-gap:2px}
+html.m .msn .mh2>:nth-child(4),html.m .msn .mh2>:nth-child(6){display:none}
+html.m .chips{flex-wrap:wrap}
+html.m .msn .mb .tr{grid-template-columns:18px 48px minmax(0,1fr) 72px!important}
+html.m .msn .mb .tr>:nth-child(4),html.m .msn .mb .tr>:nth-child(6),html.m .msn .mb .tr>:nth-child(7){display:none}
+html.m #vOutputs .pnl:first-child .scroll{max-height:40dvh;overflow:auto}
 /* modal */
 .mask{position:absolute;inset:0;background:rgba(10,7,5,.72);display:none;align-items:center;justify-content:center;z-index:20}
 .mask.show{display:flex}
@@ -251,10 +291,10 @@ html.m input,html.m textarea,html.m select{font-size:16px!important}
 <span class="mono" id="hqSub" style="font-size:10px;color:#8E7861">HQ · 3F</span>
 </div>
 <nav aria-label="주 메뉴">
-<a class="on" data-go="office">OFFICE</a><a data-go="portfolio">PORTFOLIO</a><a data-go="missions">MISSIONS</a><a data-go="meetings">MEETINGS</a><a data-go="people">PEOPLE</a><a data-go="ledger">LEDGER</a>
+<a class="on" data-go="office">OFFICE</a><a data-go="missions">MISSIONS</a><a data-go="outputs">OUTPUTS</a><a data-go="portfolio">PORTFOLIO</a><a data-go="playbook">PLAYBOOK</a><a data-go="connections">CONNECTIONS</a>
 </nav>
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
-<button class="btn" id="bWake">엔진 깨우기</button><button class="btn" id="bSync">새로고침</button><button class="btn" id="bKey">접근키</button>
+<button class="btn" id="bWork" title="근무 멈춤/재개"><i class="d" style="background:#7DB79A"></i>근무 중</button><button class="btn" id="bSync">새로고침</button><button class="btn" id="bKey">접근키</button>
 </div>
 </header>
 
@@ -277,10 +317,10 @@ html.m input,html.m textarea,html.m select{font-size:16px!important}
 
 <div class="col">
 <section class="pnl" id="pPlan" data-m="office" style="flex:none">
-<div class="ph"><span class="cap">FLOOR PLAN · 3F · LIVE</span><span class="mono" id="legend" style="font-size:9px;color:#8E7861;display:flex;gap:10px"><span><i class="d" style="background:#E2B04A"></i>RUNNING</span><span><i class="d" style="background:#E2704F"></i>REVIEW</span><span><i class="d" style="background:#79B8C9"></i>MEETING</span><span><i class="d" style="background:#9C8670"></i>QUEUED</span><span><i class="d" style="background:#7A6654"></i>IDLE</span><span style="color:#E08A5A">■ CLAUDE</span><span style="color:#7DB79A">■ GPT</span><span style="color:#A3ACDB">■ GROK</span></span></div>
+<div class="ph"><span class="cap">FLOOR PLAN · 3F · LIVE</span><span class="mono" id="legend" style="font-size:9px;color:#8E7861;display:flex;gap:10px"></span></span></div>
 <div class="plan" id="plan"><div class="card" id="card"></div></div>
 </section>
-<section class="pnl" data-m="board" style="display:flex;flex-direction:column;flex:1">
+<section class="pnl" data-m="office" style="display:flex;flex-direction:column;flex:1">
 <div class="ph"><span style="display:flex;gap:10px;align-items:center"><span class="cap">MISSION BOARD</span><span class="mono mu" style="font-size:10px" id="boardSum"></span></span><button class="btn sbtn pri" id="bMission" style="width:64px">＋ 미션</button></div>
 <div class="th"><span>#</span><span>BUSINESS</span><span>TASK</span><span>MISSION</span><span>OWNER</span><span>MODEL</span><span>STATUS</span><span class="r">QA</span><span class="r">DEPS</span><span class="r">UPD</span></div>
 <div class="scroll" id="board"></div>
@@ -292,20 +332,24 @@ html.m input,html.m textarea,html.m select{font-size:16px!important}
 <div class="ph"><span class="cap">APPROVALS</span><span class="mono" style="font-size:10px;color:#E2704F" id="apCap"></span></div>
 <div class="scroll" id="approvals"></div>
 </section>
-<section class="pnl" data-m="meet" style="display:flex;flex-direction:column;flex:1">
+<section class="pnl" data-m="office" style="display:flex;flex-direction:column;flex:1">
 <div class="ph"><span class="cap">MEETING ROOM</span><span class="mono" style="font-size:9px" id="mtCap"></span></div>
 <div style="padding:6px 10px;font-size:12px;color:#D8C7AB;border-bottom:1px solid #2C2018" class="ell" id="mtTitle"></div>
 <div class="scroll" id="talk"></div>
 <div style="padding:6px 8px;border-top:1px solid #3A2A1F;display:grid;grid-template-columns:repeat(2,1fr);gap:4px"><button class="btn pri" id="bMeet">＋ 회의 소집</button><button class="btn" id="bMinutes">회의록</button></div>
 </section>
-<section class="pnl" data-m="meet" style="display:flex;flex-direction:column;height:200px;flex:none">
+<section class="pnl" data-m="office" style="display:flex;flex-direction:column;height:200px;flex:none">
 <div class="ph"><span class="cap">ACTIVITY LOG</span><span class="mono mu" style="font-size:10px">LIVE</span></div>
 <div class="scroll" id="log" style="padding-top:2px"></div>
 </section>
 </aside>
 </main>
 
-<section id="portfolio" style="display:none"></section>
+<section id="portfolio" class="vw" style="display:none"></section>
+<section id="vMissions" class="vw" style="display:none"></section>
+<section id="vOutputs" class="vw" style="display:none"></section>
+<section id="vPlaybook" class="vw" style="display:none"></section>
+<section id="vConn" class="vw" style="display:none"></section>
 
 <footer>
 <span id="fEngine"><i class="d" style="background:#7A6654"></i>ENGINE · —</span>
@@ -355,8 +399,9 @@ html.m input,html.m textarea,html.m select{font-size:16px!important}
 </div></div></div>
 
 <nav id="mtab" aria-label="모바일 메뉴">
-<button data-m="office" class="on"><b>OFFICE</b>오피스</button><button data-m="approve"><b>DECIDE</b>결재<span class="nb" id="mtabN"></span></button><button data-m="board"><b>TASKS</b>업무</button><button data-m="meet"><b>MEET</b>회의</button><button data-m="biz"><b>BIZ</b>사업</button>
+<button data-m="office" class="on"><b>OFFICE</b>오피스</button><button data-m="approve"><b>DECIDE</b>결재<span class="nb" id="mtabN"></span></button><button data-m="missions"><b>MISSION</b>미션</button><button data-m="outputs"><b>OUTPUT</b>산출물</button><button data-m="more"><b>MORE</b>더보기</button>
 </nav>
+<div id="morePanel"><button class="btn" data-mm="portfolio">사업 (PORTFOLIO)</button><button class="btn" data-mm="playbook">플레이북</button><button class="btn" data-mm="connections">연결·엔진</button><button class="btn" data-mm="meetnew">＋ 회의 소집</button></div>
 <div class="toast" id="toast"></div>
 </div>
 
@@ -371,8 +416,8 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 
 /* ---------- stage scaling ---------- */
 let MOB=false,MPANE='office';
-function mpane(p){MPANE=p;document.querySelectorAll('#mtab button').forEach(b=>b.classList.toggle('on',b.dataset.m===p));
-  if(p==='biz'){setView('portfolio');return;}setView('office');document.querySelectorAll('main .pnl[data-m]').forEach(x=>x.classList.toggle('mon',x.dataset.m===p));$('main').scrollTop=0;}
+function mpane(p){if(p==='more'){openMore();return;}MPANE=p;document.querySelectorAll('#mtab button').forEach(b=>b.classList.toggle('on',b.dataset.m===p));
+  if(['portfolio','missions','outputs','playbook','connections'].includes(p)){setView(p);return;}setView('office');document.querySelectorAll('main .pnl[data-m]').forEach(x=>x.classList.toggle('mon',x.dataset.m===p));$('main').scrollTop=0;}
 const MQ=matchMedia('(max-width: 760px)');MQ.addEventListener&&MQ.addEventListener('change',()=>fit());
 function fit(){const mob=MQ.matches;if(mob!==MOB){MOB=mob;document.documentElement.classList.toggle('m',mob);if(mob)setTimeout(()=>mpane(MPANE));}if(mob)return;const s=Math.min(innerWidth/1440,innerHeight/960);const st=$('#stage');st.style.transform=`scale(${s})`;st.style.left=Math.max(0,(innerWidth-1440*s)/2)+'px';st.style.top=Math.max(0,(innerHeight-960*s)/2)+'px';}
 addEventListener('resize',()=>fit());
@@ -715,7 +760,8 @@ async function sync(){
     S.lastSync=Date.now();
     renderPlan();events();renderRoster();renderBoard();renderKpis();renderApprovals();renderLog();renderFooter();await renderMeeting();
     const sig=S.issues.map(i=>i.number+':'+i.updated_at).join()+'|'+(S.bus||[]).length;
-    if(sig!==S.sig){S.sig=sig;if($('#portfolio').style.display!=='none'&&window.renderPortfolio&&!document.querySelector('.mask.show'))renderPortfolio(true);}
+    renderWork();renderLegend();
+    if(sig!==S.sig){S.sig=sig;if(!document.querySelector('.mask.show')&&!(typeof PB!=='undefined'&&PB.edit)){if(VIEW==='portfolio')renderPortfolio(true);else if(VIEWS[VIEW]&&VIEW!=='playbook'&&VIEW!=='connections')VIEWS[VIEW][1]();}}
   }catch(e){
     if(e.status===401||e.status===403||e.status===404){toast('GitHub 키를 확인해 주세요');showKey('연결이 거부됐습니다('+e.status+'). 키 권한과 저장소 선택을 확인해 주세요.');}
     else toast('동기화 실패 · 잠시 후 다시 시도합니다');
@@ -775,12 +821,26 @@ $('#bMeetSave').onclick=async()=>{
 };
 $('#bMinutes').onclick=()=>{if(S.meetNum)open(`https://github.com/${REPO}/issues/${S.meetNum}`,'_blank','noopener');};
 $('#bSync').onclick=()=>{sync();toast('새로고침');};
-$('#bWake').onclick=async()=>{try{await gh('/actions/workflows/engine.yml/dispatches',{method:'POST',body:{ref:'main'}});toast('엔진을 깨웠습니다');setTimeout(sync,4000);}catch(e){toast('실패: Actions 권한을 확인해 주세요');}};
-function setView(v){document.querySelectorAll('header nav a').forEach(x=>x.classList.toggle('on',x.dataset.go===v));$('main').style.display=v==='office'?'':'none';$('#portfolio').style.display=v==='portfolio'?'grid':'none';if(v==='portfolio'&&window.renderPortfolio)renderPortfolio();}
+function ctlIssue(){return S.issues.find(i=>has(i,'control')&&i.state==='open');}
+function isPaused(){const c=ctlIssue();try{return !!(c&&JSON.parse((/\{[\s\S]*\}/.exec(c.body||'')||['{}'])[0]).paused);}catch{return false;}}
+function renderWork(){const p=isPaused();const b=$('#bWork');b.classList.toggle('paused',p);b.innerHTML=p?'<i class="d" style="background:#E2704F"></i>근무 멈춤':'<i class="d" style="background:#7DB79A"></i>근무 중';b.title=p?'누르면 근무를 다시 시작합니다':'누르면 새 업무 착수를 멈춥니다(결재·채용은 계속 처리)';}
+$('#bWork').onclick=async()=>{const p=!isPaused();if(p&&!confirm('근무를 멈출까요? 진행 중인 업무만 마치고 새 업무·회의는 시작하지 않습니다. 결재 처리는 계속됩니다.'))return;
+  const body=JSON.stringify({paused:p,by:'owen',at:new Date().toISOString()});const c=ctlIssue();
+  try{if(c)await gh(`/issues/${c.number}`,{method:'PATCH',body:{body}});else await gh('/issues',{method:'POST',body:{title:'근무 상태',body,labels:['control']}});
+    if(!p)gh('/actions/workflows/engine.yml/dispatches',{method:'POST',body:{ref:'main'}}).catch(()=>{});
+    toast(p?'근무 멈춤 · 새 업무는 시작하지 않습니다':'근무 재개 · 엔진을 깨웠습니다');setTimeout(sync,1200);}catch(e){toast('실패: '+e.message.slice(0,60));}};
+function openMore(){$('#morePanel').classList.toggle('show');}
+document.querySelectorAll('[data-mm]').forEach(b=>b.onclick=()=>{$('#morePanel').classList.remove('show');const k=b.dataset.mm;if(k==='meetnew'){$('#bMeet').click();return;}
+  MPANE=k;document.querySelectorAll('#mtab button').forEach(x=>x.classList.toggle('on',x.dataset.m==='more'));setView(k);});
+function renderLegend(){const c={};agents().forEach(a=>{const s=agentState(a.id).st;c[s]=(c[s]||0)+1;});
+  $('#legend').innerHTML=['RUNNING','REVIEW','BLOCKED','MEETING','QUEUED','IDLE'].map(k=>`<span style="color:${c[k]?SC[k]:'#6E5B4A'}"><i class="d" style="background:${SC[k]}"></i>${k} ${c[k]||0}</span>`).join('')+'<span style="color:#E08A5A">■ CLAUDE</span><span style="color:#7DB79A">■ GPT</span><span style="color:#A3ACDB">■ GROK</span>';}
+const VIEWS={portfolio:['#portfolio',()=>window.renderPortfolio&&renderPortfolio()],missions:['#vMissions',()=>renderMissions()],outputs:['#vOutputs',()=>renderOutputs()],playbook:['#vPlaybook',()=>renderPlaybook()],connections:['#vConn',()=>renderConnections()]};
+let VIEW='office';
+function setView(v){VIEW=v;document.querySelectorAll('header nav a').forEach(x=>x.classList.toggle('on',x.dataset.go===v));$('main').style.display=v==='office'?'':'none';
+  for(const [k,[sel]] of Object.entries(VIEWS)) $(sel).style.display=k===v?'grid':'none';
+  if(VIEWS[v]&&S.team) VIEWS[v][1]();}
 document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>{const go=a.dataset.go;
-  if(go==='office'||go==='portfolio'){setView(go);return;}
-  const url={missions:`issues?q=is%3Aissue+label%3Amission`,meetings:`issues?q=is%3Aissue+label%3Ameeting`,people:`blob/main/config/team.json`,ledger:`actions`}[go];
-  if(url)open(`https://github.com/${REPO}/${url}`,'_blank','noopener');});
+  setView(go);});
 addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mask.show').forEach(m=>{if(m.id!=='mKey'||TOKEN)m.classList.remove('show');});});
 
 
@@ -803,5 +863,6 @@ fit();
 if(TOKEN) sync(); else showKey('');
 </script>
 <script src="portfolio.js"></script>
+<script src="views.js"></script>
 </body>
 </html>
