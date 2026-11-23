@@ -265,6 +265,19 @@ html.m .chips{flex-wrap:wrap}
 html.m .msn .mb .tr{grid-template-columns:18px 48px minmax(0,1fr) 72px!important}
 html.m .msn .mb .tr>:nth-child(4),html.m .msn .mb .tr>:nth-child(6),html.m .msn .mb .tr>:nth-child(7){display:none}
 html.m #vOutputs .pnl:first-child .scroll{max-height:40dvh;overflow:auto}
+/* meeting picker: 누가 누구인지 보이게 */
+.ppl2{max-height:330px;overflow:auto;border:1px solid #3A2A1F}
+.pg .pgh{height:20px;display:flex;align-items:center;gap:6px;padding:0 8px;background:#2A1F17;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#D9A441}
+.pg .pgh span{font:400 10px 'IBM Plex Sans KR',sans-serif;color:#A08A72;letter-spacing:0}
+.pp{display:grid!important;grid-template-columns:16px 22px 46px minmax(0,1fr) 50px;gap:8px;align-items:center;height:30px;padding:0 8px;border-bottom:1px solid #2C2018;cursor:pointer}
+.pp.on{background:#2E2219}
+.pp input{width:14px!important;height:14px;margin:0;accent-color:#D9A441}
+.pp img{width:22px;height:22px;image-rendering:pixelated}
+.pp .pn{font:600 11px 'IBM Plex Mono',monospace}
+.pp .pt{font-size:12px;color:#E0CFB4;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pp .pm{font:10px 'IBM Plex Mono',monospace;text-align:right}
+html.m .ppl2{max-height:46dvh}
+html.m .pp{height:40px}
 /* modal */
 .mask{position:absolute;inset:0;background:rgba(10,7,5,.72);display:none;align-items:center;justify-content:center;z-index:20}
 .mask.show{display:flex}
@@ -392,8 +405,8 @@ html.m #vOutputs .pnl:first-child .scroll{max-height:40dvh;overflow:auto}
 <label>사업<select id="iTBiz"></select></label>
 <label>안건<input id="iTTitle" maxlength="80"></label>
 <label>배경·질문<textarea id="iTBody" rows="4"></textarea></label>
-<div style="font-size:10px;color:#A38C72">참석자</div>
-<div class="ppl" id="iPpl"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#A38C72"><span>참석자 <span id="pplN" class="mono"></span></span><span style="display:flex;gap:4px"><button class="btn sbtn" data-pp="lead" type="button">리드만</button><button class="btn sbtn" data-pp="kkumi" type="button">꾸미 담당</button><button class="btn sbtn" data-pp="game" type="button">게임 담당</button><button class="btn sbtn" data-pp="none" type="button">비우기</button></span></div>
+<div class="ppl2" id="iPpl"></div>
 <div class="err" id="eMeet"></div>
 <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="bMeetSave">회의 소집</button></div>
 </div></div></div>
@@ -692,11 +705,14 @@ function renderApprovals(){
     return `<div class="ap" data-n="${i.number}"><div class="h">${head}<span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${who}</span></div><div class="t ell" data-url="${i.html_url}" title="GitHub에서 열기">${esc(i.title)}</div>
     <div class="b3">${b.map(([v,l],k)=>`<button class="btn${k===0?' pri':''}" data-act="${v}">${l}</button>`).join('')}</div>
     <div class="fb"><textarea rows="3" placeholder="의견을 적으면 해당 직원이 반영해 다시 합니다"></textarea><div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn" data-act="x">취소</button><button class="btn pri" data-act="send">보내기</button></div></div></div>`;};
-  $('#approvals').innerHTML=[...rv.map(i=>card(i,has(i,'post')?'post':'task')),...hires.map(i=>card(i,'hire'))].join('')||'<div class="empty">결재할 일이 없습니다.</div>';
+  const sched=S.issues.filter(i=>i.state==='open'&&has(i,'post')&&(has(i,'status:approved')||has(i,'status:scheduled')));
+  const schedCard=i=>{const m=meta(i);const sc=has(i,'status:scheduled');return `<div class="ap" data-n="${i.number}"><div class="h"><span style="color:${m.pub_error?'#E2704F':sc?'#7DB79A':'#E2B04A'}">POST · ${m.pub_error?'게시 실패':sc?'게시 예약됨':'예약 접수 중'}</span><span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${esc(m.when||'')}</span></div><div class="t ell" data-url="${i.html_url}">${esc(m.caption||i.title)}</div>${m.pub_error?`<div style="font-size:11px;color:#E2704F">${esc(m.pub_error)}</div>`:''}<div class="b3"><button class="btn pri" data-act="지금 올리기">지금 올리기</button><button class="btn" data-act="${m.pub_error?'다시':'취소'}">${m.pub_error?'다시 시도':'예약 취소'}</button><button class="btn" data-act="open">열기</button></div></div>`;};
+  $('#approvals').innerHTML=[...rv.map(i=>card(i,has(i,'post')?'post':'task')),...sched.map(schedCard),...hires.map(i=>card(i,'hire'))].join('')||'<div class="empty">결재할 일이 없습니다.</div>';
 }
 $('#approvals').addEventListener('click',async e=>{
   const t=e.target.closest('[data-url]');if(t){open(t.dataset.url,'_blank','noopener');return;}
   const b=e.target.closest('[data-act]');if(!b)return;const ap=b.closest('.ap');const n=+ap.dataset.n;const act=b.dataset.act;
+  if(act==='open'){open(ap.querySelector('[data-url]').dataset.url,'_blank','noopener');return;}
   if(act===''){ap.classList.add('op');ap.querySelector('textarea').focus();return;}
   if(act==='x'){ap.classList.remove('op');return;}
   const body=act==='send'?ap.querySelector('textarea').value.trim():act;if(!body)return;
@@ -804,11 +820,18 @@ $('#bMissionSave').onclick=async()=>{
   catch(e){$('#eMission').textContent='등록 실패: '+e.message.slice(0,80);}
   finally{$('#bMissionSave').disabled=false;}
 };
+const MEET_PRESET={lead:['tom','kate','jake','emma','max','noah','sam'],kkumi:['tom','noah','anna','lily','emma','mia','max'],game:['tom','sam','zoe','leo','emma','ryan']};
+function pplHtml(sel){const teams=S.team.teams||{};const list=agents();const order=[...Object.keys(teams),...new Set(list.map(a=>a.team).filter(t=>!(t in teams)))];
+  return order.filter(t=>list.some(a=>a.team===t)).map(t=>`<div class="pg"><div class="pgh">${esc(t)} <span>${esc(teams[t]||'')}</span></div>${list.filter(a=>a.team===t).map(a=>`<label class="pp${sel.includes(a.id)?' on':''}"><input type="checkbox" value="${a.id}" ${sel.includes(a.id)?'checked':''}><img src="${spriteOf(a.id)}" alt="" onerror="this.src='assets/s-ben.png'"><span class="pn" style="color:${MC[a.model]}">${esc(a.name)}</span><span class="pt">${esc(a.title||'')}</span><span class="pm" style="color:${MC[a.model]}">${a.model.toUpperCase()}</span></label>`).join('')}</div>`).join('');}
+function setPpl(sel){$('#iPpl').innerHTML=pplHtml(sel);$('#iPpl').querySelectorAll('input').forEach(x=>x.onchange=()=>{x.parentElement.classList.toggle('on',x.checked);pplCount();});pplCount();}
+function pplCount(){const n=document.querySelectorAll('#iPpl input:checked').length;$('#pplN').textContent=`${n}명 선택 · 2~6명`;$('#pplN').style.color=n>=2&&n<=6?'#A08A72':'#E2704F';}
 $('#bMeet').onclick=()=>{
-  const list=agents();const def=['tom','jake','emma','max'];
-  $('#iPpl').innerHTML=list.map(a=>`<label><input type="checkbox" value="${a.id}" ${def.includes(a.id)?'checked':''}>${esc(a.name)}</label>`).join('');
-  $('#iTBiz').innerHTML=bizOptions('');$('#iTTitle').value='';$('#iTBody').value='';$('#eMeet').textContent='';$('#mMeet').classList.add('show');setTimeout(()=>$('#iTTitle').focus(),50);
+  $('#iTBiz').innerHTML=bizOptions('');$('#iTTitle').value='';$('#iTBody').value='';$('#eMeet').textContent='';
+  setPpl(['tom','jake','emma','max']);
+  $('#iTBiz').onchange=()=>{const v=$('#iTBiz').value;if(MEET_PRESET[v])setPpl(MEET_PRESET[v].filter(x=>S.team.agents[x]).slice(0,6));};
+  $('#mMeet').classList.add('show');setTimeout(()=>$('#iTTitle').focus(),50);
 };
+document.querySelectorAll('[data-pp]').forEach(b=>b.onclick=()=>{const k=b.dataset.pp;setPpl(k==='none'?[]:(MEET_PRESET[k]||[]).filter(x=>S.team.agents[x]).slice(0,6));});
 $('#bMeetSave').onclick=async()=>{
   const title=$('#iTTitle').value.trim();const ppl=[...document.querySelectorAll('#iPpl input:checked')].map(x=>x.value);
   if(!title){$('#eMeet').textContent='안건을 적어 주세요.';return;}

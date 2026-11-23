@@ -76,7 +76,7 @@ function postDate(i){
   if(k){const base=new Date(i.created_at);const d=new Date(base);d.setHours(+k[2],+k[3],0,0);let add=(WD.indexOf(k[1])-d.getDay()+7)%7;if(add===0&&d<base)add=7;d.setDate(d.getDate()+add);return d;}
   return null;
 }
-const PST={REVIEW:['결재 대기','#E2704F'],APPROVED:['게시 대기','#7DB79A'],DONE:['종료','#7A6654'],POSTED:['게시됨','#79B8C9']};
+const PST={REVIEW:['결재 대기','#E2704F'],APPROVED:['예약 접수 중','#E2B04A'],SCHEDULED:['게시 예약됨','#7DB79A'],DONE:['종료','#7A6654'],POSTED:['게시됨','#79B8C9']};
 function pStatus(i){if(i.state==='closed')return has(i,'status:posted')?'POSTED':'DONE';return statusOf(i);}
 function pCalendar(body,b){
   const start=new Date();start.setHours(0,0,0,0);start.setDate(start.getDate()-((start.getDay()+6)%7));
@@ -121,7 +121,7 @@ function pQueue(body,b){
     <div><div class="cp">${esc(m.caption||i.title)}</div><div class="mono mu" style="font-size:10px;margin-top:2px"><b style="color:#D9A441">${code(i)}</b> · ${esc((m.hashtags||'').slice(0,60))}</div></div>
     <span class="mono" style="font-size:11px">${d?`${d.getMonth()+1}/${d.getDate()} ${WD[d.getDay()]} ${d.toTimeString().slice(0,5)}`:esc(m.when||'—')}</span>
     <span class="mono" style="font-size:11px;color:${c}"><i class="d" style="background:${c}"></i>${l}</span>
-    <div>${st==='REVIEW'?`<div class="b3"><button class="btn pri" data-act="승인">게시 승인</button><button class="btn" data-act="">의견</button><button class="btn" data-act="기각">기각</button></div>`:st==='APPROVED'?'<span class="mu" style="font-size:11px">승인됨 · 인스타 게시 연결 전</span>':'<span class="mu" style="font-size:11px">—</span>'}</div></div>`;}).join('')||'<div class="empty">게시물이 없습니다. 직원 결과물의 [[POST]] 블록이나 ＋ 게시물로 생깁니다.</div>'}</div>`;
+    <div>${st==='REVIEW'?`<div class="b3"><button class="btn pri" data-act="승인">게시 승인</button><button class="btn" data-act="">의견</button><button class="btn" data-act="기각">기각</button></div>`:(st==='APPROVED'||st==='SCHEDULED')?`<div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn pri" data-act="지금 올리기">지금 올리기</button>${m.pub_error?'<button class="btn" data-act="다시">다시 시도</button>':'<button class="btn" data-act="기각">취소</button>'}</div>${m.pub_error?`<div style="font-size:11px;color:#E2704F;margin-top:3px">${esc(m.pub_error)}</div>`:''}`:'<span class="mu" style="font-size:11px">—</span>'}</div></div>`;}).join('')||'<div class="empty">게시물이 없습니다. 직원 결과물의 [[POST]] 블록이나 ＋ 게시물로 생깁니다.</div>'}</div>`;
   body.querySelectorAll('[data-act]').forEach(btn=>btn.onclick=async()=>{const n=+btn.closest('[data-n]').dataset.n;let txt=btn.dataset.act;
     if(!txt){txt=prompt('의견을 적어 주세요. LILY가 반영해서 다시 만듭니다.');if(!txt)return;}
     btn.disabled=true;try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body:txt}});toast(`${codeN(n)} 처리했습니다`);setTimeout(sync,1500);}catch(e){toast('실패: '+e.message.slice(0,60));btn.disabled=false;}});
