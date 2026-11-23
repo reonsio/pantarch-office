@@ -19,6 +19,7 @@ button{font:inherit;color:inherit}
 #stage{position:absolute;left:0;top:0;width:1440px;height:960px;transform-origin:0 0;background:#17110D;display:grid;grid-template-rows:38px minmax(0,1fr) 22px}
 .cap{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:1.4px;color:#C2A988}
 .pnl{background:#211812;border:1px solid #3A2A1F;min-height:0}
+.ph>*{white-space:nowrap}
 .ph{height:28px;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:0 8px;border-bottom:1px solid #3A2A1F;background:#271C15;flex:none}
 .btn{height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;border:1px solid #4A3626;background:#2A1F17;color:#E9DAC2;cursor:pointer;padding:0 8px;white-space:nowrap}
 .btn:hover{border-color:#7A5A3E}
@@ -69,7 +70,7 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .rr .ell{color:#D8C7AB;font-size:12px}
 .st{font:10px 'IBM Plex Mono',monospace;text-align:right;white-space:nowrap}
 .st i{width:5px;height:5px;display:inline-block;margin-right:4px}
-.tr,.th{display:grid;grid-template-columns:28px 104px minmax(0,1fr) 104px 50px 52px 76px 26px 40px 38px;gap:8px;align-items:center;padding:0 10px;height:27px;font-size:12px;border-bottom:1px solid #2C2018}
+.tr,.th{display:grid;grid-template-columns:48px 100px minmax(0,1fr) 110px 46px 52px 72px 26px 56px 38px;gap:8px;align-items:center;padding:0 10px;height:27px;font-size:12px;border-bottom:1px solid #2C2018}
 .tr{cursor:pointer}.tr:hover{background:#2A1F17}
 .th{height:22px;font:10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#A08A72;background:#271C15}
 .tr .mono{font-size:11px}
@@ -95,6 +96,56 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .lg b{font:600 11px 'IBM Plex Mono',monospace}
 .lg .ell{color:#E0CFB4}
 footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;padding:0 12px;font:9px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#8E7861;border-top:1px solid #3A2A1F;background:#1E1611}
+
+/* portfolio */
+#portfolio{grid-template-columns:232px minmax(0,1fr);gap:8px;padding:8px;min-height:0}
+.bz{height:64px;display:grid;grid-template-columns:4px minmax(0,1fr);gap:10px;padding:0 10px 0 0;border-bottom:1px solid #2C2018;cursor:pointer;align-items:center}
+.bz:hover{background:#2A1F17}.bz.on{background:#2E2219}
+.bz .bar{height:100%}
+.bz .k{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px}
+.bz .n{font-size:14px;font-weight:600;color:#F4E6CF;margin:1px 0}
+.bz .s{font:10px 'IBM Plex Mono',monospace;color:#A08A72}
+.tabs{display:grid;grid-template-columns:repeat(4,120px);gap:4px}
+.tabs .btn{height:24px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:8px;padding:10px;align-content:start}
+.tile{position:relative;aspect-ratio:1;background:#17110D;border:1px solid #3A2A1F;cursor:pointer;overflow:hidden}
+.tile img,.tile video{width:100%;height:100%;object-fit:cover}
+.tile .cap2{position:absolute;left:0;right:0;bottom:0;padding:2px 5px;background:rgba(23,16,12,.85);font:10px 'IBM Plex Mono',monospace;color:#D8C7AB;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .vb{position:absolute;right:4px;top:4px;font:600 9px 'IBM Plex Mono',monospace;background:#D9A441;color:#1E150F;padding:0 4px}
+.tile.sel{outline:2px solid #D9A441;outline-offset:-2px}
+.chips{display:flex;gap:4px}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);grid-template-rows:20px repeat(2,minmax(118px,1fr));gap:4px;padding:10px}
+.cal .hd{grid-row:auto;min-height:0;height:20px;font:10px 'IBM Plex Mono',monospace;color:#A08A72;text-align:center}
+.day{background:#1B1410;border:1px solid #33251B;padding:5px;display:flex;flex-direction:column;gap:4px;min-height:118px}
+.day .dn{font:600 11px 'IBM Plex Mono',monospace;color:#A08A72}
+.day.today{border-color:#D9A441}.day.today .dn{color:#D9A441}
+.pc{display:grid;grid-template-columns:30px minmax(0,1fr);gap:5px;align-items:center;background:#271C15;border-left:2px solid;padding:3px;cursor:pointer}
+.pc img{width:30px;height:30px;object-fit:cover}
+.pc span{font-size:11px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.pq,.pqh{display:grid;grid-template-columns:56px minmax(0,1fr) 120px 92px 250px;gap:10px;align-items:center;padding:6px 10px;border-bottom:1px solid #2C2018}
+.pqh{padding:0 10px;height:22px;font:10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#A08A72;background:#271C15}
+.pq img{width:56px;height:56px;object-fit:cover;background:#17110D}
+.pq .cp{font-size:12px;line-height:1.45;color:#E6D6BC;white-space:pre-wrap;max-height:52px;overflow:hidden}
+.pq .b3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px}
+.note{margin:10px;padding:10px 12px;border:1px dashed #5A4130;color:#D8C7AB;font-size:12px;line-height:1.6}
+.ms{border-bottom:1px solid #2C2018;padding:8px 10px}
+.ms .bar2{height:6px;background:#2A1F17;margin:6px 0}
+.ms .bar2 i{display:block;height:100%;background:#7DB79A}
+.doc{display:grid;grid-template-columns:280px minmax(0,1fr);min-height:0;flex:1}
+.doc .ls{border-right:1px solid #3A2A1F;overflow:auto}
+.doc .ls div{height:26px;display:flex;align-items:center;padding:0 10px;font:11px 'IBM Plex Mono',monospace;color:#D8C7AB;cursor:pointer;border-bottom:1px solid #2C2018;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.doc .ls div:hover,.doc .ls div.on{background:#2A1F17;color:#F4E6CF}
+.doc pre{margin:0;padding:12px;overflow:auto;white-space:pre-wrap;font:12px/1.6 'IBM Plex Sans KR',sans-serif;color:#E6D6BC}
+.pv{width:720px;max-height:900px;display:flex;flex-direction:column}
+.pv .media{background:#0E0A08;display:flex;align-items:center;justify-content:center;max-height:640px;overflow:hidden}
+.pv .media img,.pv .media video{max-width:100%;max-height:640px}
+
+.fold{width:20px;height:18px;display:inline-flex;align-items:center;justify-content:center;border:1px solid #4A3626;background:#2A1F17;color:#D8C7AB;font:600 11px 'IBM Plex Mono',monospace;cursor:pointer;margin-left:6px;flex:none}
+.fold:hover{border-color:#7A5A3E}
+.pnl.folded{flex:none!important;height:auto!important;max-height:none!important}
+.pnl.folded>:not(.ph){display:none!important}
+.ms.folded .tr{display:none}
+.ms .mh{cursor:pointer}
 /* modal */
 .mask{position:absolute;inset:0;background:rgba(10,7,5,.72);display:none;align-items:center;justify-content:center;z-index:20}
 .mask.show{display:flex}
@@ -121,7 +172,7 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 <span class="mono" id="hqSub" style="font-size:10px;color:#8E7861">HQ · 3F</span>
 </div>
 <nav aria-label="주 메뉴">
-<a class="on" data-go="office">OFFICE</a><a data-go="missions">MISSIONS</a><a data-go="meetings">MEETINGS</a><a data-go="people">PEOPLE</a><a data-go="archive">ARCHIVE</a><a data-go="ledger">LEDGER</a>
+<a class="on" data-go="office">OFFICE</a><a data-go="portfolio">PORTFOLIO</a><a data-go="missions">MISSIONS</a><a data-go="meetings">MEETINGS</a><a data-go="people">PEOPLE</a><a data-go="ledger">LEDGER</a>
 </nav>
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
 <button class="btn" id="bWake">엔진 깨우기</button><button class="btn" id="bSync">새로고침</button><button class="btn" id="bKey">접근키</button>
@@ -174,6 +225,8 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 </section>
 </aside>
 </main>
+
+<section id="portfolio" style="display:none"></section>
 
 <footer>
 <span id="fEngine"><i class="d" style="background:#7A6654"></i>ENGINE · —</span>
@@ -229,7 +282,7 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 const REPO='reonsio/pantarch-hq', OWNER='reonsio', API='https://api.github.com/repos/'+REPO;
 const LEGACY={archon:'tom',krites:'kate',praxis:'jake',eikon:'emma',kairos:'max'};
 const MC={claude:'#E08A5A',gpt:'#7DB79A',grok:'#A3ACDB'};
-const SC={RUNNING:'#E2B04A',REVIEW:'#E2704F',MEETING:'#79B8C9',QUEUED:'#9C8670',BLOCKED:'#E2704F',IDLE:'#7A6654',BREAK:'#B79C7E',DONE:'#7A6654'};
+const SC={APPROVED:'#7DB79A',RUNNING:'#E2B04A',REVIEW:'#E2704F',MEETING:'#79B8C9',QUEUED:'#9C8670',BLOCKED:'#E2704F',IDLE:'#7A6654',BREAK:'#B79C7E',DONE:'#7A6654'};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
@@ -295,6 +348,9 @@ function bizOf(it){
   const t=(it.title||'')+' '+(it.body||'').slice(0,300);
   if(/게임/.test(t)) return 'game'; if(/꾸미/.test(t)) return 'kkumi'; return '';
 }
+const PFX={task:'T',mission:'M',meeting:'MT',post:'P',hire:'H'};
+function code(i){if(!i)return '';const k=Object.keys(PFX).find(l=>has(i,l));return (PFX[k]||'#')+'-'+String(i.number).padStart(3,'0');}
+const codeN=n=>{const i=S.issues.find(x=>x.number===+n);return i?code(i):'#'+n;};
 const hhmm=d=>{const t=new Date(d),n=new Date();return t.toDateString()===n.toDateString()?t.toTimeString().slice(0,5):`${t.getMonth()+1}/${t.getDate()}`;};
 function statusOf(it){if(it.state==='closed')return 'DONE';const s=lab(it,'status:');return s?s.toUpperCase():'QUEUED';}
 function participants(it){const m=/참석\s*[:：]\s*(.+)/.exec(it.body||'');const ids=Object.keys(S.team.agents);let p=m?m[1].split(/[,\s]+/).map(x=>x.trim().toLowerCase()).filter(x=>ids.includes(x)):[];if(!p.length)p=['tom','jake','emma','max'].filter(x=>ids.includes(x));return p;}
@@ -331,7 +387,7 @@ function ensureSprite(a,home){
   el.append(img);const tag=document.createElement('div');tag.className='tg';el.append(tag);
   el.addEventListener('click',e=>{e.stopPropagation();showCard(a.id);});
   plan.append(el);
-  const g=AG[a.id]={el,img,tag,x:home.pos[0],y:home.pos[1],room:home.room,path:[],wait:0,brk:null,next:performance.now()+5000+Math.random()*20000};
+  const g=AG[a.id]={el,img,tag,x:home.pos[0],y:home.pos[1],room:home.room,path:[],trip:null,tripMsg:null,waitUntil:0};
   place(g);return g;
 }
 function place(g){const [l,t]=P(g.x,g.y);g.el.style.left=l+'%';g.el.style.top=t+'%';}
@@ -346,15 +402,56 @@ function tick(now){
       if(d<=sp){g.x=tx;g.y=ty;g.path.shift();if(!g.path.length){g.room=g.toRoom;g.el.classList.remove('mv','flip');}}
       else{g.x+=dx/d*sp;g.y+=dy/d*sp;g.el.classList.add('mv');}
       place(g);
-    }else if(g.idle&&now>g.next){ // wander
-      const h=HOMES[id];
-      if(g.brk){g.brk=null;goTo(g,h.room,h.pos);g.next=now+25000+Math.random()*35000;}
-      else{const r=Math.random()<.5?'PANTRY':'LOUNGE';const spots=BREAK[r];g.brk=r;goTo(g,r,spots[Math.floor(Math.random()*spots.length)]);g.next=now+12000+Math.random()*15000;}
+    }else if(g.trip){ // 의미 있는 이동: 보고·인계·검수·브리핑
+      if(g.waitUntil&&now<g.waitUntil){}
+      else{g.waitUntil=0;const st=g.trip.steps.shift();
+        if(!st){g.trip=null;g.tripMsg=null;paintBubble(g);}
+        else if(st.go){goTo(g,st.go[0],st.go[1]);}
+        else if(st.wait){g.waitUntil=now+st.wait;}
+        else if(st.home){const h=HOMES[id];if(h)goTo(g,h.room,h.pos);}}
     }
   }
   requestAnimationFrame(tick);
 }
 requestAnimationFrame(tick);
+
+function paintBubble(g){
+  g.el.querySelectorAll('.bb,.bang').forEach(n=>n.remove());
+  const b=document.createElement('div');
+  if(g.tripMsg){b.className='bb';b.textContent=g.tripMsg;g.el.prepend(b);return;}
+  if(g.state==='RUNNING'&&g.task){b.className='bb';b.textContent=`${code(g.task)} 작업 중`;g.el.prepend(b);}
+  else if(g.state==='REVIEW'){b.className='bang';b.textContent='!';g.el.prepend(b);}
+}
+/* 이동은 상태가 바뀐 사건에서만 일어난다 */
+const CEO_SPOT=[1690,600], ENGINE_SPOT=[1690,880];
+function deskOf(id){return HOMES[id];}
+function trip(id,steps,msg){const g=AG[id];if(!g||g.state==='MEETING')return;
+  const t={steps:[...steps,{home:1}]};
+  if(g.trip){g.trip.steps.push(...t.steps);return;} // 진행 중이면 이어서
+  g.trip=t;g.tripMsg=msg;g.waitUntil=0;paintBubble(g);}
+let PREV=null;
+function events(){
+  const cur={};S.issues.filter(i=>has(i,'task')).forEach(i=>cur[i.number]={st:statusOf(i),aid:lab(i,'agent:')});
+  if(!PREV){PREV=cur;return;}
+  const lead=(S.team.roles||{}).lead||'tom', qa=(S.team.roles||{}).qa||'kate';
+  const ev=[];
+  for(const [n,c] of Object.entries(cur)){
+    const p=PREV[n];const it=S.issues.find(i=>i.number===+n);const cd=code(it);
+    if(!p){ // 새 업무: 담당자가 총괄에게 가서 브리핑을 받는다
+      if(c.aid&&c.aid!==lead&&deskOf(lead)){const L=deskOf(lead);const spot=L.room==='MEETING'?MEET_SEATS[1]:[L.pos[0]+34,L.pos[1]];trip(c.aid,[{go:[L.room,spot]},{wait:4000}],`${cd} 브리핑 받으러`);ev.push(`${cd} 배정 → ${c.aid}`);}
+      continue;}
+    if(p.st===c.st) continue;
+    if(p.st==='RUNNING'&&c.st!=='RUNNING'&&c.aid&&deskOf(c.aid)&&qa!==c.aid) // 검수관이 담당자 자리로 와서 검수
+      trip(qa,[{go:[deskOf(c.aid).room,deskOf(c.aid).pos.map((v,k)=>v+(k?0:34))]},{wait:5000}],`${cd} 검수 ${meta(it).score??''}점`);
+    if(c.st==='REVIEW') trip(c.aid,[{go:['CEO',CEO_SPOT]},{wait:4000}],`${cd} 결재 올림`);
+    if(c.st==='DONE'){ // 다음 업무 담당자에게 인계 편지를 들고 간다
+      const nxt=S.issues.filter(i=>has(i,'task')&&i.state==='open'&&(meta(i).deps||[]).includes(+n));
+      const to=nxt.map(i=>lab(i,'agent:')).find(a=>a&&a!==c.aid&&deskOf(a));
+      if(to) trip(c.aid,[{go:[deskOf(to).room,deskOf(to).pos.map((v,k)=>v+(k?0:-34))]},{wait:4000}],`${cd} 인계 → ${(S.team.agents[to]||{}).name||to}`);
+      else trip(c.aid,[{go:['CEO',CEO_SPOT]},{wait:3000}],`${cd} 완료 보고`);}
+  }
+  PREV=cur;
+}
 let HOMES={},meetIdx={};
 function renderPlan(){
   HOMES=homes();
@@ -363,15 +460,12 @@ function renderPlan(){
   const list=agents();
   for(const a of list){
     const h=HOMES[a.id];const g=ensureSprite(a,h);const {st,task}=agentState(a.id);
-    g.state=st;g.idle=st==='IDLE';
-    if(st==='MEETING'){g.brk=null;goTo(g,'MEETING',MEET_SEATS[meetIdx[a.id]??1]);}
-    else if(!g.idle||!g.brk){g.brk=null;goTo(g,h.room,h.pos);}
-    const showSt=g.brk?'BREAK':st;
+    g.state=st;g.task=task;
+    if(st==='MEETING'){g.trip=null;g.tripMsg=null;goTo(g,'MEETING',MEET_SEATS[meetIdx[a.id]??1]);}
+    else if(!g.trip){goTo(g,h.room,h.pos);}
     g.tag.style.borderLeftColor=MC[a.model]||'#999';
-    g.tag.innerHTML=`<i style="background:${SC[showSt]}"></i>${esc(a.name)}`;
-    g.el.querySelectorAll('.bb,.bang').forEach(n=>n.remove());
-    if(st==='RUNNING'&&task){const b=document.createElement('div');b.className='bb';b.textContent=task.title.slice(0,16)+' 중';g.el.prepend(b);}
-    if(st==='REVIEW'){const b=document.createElement('div');b.className='bang';b.textContent='!';g.el.prepend(b);}
+    g.tag.innerHTML=`<i style="background:${SC[st]}"></i>${esc(a.name)}`;
+    paintBubble(g);
     g.el.title=`${a.name} · ${a.title||''}`;
   }
   for(const id of Object.keys(AG)) if(!HOMES[id]){AG[id].el.remove();delete AG[id];}
@@ -400,7 +494,7 @@ function showCard(id){
   const done=S.issues.filter(i=>has(i,'task')&&lab(i,'agent:')===id&&i.state==='closed').length;
   c.innerHTML=`<h4><img src="${spriteOf(id)}" style="width:22px;height:22px;image-rendering:pixelated" onerror="this.src='assets/s-ben.png'">${esc(a.name)} <span style="font-size:9px;color:${MC[m]}">${m.toUpperCase()}</span><span style="margin-left:auto;font-size:9px;color:${SC[st]}">${st}</span></h4>
   <p>${esc((S.team.teams||{})[a.team]||a.team)} · ${esc(a.title||'')} · 완료 ${done}건</p><p>${esc(a.mission||'')}</p>
-  ${task?`<p>지금: <a href="${task.html_url}" target="_blank" rel="noopener">#${task.number} ${esc(task.title)}</a></p>`:'<p>지금: 맡은 일 없음</p>'}
+  ${task?`<p>지금: <a href="${task.html_url}" target="_blank" rel="noopener">${code(task)} ${esc(task.title)}</a></p>`:'<p>지금: 맡은 일 없음</p>'}
   <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-top:6px"><button class="btn" onclick="openMission('${id}')">일 맡기기</button><button class="btn" onclick="$('#card').classList.remove('show');Object.values(AG).forEach(x=>x.el.classList.remove('hl'))">닫기</button></div>`;
   c.classList.add('show');
 }
@@ -413,8 +507,8 @@ function renderRoster(){
   let h='';
   for(const t of order){const mem=list.filter(a=>a.team===t);if(!mem.length)continue;
     h+=`<div class="rg"><span>${esc(t)}</span><span>${esc(teams[t]||t)} · ${mem.length}</span></div>`;
-    for(const a of mem){const {st,task}=agentState(a.id);const g=AG[a.id];const s=g&&g.brk?'BREAK':st;
-      h+=`<div class="rr" data-ag="${a.id}"><img src="${spriteOf(a.id)}" alt="" onerror="this.src='assets/s-ben.png'"><b style="color:${MC[a.model]}" title="${a.model.toUpperCase()}">${esc(a.name)}</b><span class="ell">${esc(a.title||'')} · ${esc(task?task.title:(s==='BREAK'?'휴식':'대기'))}</span><span class="st" style="color:${SC[s]}"><i style="background:${SC[s]}"></i>${s}</span></div>`;}}
+    for(const a of mem){const {st,task}=agentState(a.id);const g=AG[a.id];const s=st;
+      h+=`<div class="rr" data-ag="${a.id}"><img src="${spriteOf(a.id)}" alt="" onerror="this.src='assets/s-ben.png'"><b style="color:${MC[a.model]}" title="${a.model.toUpperCase()}">${esc(a.name)}</b><span class="ell">${esc(a.title||'')} · ${task?`<b class="mono" style="font-size:10px;color:#D9A441;font-weight:600">${code(task)}</b> `+esc(task.title):'대기'}</span><span class="st" style="color:${SC[s]}"><i style="background:${SC[s]}"></i>${s}</span></div>`;}}
   $('#roster').innerHTML=h;
   $('#pplCap').textContent=`PEOPLE · ${order.filter(t=>list.some(a=>a.team===t)).length} TEAMS`;
   const seats=Object.values(ROOMS).filter(r=>r.pod).length*4;
@@ -434,7 +528,7 @@ function renderBoard(){
   const rows=[...open,...closed];
   $('#board').innerHTML=rows.length?rows.map(i=>{const st=statusOf(i),m=meta(i),aid=lab(i,'agent:'),a=S.team.agents[aid]||{},mo=(a.model||'').toLowerCase();
     const ms=m.mission?S.issues.find(x=>x.number===m.mission):null;
-    return `<div class="tr${i.state==='closed'?' cl':''}" data-url="${i.html_url}"><span class="mono mu">${i.number}</span><span class="ell">${bizTag(bizOf(i))}</span><span class="ell">${esc(i.title)}</span><span class="ell mu" title="${ms?esc(ms.title):''}">${ms?'#'+ms.number+' '+esc(ms.title):'—'}</span><span class="mono">${esc(a.name||aid||'—')}</span><span class="mono" style="color:${MC[mo]||'#A08A72'}">${mo?mo.toUpperCase():'—'}</span><span class="mono" style="color:${SC[st]}"><i class="d" style="background:${SC[st]}"></i>${st}</span><span class="mono r">${m.score??'—'}</span><span class="mono r mu">${(m.deps||[]).length?m.deps.join('·'):'—'}</span><span class="mono r mu">${hhmm(i.updated_at)}</span></div>`;}).join(''):'<div class="empty">업무가 없습니다. ＋ 미션으로 TOM에게 일을 맡기세요.</div>';
+    return `<div class="tr${i.state==='closed'?' cl':''}" data-url="${i.html_url}"><span class="mono" style="color:#D9A441">${code(i)}</span><span class="ell">${bizTag(bizOf(i))}</span><span class="ell">${esc(i.title)}</span><span class="ell mu" title="${ms?esc(ms.title):''}">${ms?code(ms)+' '+esc(ms.title):'—'}</span><span class="mono">${esc(a.name||aid||'—')}</span><span class="mono" style="color:${MC[mo]||'#A08A72'}">${mo?mo.toUpperCase():'—'}</span><span class="mono" style="color:${SC[st]}"><i class="d" style="background:${SC[st]}"></i>${st}</span><span class="mono r">${m.score??'—'}</span><span class="mono r mu">${(m.deps||[]).length?m.deps.map(codeN).join(' '):'—'}</span><span class="mono r mu">${hhmm(i.updated_at)}</span></div>`;}).join(''):'<div class="empty">업무가 없습니다. ＋ 미션으로 TOM에게 일을 맡기세요.</div>';
   const c={};open.forEach(i=>{const s=statusOf(i);c[s]=(c[s]||0)+1;});
   $('#boardSum').textContent=`${open.length} OPEN · ${c.RUNNING||0} RUNNING · ${c.REVIEW||0} REVIEW · ${c.QUEUED||0} QUEUED`;
 }
@@ -449,16 +543,17 @@ function renderKpis(){
   $('#kpis').innerHTML=k.map(([a,b,c])=>`<div><span>${a}</span><b${c?` style="color:${c}"`:''}>${b}</b></div>`).join('');
 }
 function renderApprovals(){
-  const rv=S.issues.filter(i=>i.state==='open'&&has(i,'task')&&statusOf(i)==='REVIEW');
+  const rv=S.issues.filter(i=>i.state==='open'&&(has(i,'task')||has(i,'post'))&&statusOf(i)==='REVIEW');
   const hires=S.issues.filter(i=>i.state==='open'&&has(i,'hire'));
   $('#apCap').textContent=`${rv.length+hires.length} PENDING`;
   const card=(i,kind)=>{const m=meta(i);let head,who,b;
     if(kind==='hire'){const a=m.agent||{};head=`<span style="color:${MC[(a.model||'').toLowerCase()]||'#A3ACDB'}">HIRE · ${esc((a.model||'').toUpperCase())}</span>`;who=esc(a.team||'');b=[['승인','채용'],['','의견'],['거절','보류']];}
+    else if(has(i,'post')){head=`<span style="color:#E08A5A">POST · ${esc(BIZ[bizOf(i)]?BIZ[bizOf(i)].name:'')}</span>`;who=esc(m.when||'');b=[['승인','게시 승인'],['','의견'],['기각','기각']];}
     else{const aid=lab(i,'agent:');const a=S.team.agents[aid]||{};head=`<span style="color:#E2704F">TASK · QA ${m.score??'—'}</span>`;who=esc(a.name||aid||'');b=[['승인','승인'],['','의견'],['기각','기각']];}
-    return `<div class="ap" data-n="${i.number}"><div class="h">${head}<span class="mu">#${i.number} · ${who}</span></div><div class="t ell" data-url="${i.html_url}" title="GitHub에서 열기">${esc(i.title)}</div>
+    return `<div class="ap" data-n="${i.number}"><div class="h">${head}<span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${who}</span></div><div class="t ell" data-url="${i.html_url}" title="GitHub에서 열기">${esc(i.title)}</div>
     <div class="b3">${b.map(([v,l],k)=>`<button class="btn${k===0?' pri':''}" data-act="${v}">${l}</button>`).join('')}</div>
     <div class="fb"><textarea rows="3" placeholder="의견을 적으면 해당 직원이 반영해 다시 합니다"></textarea><div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn" data-act="x">취소</button><button class="btn pri" data-act="send">보내기</button></div></div></div>`;};
-  $('#approvals').innerHTML=[...rv.map(i=>card(i,'task')),...hires.map(i=>card(i,'hire'))].join('')||'<div class="empty">결재할 일이 없습니다.</div>';
+  $('#approvals').innerHTML=[...rv.map(i=>card(i,has(i,'post')?'post':'task')),...hires.map(i=>card(i,'hire'))].join('')||'<div class="empty">결재할 일이 없습니다.</div>';
 }
 $('#approvals').addEventListener('click',async e=>{
   const t=e.target.closest('[data-url]');if(t){open(t.dataset.url,'_blank','noopener');return;}
@@ -467,7 +562,7 @@ $('#approvals').addEventListener('click',async e=>{
   if(act==='x'){ap.classList.remove('op');return;}
   const body=act==='send'?ap.querySelector('textarea').value.trim():act;if(!body)return;
   ap.querySelectorAll('button').forEach(x=>x.disabled=true);
-  try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body}});toast(act==='send'?'의견을 보냈습니다':`#${n} ${act} 처리했습니다`);setTimeout(sync,1500);}
+  try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body}});toast(act==='send'?'의견을 보냈습니다':`${codeN(n)} ${act} 처리했습니다`);setTimeout(sync,1500);}
   catch(err){toast('실패: '+err.message.slice(0,60));ap.querySelectorAll('button').forEach(x=>x.disabled=false);}
 });
 async function renderMeeting(){
@@ -476,7 +571,7 @@ async function renderMeeting(){
   if(!it){$('#mtTitle').textContent='아직 회의가 없습니다';$('#talk').innerHTML='<div class="empty">＋ 회의 소집으로 직원들을 모아 보세요.</div>';$('#mtCap').textContent='';S.meetNum=null;return;}
   S.meetNum=it.number;
   const ppl=participants(it).map(p=>(S.team.agents[p]||{}).name||p).join(' · ');
-  $('#mtTitle').textContent=`#${it.number} ${it.title} · ${ppl}`;
+  $('#mtTitle').textContent=`${code(it)} ${it.title} · ${ppl}`;
   const isLive=live&&has(live,'live');
   $('#mtCap').innerHTML=isLive?'<span style="color:#79B8C9"><i class="d" style="background:#79B8C9"></i>LIVE</span>':(live?'<span style="color:#9C8670">대기 · 엔진 시작 전</span>':'<span class="mu">지난 회의</span>');
   let cs=[];try{cs=await gh(`/issues/${it.number}/comments?per_page=100`)||[];}catch{}
@@ -500,7 +595,7 @@ function renderLog(){
     else if(m){who=m[1].toUpperCase();const id=Object.keys(S.team.agents).find(k=>(S.team.agents[k].name||'').toUpperCase()===who);col=MC[((S.team.agents[id]||{}).model||'').toLowerCase()];}
     else{const id=it&&lab(it,'agent:');const a=S.team.agents[id]||S.team.agents[(S.team.roles||{}).lead||'tom']||{};who=(a.name||'ENGINE').toUpperCase();col=MC[(a.model||'').toLowerCase()];}
     let msg=strip(b).replace(/[#*>`_]/g,'').split('\n').find(x=>x.trim())||'';const sc=/검수 (\d+)점/.exec(b);if(sc)msg=`결과 제출 · 검수 ${sc[1]}점`;
-    return `<div class="lg"><span class="mono mu">${hhmm(c.created_at)}</span><b style="color:${col||'#EFE2CC'}">${esc(who.slice(0,6))}</b><span class="ell" title="${esc(msg)}">${it?'#'+it.number+' ':''}${esc(msg.slice(0,80))}</span></div>`;});
+    return `<div class="lg"><span class="mono mu">${hhmm(c.created_at)}</span><b style="color:${col||'#EFE2CC'}">${esc(who.slice(0,6))}</b><span class="ell" title="${esc(msg)}">${it?`<b class="mono" style="font-size:10px;color:#D9A441">${code(it)}</b> `:''}${esc(msg.replace(/#(\d+)/g,(m,n)=>codeN(n)).slice(0,80))}</span></div>`;});
   $('#log').innerHTML=rows.join('')||'<div class="empty">아직 기록이 없습니다.</div>';
 }
 function renderFooter(){
@@ -522,7 +617,8 @@ async function sync(){
     S.comments=await gh('/issues/comments?sort=created&direction=desc&per_page=40')||[];
     try{const r=await gh('/actions/workflows/engine.yml/runs?per_page=1');S.runs=r&&r.workflow_runs;}catch{}
     S.lastSync=Date.now();
-    renderPlan();renderRoster();renderBoard();renderKpis();renderApprovals();renderLog();renderFooter();await renderMeeting();
+    renderPlan();events();renderRoster();renderBoard();renderKpis();renderApprovals();renderLog();renderFooter();await renderMeeting();
+    if($('#portfolio').style.display!=='none'&&window.renderPortfolio)renderPortfolio(true);
   }catch(e){
     if(e.status===401||e.status===403||e.status===404){toast('GitHub 키를 확인해 주세요');showKey('연결이 거부됐습니다('+e.status+'). 키 권한과 저장소 선택을 확인해 주세요.');}
     else toast('동기화 실패 · 잠시 후 다시 시도합니다');
@@ -561,7 +657,7 @@ $('#bMissionSave').onclick=async()=>{
   const lbl=['mission'];if(biz)lbl.push('biz:'+biz);
   const extra=missionFor?`\n\n담당 지정: ${missionFor} (${S.team.agents[missionFor].name})`:'';
   $('#bMissionSave').disabled=true;
-  try{const r=await gh('/issues',{method:'POST',body:{title,body:`사업: ${biz||'공통'}\n\n${body}${extra}`,labels:lbl}});$('#mMission').classList.remove('show');toast(`미션 #${r.number} 등록 · 엔진이 곧 계획을 세웁니다`);setTimeout(sync,1500);}
+  try{const r=await gh('/issues',{method:'POST',body:{title,body:`사업: ${biz||'공통'}\n\n${body}${extra}`,labels:lbl}});$('#mMission').classList.remove('show');toast(`M-${String(r.number).padStart(3,'0')} 등록 · TOM이 곧 업무로 나눕니다`);setTimeout(sync,1500);}
   catch(e){$('#eMission').textContent='등록 실패: '+e.message.slice(0,80);}
   finally{$('#bMissionSave').disabled=false;}
 };
@@ -576,19 +672,37 @@ $('#bMeetSave').onclick=async()=>{
   if(ppl.length<2){$('#eMeet').textContent='참석자를 2명 이상 골라 주세요.';return;}
   if(ppl.length>6){$('#eMeet').textContent='6명까지만 부를 수 있습니다(호출 비용).';return;}
   $('#bMeetSave').disabled=true;
-  try{const r=await gh('/issues',{method:'POST',body:{title,body:`참석: ${ppl.join(', ')}\n\n${$('#iTBody').value.trim()}`,labels:['meeting']}});$('#mMeet').classList.remove('show');toast(`회의 #${r.number} 소집 · 직원들이 회의실로 갑니다`);setTimeout(sync,1500);}
+  try{const r=await gh('/issues',{method:'POST',body:{title,body:`참석: ${ppl.join(', ')}\n\n${$('#iTBody').value.trim()}`,labels:['meeting']}});$('#mMeet').classList.remove('show');toast(`MT-${String(r.number).padStart(3,'0')} 소집 · 엔진이 시작하면 회의실로 모입니다`);setTimeout(sync,1500);}
   catch(e){$('#eMeet').textContent='소집 실패: '+e.message.slice(0,80);}
   finally{$('#bMeetSave').disabled=false;}
 };
 $('#bMinutes').onclick=()=>{if(S.meetNum)open(`https://github.com/${REPO}/issues/${S.meetNum}`,'_blank','noopener');};
 $('#bSync').onclick=()=>{sync();toast('새로고침');};
 $('#bWake').onclick=async()=>{try{await gh('/actions/workflows/engine.yml/dispatches',{method:'POST',body:{ref:'main'}});toast('엔진을 깨웠습니다');setTimeout(sync,4000);}catch(e){toast('실패: Actions 권한을 확인해 주세요');}};
+function setView(v){document.querySelectorAll('nav a').forEach(x=>x.classList.toggle('on',x.dataset.go===v));$('main').style.display=v==='office'?'':'none';$('#portfolio').style.display=v==='portfolio'?'grid':'none';if(v==='portfolio'&&window.renderPortfolio)renderPortfolio();}
 document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>{const go=a.dataset.go;
-  const url={missions:`issues?q=is%3Aissue+label%3Amission`,meetings:`issues?q=is%3Aissue+label%3Ameeting`,people:`blob/main/config/team.json`,archive:`tree/main/workspace`,ledger:`actions`}[go];
+  if(go==='office'||go==='portfolio'){setView(go);return;}
+  const url={missions:`issues?q=is%3Aissue+label%3Amission`,meetings:`issues?q=is%3Aissue+label%3Ameeting`,people:`blob/main/config/team.json`,ledger:`actions`}[go];
   if(url)open(`https://github.com/${REPO}/${url}`,'_blank','noopener');});
 addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mask.show').forEach(m=>{if(m.id!=='mKey'||TOKEN)m.classList.remove('show');});});
 
+
+/* 접기/펼치기: 패널 머리의 −/+ 버튼, 상태는 이 브라우저에 기억 */
+const FOLD=JSON.parse(localStorage.getItem('pantarch_fold')||'{}');
+function foldable(root){
+  root.querySelectorAll('.pnl:not([data-nofold])').forEach((p,k)=>{const ph=p.querySelector(':scope>.ph');if(!ph||ph.querySelector('.fold'))return;
+    const key=p.getAttribute('aria-label')||p.dataset.fold||(ph.querySelector('.cap')||{}).textContent||('p'+k);
+    const b=document.createElement('button');b.className='fold';b.title='접기/펼치기';
+    const set=v=>{p.classList.toggle('folded',v);b.textContent=v?'+':'−';};
+    set(!!FOLD[key]);b.onclick=e=>{e.stopPropagation();FOLD[key]=!p.classList.contains('folded');set(FOLD[key]);localStorage.setItem('pantarch_fold',JSON.stringify(FOLD));};
+    const w=document.createElement('span');w.style.cssText='display:flex;align-items:center;gap:0';
+    const right=ph.children.length>1?ph.lastElementChild:null;
+    if(right){ph.insertBefore(w,right);w.append(right);}else ph.append(w);
+    w.append(b);});
+}
+foldable($('main'));
 if(TOKEN) sync(); else showKey('');
 </script>
+<script src="portfolio.js"></script>
 </body>
 </html>
