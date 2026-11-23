@@ -2,13 +2,14 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<script>if(matchMedia("(max-width: 760px)").matches)document.documentElement.classList.add("m");</script>
 <title>PANTARCH HQ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+KR:wght@400;500;600;700&display=swap">
 <style>
 *{box-sizing:border-box}
-html,body{margin:0;height:100%;background:#120D0A;overflow:hidden}
+html,body{margin:0;height:100%;background:#120D0A;overflow:hidden;-webkit-text-size-adjust:100%;text-size-adjust:100%}
 body{font-family:'IBM Plex Sans KR',sans-serif;color:#EFE2CC;font-size:12px}
 img{display:block}
 button{font:inherit;color:inherit}
@@ -149,62 +150,81 @@ footer{display:grid;grid-template-columns:repeat(6,1fr);align-items:center;paddi
 
 /* ---------- mobile ---------- */
 #mtab{display:none}
-body.m{overflow:auto}
-body.m #stage{position:relative;left:0!important;top:0!important;transform:none!important;width:100%;height:100dvh;grid-template-rows:44px minmax(0,1fr) 56px}
-body.m header{grid-template-columns:minmax(0,1fr) auto;padding:0 10px}
-body.m header nav{display:none}
-body.m header>div:last-child{grid-template-columns:repeat(3,64px)}
-body.m header>div:last-child .btn{height:28px;font-size:11px;padding:0}
-body.m #hqSub{display:none}
-body.m main{display:flex;flex-direction:column;gap:8px;overflow:auto;padding:8px;-webkit-overflow-scrolling:touch}
-body.m main>aside,body.m main>.col{display:contents}
-body.m main .pnl{display:none!important}
-body.m main .pnl.mon{display:flex!important;flex-direction:column;flex:none!important;height:auto!important;max-height:none!important}
-body.m main .pnl.mon.folded>:not(.ph){display:none!important}
-body.m main .pnl.mon .scroll{overflow:visible;flex:none}
-body.m .plan{display:block}
-body.m #pPlan{order:-1}
-body.m #legend{display:none!important}
-body.m main .ph{height:auto;min-height:34px;flex-wrap:wrap;row-gap:4px;padding:5px 8px}
-body.m .ag{width:18px;height:18px;margin:-9px 0 0 -9px}
-body.m .ag img{width:18px;height:18px}
-body.m .tg{font-size:7px;line-height:9px;padding:0 2px}
-body.m .bb{font-size:8px;line-height:10px;max-width:90px;padding:0 3px}
-body.m .rl{font-size:7px;line-height:10px;padding:0 3px}
-body.m .rl span,body.m .rl em{display:none}
-body.m .seat{width:12px;height:12px;margin:-6px 0 0 -6px;font-size:8px;line-height:10px}
-body.m .card{left:6px;right:6px;bottom:6px;width:auto}
-body.m .th{display:none}
-body.m .tr{grid-template-columns:52px minmax(0,1fr) 46px 78px;height:auto;min-height:36px;padding:6px 10px}
-body.m .tr>:nth-child(2),body.m .tr>:nth-child(4),body.m .tr>:nth-child(6),body.m .tr>:nth-child(8),body.m .tr>:nth-child(9),body.m .tr>:nth-child(10){display:none}
-body.m .tr>.ell:nth-child(3){white-space:normal}
-body.m .btn{height:34px;font-size:12px}
-body.m .sbtn{height:26px}
-body.m .ap .t{white-space:normal}
-body.m .mask .fm{width:94vw!important;max-height:90dvh;overflow:auto}
-body.m footer{display:none}
-body.m #mtab{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #3A2A1F;background:#1E1611}
+html.m body{overflow:hidden;font-size:11px}
+html.m #stage{max-width:100vw;overflow:hidden}
+html.m main{overflow-x:hidden}
+html.m main .pnl{min-width:0;max-width:100%}
+html.m .cap{font-size:10px;letter-spacing:1px}
+html.m .rr{height:24px;grid-template-columns:18px 40px minmax(0,1fr) 58px;gap:6px;padding:0 8px}
+html.m .rr img{width:18px;height:18px}
+html.m .rr b{font-size:10px}
+html.m .rr .ell{font-size:11px}
+html.m .st{font-size:9px}
+html.m .rg{height:18px;font-size:9px;padding:0 8px}
+html.m .rg span:last-child{font-size:10px}
+html.m .tr{font-size:11px}
+html.m .tr .mono{font-size:10px}
+html.m .ap .t{font-size:12px}
+html.m .tk p,html.m .lg{font-size:11px}
+html.m .kp b{font-size:13px}
+html.m #stage{position:relative;left:0!important;top:0!important;transform:none!important;width:100%;height:100dvh;grid-template-rows:44px minmax(0,1fr) 56px}
+html.m header{grid-template-columns:minmax(0,1fr) auto;padding:0 10px}
+html.m header nav{display:none}
+html.m header>div:last-child{grid-template-columns:repeat(3,60px);gap:4px}
+html.m header .mono{font-size:11px!important;letter-spacing:2px!important}
+html.m header>div:last-child .btn{height:26px;font-size:10px;padding:0}
+html.m #hqSub{display:none}
+html.m main{display:flex;flex-direction:column;gap:8px;overflow:auto;padding:8px;-webkit-overflow-scrolling:touch}
+html.m main>aside,html.m main>.col{display:contents}
+html.m main .pnl{display:none!important}
+html.m main .pnl.mon{display:flex!important;flex-direction:column;flex:none!important;height:auto!important;max-height:none!important}
+html.m main .pnl.mon.folded>:not(.ph){display:none!important}
+html.m main .pnl.mon .scroll{overflow:visible;flex:none}
+html.m .plan{display:block}
+html.m #pPlan{order:-1}
+html.m #legend{display:none!important}
+html.m main .ph{height:auto;min-height:34px;flex-wrap:wrap;row-gap:4px;padding:5px 8px}
+html.m .ag{width:18px;height:18px;margin:-9px 0 0 -9px}
+html.m .ag img{width:18px;height:18px}
+html.m .tg{font-size:7px;line-height:9px;padding:0 2px}
+html.m .bb{font-size:8px;line-height:10px;max-width:90px;padding:0 3px}
+html.m .rl{font-size:7px;line-height:10px;padding:0 3px}
+html.m .rl span,html.m .rl em{display:none}
+html.m .seat{width:12px;height:12px;margin:-6px 0 0 -6px;font-size:8px;line-height:10px}
+html.m .card{left:6px;right:6px;bottom:6px;width:auto}
+html.m .th{display:none}
+html.m .tr{grid-template-columns:52px minmax(0,1fr) 46px 78px;height:auto;min-height:36px;padding:6px 10px}
+html.m .tr>:nth-child(2),html.m .tr>:nth-child(4),html.m .tr>:nth-child(6),html.m .tr>:nth-child(8),html.m .tr>:nth-child(9),html.m .tr>:nth-child(10){display:none}
+html.m .tr>.ell:nth-child(3){white-space:normal}
+html.m .btn{height:32px;font-size:11px}
+html.m .sbtn{height:26px}
+html.m .ap .t{white-space:normal}
+html.m .mask .fm{width:94vw!important;max-height:90dvh;overflow:auto}
+html.m footer{display:none}
+html.m #mtab{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #3A2A1F;background:#1E1611}
 #mtab button{background:none;border:0;border-top:2px solid transparent;color:#A08A72;font:600 11px 'IBM Plex Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
 #mtab button b{font:10px 'IBM Plex Mono',monospace;letter-spacing:1px;font-weight:400}
 #mtab button.on{color:#F4E6CF;border-top-color:#D9A441}
 #mtab button .nb{color:#E2704F}
-body.m #portfolio{grid-template-columns:1fr;overflow:auto;padding:8px}
-body.m #portfolio>section:first-child{max-height:none}
-body.m #portfolio .bz{height:52px}
-body.m #portfolio .ph{height:auto!important;min-height:34px;flex-wrap:wrap;gap:6px;padding:6px 8px}
-body.m #portfolio .tabs{grid-template-columns:repeat(4,1fr)!important;width:100%}
-body.m .cal{grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:18px repeat(2,minmax(84px,auto));gap:2px;padding:6px}
-body.m .day{min-height:84px;padding:3px}
-body.m .day .dn{font-size:9px}
-body.m .pc{grid-template-columns:1fr}
-body.m .pc img{width:100%;height:auto;aspect-ratio:1}
-body.m .pc span{font-size:9px}
-body.m .pqh{display:none}
-body.m .pq{grid-template-columns:64px minmax(0,1fr);grid-template-areas:"m c" "w s" "d d";row-gap:6px}
-body.m .pq>:nth-child(1){grid-area:m}body.m .pq>:nth-child(2){grid-area:c}body.m .pq>:nth-child(3){grid-area:w}body.m .pq>:nth-child(4){grid-area:s}body.m .pq>:nth-child(5){grid-area:d}
-body.m .grid{grid-template-columns:repeat(3,1fr);gap:4px;padding:6px}
-body.m .doc{grid-template-columns:1fr}
-body.m .doc .ls{max-height:200px;border-right:0;border-bottom:1px solid #3A2A1F}
+html.m #portfolio{grid-template-columns:1fr;overflow:auto;padding:8px}
+html.m #portfolio>section:first-child{max-height:none}
+html.m #portfolio .bz{height:52px}
+html.m #portfolio .ph{height:auto!important;min-height:34px;flex-wrap:wrap;gap:6px;padding:6px 8px}
+html.m #portfolio .tabs{grid-template-columns:repeat(4,1fr)!important;width:100%}
+html.m .cal{grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:18px repeat(2,minmax(84px,auto));gap:2px;padding:6px}
+html.m .day{min-height:84px;padding:3px}
+html.m .day .dn{font-size:9px}
+html.m .pc{grid-template-columns:1fr}
+html.m .pc img{width:100%;height:auto;aspect-ratio:1}
+html.m .pc span{font-size:9px}
+html.m .pqh{display:none}
+html.m .pq{grid-template-columns:64px minmax(0,1fr);grid-template-areas:"m c" "w s" "d d";row-gap:6px}
+html.m .pq>:nth-child(1){grid-area:m}html.m .pq>:nth-child(2){grid-area:c}html.m .pq>:nth-child(3){grid-area:w}html.m .pq>:nth-child(4){grid-area:s}html.m .pq>:nth-child(5){grid-area:d}
+html.m .grid{grid-template-columns:repeat(3,1fr);gap:4px;padding:6px}
+html.m .doc{grid-template-columns:1fr}
+html.m .doc .ls{max-height:200px;border-right:0;border-bottom:1px solid #3A2A1F}
+/* 아이폰은 16px보다 작은 입력칸을 누르면 화면을 확대해 버린다 */
+html.m input,html.m textarea,html.m select{font-size:16px!important}
 /* modal */
 .mask{position:absolute;inset:0;background:rgba(10,7,5,.72);display:none;align-items:center;justify-content:center;z-index:20}
 .mask.show{display:flex}
@@ -354,7 +374,7 @@ let MOB=false,MPANE='office';
 function mpane(p){MPANE=p;document.querySelectorAll('#mtab button').forEach(b=>b.classList.toggle('on',b.dataset.m===p));
   if(p==='biz'){setView('portfolio');return;}setView('office');document.querySelectorAll('main .pnl[data-m]').forEach(x=>x.classList.toggle('mon',x.dataset.m===p));$('main').scrollTop=0;}
 const MQ=matchMedia('(max-width: 760px)');MQ.addEventListener&&MQ.addEventListener('change',()=>fit());
-function fit(){const mob=MQ.matches;if(mob!==MOB){MOB=mob;document.body.classList.toggle('m',mob);if(mob)setTimeout(()=>mpane(MPANE));}if(mob)return;const s=Math.min(innerWidth/1440,innerHeight/960);const st=$('#stage');st.style.transform=`scale(${s})`;st.style.left=Math.max(0,(innerWidth-1440*s)/2)+'px';st.style.top=Math.max(0,(innerHeight-960*s)/2)+'px';}
+function fit(){const mob=MQ.matches;if(mob!==MOB){MOB=mob;document.documentElement.classList.toggle('m',mob);if(mob)setTimeout(()=>mpane(MPANE));}if(mob)return;const s=Math.min(innerWidth/1440,innerHeight/960);const st=$('#stage');st.style.transform=`scale(${s})`;st.style.left=Math.max(0,(innerWidth-1440*s)/2)+'px';st.style.top=Math.max(0,(innerHeight-960*s)/2)+'px';}
 addEventListener('resize',()=>fit());
 
 /* ---------- map geometry (plan source units) ---------- */
