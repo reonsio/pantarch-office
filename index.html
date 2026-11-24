@@ -82,6 +82,18 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .tr{cursor:pointer}.tr:hover{background:#2A1F17}
 ::placeholder{font-size:11px!important;color:#6E5C4A!important;opacity:1}
 select{-webkit-appearance:none;appearance:none;border-radius:0!important;background-image:linear-gradient(45deg,transparent 50%,#8E7861 50%),linear-gradient(135deg,#8E7861 50%,transparent 50%)!important;background-position:calc(100% - 12px) 50%,calc(100% - 8px) 50%!important;background-size:4px 4px!important;background-repeat:no-repeat!important;padding-right:22px!important}
+.lba{padding:6px 10px;font-size:10px;color:#8E7861;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbc{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:6px;padding:0 10px 10px}
+.lbi{position:relative;display:grid;grid-template-rows:170px 16px 14px;gap:3px;padding:0 0 5px;background:#1A120E;border:1px solid #33251B;color:inherit;text-align:left;cursor:pointer;font:inherit;min-width:0}
+.lbi.on{border-color:#D9A441}.lbi img,.lbi .lbx{width:100%;height:170px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#241A14;color:#7A6654;font-size:10px}
+.lbi em{position:absolute;left:0;top:0;background:#D9A441;color:#1E150F;font:600 11px 'IBM Plex Mono',monospace;padding:1px 5px}
+.lbi b{font-size:11px;font-weight:600;color:#F4E6CF;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbi>span.mono{font-size:9px;color:#8E7861;padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbd{margin:0 10px 10px;border:1px solid #3A2A1F;background:#1A120E}
+.lbh{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:10px;align-items:center;padding:6px 8px;border-bottom:1px solid #2C2018}.lbh b{font-size:13px;color:#F4E6CF}.lbh a{text-decoration:none;display:flex;align-items:center;justify-content:center}.lbh .mono{font-size:10px;color:#A38C72;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lbf{display:grid;grid-template-columns:repeat(4,minmax(0,150px));gap:6px;padding:8px}.lbf figure{margin:0}.lbf img{width:100%;aspect-ratio:9/16;object-fit:cover;background:#241A14;display:block}.lbf figcaption{font-size:9px;color:#8E7861;text-align:center;padding-top:2px}
+.lbg{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px;padding:2px 8px 8px}.lbk{padding:6px 0;border-top:1px solid #2C2018;min-width:0}.lbk b{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.6px}.lbk p{margin:3px 0 0;font-size:12px;line-height:1.55;color:#D8C7AB;text-align:justify;overflow-wrap:anywhere}
+html.m .lbg{grid-template-columns:1fr}html.m .lbh{grid-template-columns:minmax(0,1fr) auto}html.m .lbh .mono{grid-column:1/-1;grid-row:2;white-space:normal}html.m .lbc{grid-template-columns:repeat(3,minmax(0,1fr))}html.m .lbi{grid-template-rows:150px 16px 14px}html.m .lbi img,html.m .lbi .lbx{height:150px}
 .rfc{padding:8px 10px;border-bottom:1px solid #2C2018}.rfn{height:28px;display:flex;align-items:center;font:11px 'IBM Plex Mono',monospace;color:#8E7861}
 .bg{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;background:#241A13;border-bottom:1px solid #2C2018;cursor:pointer;user-select:none}
 .bg:hover{background:#2A1F17}
@@ -996,7 +1008,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241152';
+const APPVER='11241156';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1132,8 +1144,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241152"></script>
-<script src="views.js?v=11241152"></script>
-<script src="chat.js?v=11241152"></script>
+<script src="portfolio.js?v=11241156"></script>
+<script src="views.js?v=11241156"></script>
+<script src="chat.js?v=11241156"></script>
 </body>
 </html>

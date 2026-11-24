@@ -167,11 +167,28 @@ async function renderRefs(){
   const root=$('#vRefs');const sc=refScopes();
   await Promise.all(sc.map(async x=>{if(REF.cache[x.id]===undefined){try{REF.cache[x.id]=await gh(`/contents/workspace/${x.id}/voice.md`,{raw:true})||'';}catch{REF.cache[x.id]='';}}}));
   const ORDER=[['레퍼런스 계정','계정'],['레퍼런스 예시','예시'],['레퍼런스 캡션(대표님이 준 예)','예시'],['레퍼런스 링크','링크'],['레퍼런스 스크린샷','스크린샷'],['레퍼런스 영상','영상'],['대표님이 통과시킨 캡션','통과시킨 것'],['대표님이 싫어한 캡션','싫어한 것'],['대표님 의견','대표님 의견'],['기본','기본 원칙']];
+  REF.lib=REF.lib||{};
+  await Promise.all(sc.filter(x=>x.id!=='_common').map(async x=>{if(REF.lib[x.id]===undefined){try{REF.lib[x.id]=JSON.parse(await gh(`/contents/workspace/${x.id}/refs/library.json`,{raw:true})||'{}');}catch{REF.lib[x.id]={};}}}));
+  const num=n=>n==null?'—':n>=1e4?(n/1e4).toFixed(n>=1e5?0:1)+'만':Number(n).toLocaleString();
+  const libOf=x=>{const L=REF.lib[x.id]||{};const its=(L.items||[]).slice().sort((a,b)=>(b.mult||0)-(a.mult||0));const ac=Object.entries(L.accounts||{});
+    if(!ac.length)return '';
+    const open=its.find(i=>i.id===REF.open);
+    const ul=(t,a,c)=>a&&a.length?`<div class="lbk"><b style="color:${c}">${t}</b>${a.map(v=>`<p>${esc(v)}</p>`).join('')}</div>`:'';
+    const det=open?`<div class="lbd"><div class="lbh"><b>${esc(open.title||open.type)}</b><span class="mono">@${esc(open.handle)} · ${open.posted||''} · ${open.metric} ${num(open.value)} · 평소 ${num(open.base)}의 ${open.mult}배 · 좋아요 ${num(open.likes)} · 댓글 ${num(open.comments)}</span>${open.permalink?`<a href="${esc(open.permalink)}" target="_blank" rel="noopener" class="btn sbtn" style="width:64px">원본</a>`:''}</div>
+      ${(open.frames||[]).length?`<div class="lbf">${open.frames.map((f,k)=>`<figure><img data-path="${esc(f)}" alt=""><figcaption class="mono">${open.frames.length>1?`0:0${k}`:'표지'}</figcaption></figure>`).join('')}</div>`:''}
+      ${open.note?`<div class="libnote">${esc(open.note)}</div>`:''}
+      <div class="lbg">${open.hook?`<div class="lbk"><b style="color:#D9A441">첫 3초</b><p>${esc(open.hook)}</p></div>`:''}
+      ${(open.structure||[]).length?`<div class="lbk"><b style="color:#D9A441">구조</b>${open.structure.map((u,k)=>`<p><span class="mono" style="color:#8E7861">${k+1} ${esc(u.role)}</span> ${esc(u.text)}</p>`).join('')}</div>`:''}
+      ${ul('확인된 것',open.seen,'#7DB79A')}${ul('반응 이유 · 가설',open.guess,'#E2B04A')}${ul('아직 모르는 것',open.unknown,'#8E7861')}${ul('같은 구조 · 우리 기획 5개',open.ideas,'#E08A5A')}
+      ${open.speech?`<div class="lbk"><b style="color:#D9A441">말소리 대본</b><p>${esc(open.speech)}</p></div>`:''}${open.caption?`<div class="lbk"><b style="color:#D9A441">캡션</b><p>${esc(open.caption)}</p></div>`:''}</div></div>`:'';
+    return `<div class="vg"><div class="vh"><b>보관함 · 평소보다 터진 것</b><em>${its.length}</em></div>
+      <div class="lba mono">${ac.map(([h,a])=>`@${esc(h)}${a.base_views?` 평소 조회 ${num(a.base_views)}`:a.base_likes?` 평소 좋아요 ${num(a.base_likes)}`:''}${a.problem?' · '+esc(a.problem):''}`).join('　')}</div>
+      ${its.length?`<div class="lbc">${its.map(i=>`<button type="button" class="lbi${i.id===REF.open?' on':''}" data-lb="${i.id}">${(i.frames||[])[0]?`<img data-path="${esc(i.frames[0])}" alt="">`:`<span class="lbx mono">${esc(i.type)}</span>`}<em class="mono">${i.mult}×</em><b>${esc(i.title||(i.caption||'').slice(0,18)||i.type)}</b><span class="mono">@${esc(i.handle)} · ${i.metric} ${num(i.value)}${i.analyzed?'':' · 분석 전'}</span></button>`).join('')}</div>`:'<div class="empty">아직 기준(평소의 2배)을 넘은 게시물이 없습니다</div>'}${det}</div>`;};
   const cnt=x=>Object.values(parseVoice(REF.cache[x.id])).reduce((n,a)=>n+a.length,0);
   const shown=sc.filter(x=>REF.f==='all'||REF.f===x.id);
   const list=shown.map(x=>{const sec=parseVoice(REF.cache[x.id]);
     const groups=ORDER.filter(([k])=>sec[k]&&sec[k].length).map(([k,l])=>`<div class="vg"><div class="vh"><b>${l}</b><em>${sec[k].length}</em></div>${(k==='기본'?sec[k]:sec[k].slice().reverse()).map(v=>`<div class="vi">${esc(v)}</div>`).join('')}</div>`).join('');
-    return `<div class="vs"><span style="color:${x.col}">${x.kind}</span><span style="color:#F4E6CF">${esc(x.name)}</span></div>${groups||'<div class="empty">없음</div>'}`;}).join('');
+    return `<div class="vs"><span style="color:${x.col}">${x.kind}</span><span style="color:#F4E6CF">${esc(x.name)}</span></div>${x.id==='_common'?'':libOf(x)}${groups||(x.id!=='_common'&&libOf(x)?'':'<div class="empty">없음</div>')}`;}).join('');
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">ADD REFERENCE</span></div>
     <form class="rf" id="rfF"><div class="rfr"><label>어디에<select id="rfS">${sc.map(x=>`<option value="${x.id}"${x.id===(REF.f==='all'?'_common':REF.f)?' selected':''}>${x.id==='_common'?'회사 공통':`${x.kind} · ${esc(x.name)}`}</option>`).join('')}</select></label>
     <label>종류<select id="rfK">${REF_KINDS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label></div>
@@ -181,6 +198,7 @@ async function renderRefs(){
   <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span></div><div class="rfc rfr"><label>보기<select id="rfV">${[{id:'all',name:'전체'}].concat(sc).map(x=>`<option value="${x.id}"${REF.f===x.id?' selected':''}>${esc(x.id==='all'?'전체':x.id==='_common'?'회사 공통':`${x.kind} · ${x.name}`)} (${x.id==='all'?sc.reduce((n,y)=>n+cnt(y),0):cnt(x)})</option>`).join('')}</select></label><label>항목<span class="rfn">${sc.reduce((n,y)=>n+cnt(y),0)}개 · 사업 ${sc.length-1}곳</span></label></div>
     <div class="scroll">${list}</div></section>`;
   const rv=root.querySelector('#rfV');if(rv)rv.onchange=()=>{REF.f=rv.value;renderRefs();};
+  root.querySelectorAll('[data-lb]').forEach(el=>el.onclick=()=>{REF.open=REF.open===el.dataset.lb?null:el.dataset.lb;renderRefs();});if(typeof lazy==='function')lazy(root);
   let files=[];
   $('#rfI').onchange=e=>{files=[...e.target.files];$('#rfN').textContent=files.length?`${files.length}장`:'';};
   $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const scope=$('#rfS').value,kind=$('#rfK').value;const go=$('#rfGo');go.disabled=true;
