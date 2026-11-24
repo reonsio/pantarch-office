@@ -50,7 +50,7 @@ window.renderPortfolio=async function(soft){
     return `<div class="bz${x.id===PF.biz?' on':''}" data-bz="${x.id}"><div class="bar" style="background:${x.col}"></div><div><div class="k" style="color:${x.col}">${x.kind}</div><div class="n">${esc(x.name)}</div><div class="s">${esc(s)}</div></div></div>`;}).join('');
   const tabs=(KINDS[b.kind]||KINDS.SERVICE).tabs;if(!PF.tab[b.id]||!tabs.some(t=>t[0]===PF.tab[b.id]))PF.tab[b.id]=tabs[0][0];const cur=PF.tab[b.id];
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column">
-    <div class="ph"><span class="cap">PORTFOLIO</span><span class="mono mu" style="font-size:10px">${BL.length} BUSINESS</span></div>
+    <div class="ph"><span class="cap">BUSINESS</span></div>
     <div class="scroll bzlist">${side}</div>
     <div style="padding:6px 8px;border-top:1px solid #3A2A1F"><button class="btn" style="width:100%" id="pAddBiz">＋ 사업 추가</button></div>
   </section>
@@ -87,7 +87,8 @@ function pCalendar(body,b){
   const cell=d=>{const items=ps.filter(x=>x.d.toDateString()===d.toDateString()).sort((a,c)=>a.d-c.d);
     return `<div class="day${d.toDateString()===today?' today':''}"><div class="dn">${d.getMonth()+1}/${d.getDate()} ${WD[d.getDay()]}</div>${items.map(({i,d})=>{const m=meta(i);const [l,c]=PST[pStatus(i)]||['',''];
       return `<div class="pc" style="border-left-color:${c}" data-url="${i.html_url}" title="${esc(l)}">${m.media&&isImg(m.media)&&m.media.startsWith('workspace/')?`<img data-path="${esc(m.media)}" alt="">`:'<span class="mono mu" style="font-size:9px">'+esc(m.kind||'')+'</span>'}<span><b class="mono" style="font-size:10px;color:${c}">${code(i)} ${d.toTimeString().slice(0,5)}</b> ${esc(m.caption||i.title)}</span></div>`;}).join('')}</div>`;};
-  body.innerHTML=`<div class="ph"><span class="cap">2 WEEKS · ${days[0].getMonth()+1}/${days[0].getDate()} – ${days[13].getMonth()+1}/${days[13].getDate()}</span><span style="display:flex;gap:10px;align-items:center" class="mono"><span style="font-size:10px;color:#E2704F"><i class="d" style="background:#E2704F"></i>결재 대기</span><span style="font-size:10px;color:#7DB79A"><i class="d" style="background:#7DB79A"></i>게시 대기</span><span style="font-size:10px;color:#79B8C9"><i class="d" style="background:#79B8C9"></i>게시됨</span><button class="btn sbtn pri" id="pNew" style="width:84px">＋ 게시물</button></span></div>
+  body.innerHTML=`<div class="ph nw"><span class="cap">2 WEEKS · ${days[0].getMonth()+1}/${days[0].getDate()} – ${days[13].getMonth()+1}/${days[13].getDate()}</span><button class="btn sbtn pri" id="pNew" style="width:84px">＋ 게시물</button></div>
+  <div class="lgd"><span style="color:#E2704F"><i class="d" style="background:#E2704F"></i>결재 대기</span><span style="color:#7DB79A"><i class="d" style="background:#7DB79A"></i>게시 대기</span><span style="color:#79B8C9"><i class="d" style="background:#79B8C9"></i>게시됨</span></div>
   <div class="scroll"><div class="cal">${WD.slice(1).concat(WD[0]).map(w=>`<div class="hd">${w}</div>`).join('')}${days.map(cell).join('')}</div>
   ${nodate.length?`<div class="note">날짜가 정해지지 않은 게시물 ${nodate.length}건 — POST QUEUE에서 확인하세요.</div>`:''}</div>`;
   body.querySelectorAll('[data-url]').forEach(el=>el.onclick=()=>open(el.dataset.url,'_blank','noopener'));

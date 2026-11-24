@@ -26,7 +26,7 @@ async function renderMissions(){
     <div class="mb">
       <div class="sum">${plan===undefined?'<span class="mu">요약 불러오는 중…</span>':plan?mdLite(plan):'<span class="mu">—</span>'}</div>
       ${ts.map((t,k)=>{const st=statusOf(t),a=S.team.agents[lab(t,'agent:')]||{};return `<div class="tr" data-url="${t.html_url}" style="grid-template-columns:22px 52px minmax(0,1fr) 54px 78px 30px 70px"><span class="mono mu">${k+1}</span><span class="mono" style="color:#D9A441">${code(t)}</span><span class="ell">${esc(t.title)}</span><span class="mono" style="color:${MC[(a.model||'').toLowerCase()]||'#A08A72'}">${esc(a.name||'')}</span><span class="mono" style="color:${SC[st]}"><i class="d" style="background:${SC[st]}"></i>${st}</span><span class="mono r">${meta(t).score??'—'}</span><span class="mono r mu">${(meta(t).deps||[]).map(codeN).join(' ')||'—'}</span></div>`;}).join('')||'<div class="empty">업무 없음</div>'}
-      <div class="b3" style="grid-template-columns:repeat(3,1fr);margin-top:8px">${has(m,'mission')&&m.state==='open'?(has(m,'paused')?'<button class="btn pri" data-ma="resume">재개</button>':'<button class="btn" data-ma="pause">일시정지</button>'):'<span></span>'}<button class="btn" data-ma="comment">의견 남기기</button><a class="btn" href="${m.html_url}" target="_blank" rel="noopener">GitHub에서 보기</a></div>
+      <div class="b3" style="grid-template-columns:repeat(3,1fr);margin-top:8px">${has(m,'mission')&&m.state==='open'?(has(m,'paused')?'<button class="btn pri" data-ma="resume">재개</button>':'<button class="btn" data-ma="pause">일시정지</button>'):'<span></span>'}<button class="btn" data-ma="comment">의견 남기기</button>${m.state==='open'?'<button class="btn" data-ma="del">삭제</button>':'<span></span>'}</div>
     </div></div>`;};
   const openN=ms.filter(m=>m.state==='open').length;
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0;flex:1"><div class="ph"><span class="cap">MISSIONS · ${openN} OPEN · ${ms.length-openN} CLOSED</span><span style="display:flex;gap:4px"><button class="btn sbtn" id="mvMeet" style="width:84px">＋ 회의</button><button class="btn sbtn pri" id="mvNew" style="width:84px">＋ 미션</button></span></div>
@@ -35,7 +35,14 @@ async function renderMissions(){
     if(VW.open[n]&&VW.plan[n]===undefined){try{const cs=await commentsOf(n);const c=cs.map(x=>x.body).find(b=>/## (계획|결론)/.test(b))||'';const m=/## (?:계획|결론)\s*\n+([\s\S]*?)(?=\n## |$)/.exec(c);VW.plan[n]=m?strip(m[1]):strip(c).slice(0,600);}catch{VW.plan[n]='';}renderMissions();}});
   root.querySelectorAll('[data-url]').forEach(el=>el.onclick=()=>open(el.dataset.url,'_blank','noopener'));
   root.querySelectorAll('[data-ma]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const n=+b.closest('[data-mn]').dataset.mn;const a=b.dataset.ma;b.disabled=true;
-    try{if(a==='pause'){await gh(`/issues/${n}/labels`,{method:'POST',body:{labels:['paused']}});toast(`${codeN(n)} 일시정지 · 진행 중인 업무만 마치고 멈춥니다`);}
+    try{if(a==='del'){
+        const ts=tasks.filter(t=>meta(t).mission===n&&t.state==='open');const tn=new Set(tasks.filter(t=>meta(t).mission===n).map(t=>t.number));
+        const ps=S.issues.filter(i=>has(i,'post')&&i.state==='open'&&!has(i,'status:scheduled')&&tn.has(meta(i).task));
+        if(!confirm(`${codeN(n)} 미션을 삭제합니다. 남은 업무 ${ts.length}건${ps.length?`, 게시 결재 ${ps.length}건`:''}도 함께 지웁니다.`)){b.disabled=false;return;}
+        for(const x of [...ts,...ps,{number:n}])await gh(`/issues/${x.number}`,{method:'PATCH',body:{state:'closed',state_reason:'not_planned'}});
+        const gone=new Set([n,...ts.map(t=>t.number),...ps.map(p=>p.number)]);S.issues=S.issues.filter(i=>!gone.has(i.number));
+        toast(`${codeN(n)} 삭제했습니다`);renderMissions();renderApprovals();renderBoard();return;}
+      if(a==='pause'){await gh(`/issues/${n}/labels`,{method:'POST',body:{labels:['paused']}});toast(`${codeN(n)} 일시정지 · 진행 중인 업무만 마치고 멈춥니다`);}
       else if(a==='resume'){await gh(`/issues/${n}/labels/paused`,{method:'DELETE'});toast(`${codeN(n)} 재개`);gh('/actions/workflows/engine.yml/dispatches',{method:'POST',body:{ref:'main'}}).catch(()=>{});}
       else{const t=prompt('의견을 적어 주세요. 이 미션 담당 TOM이 반영합니다.');if(!t){b.disabled=false;return;}await gh(`/issues/${n}/comments`,{method:'POST',body:{body:t}});toast('의견을 남겼습니다');}
       setTimeout(sync,1200);}catch(err){toast('실패: '+err.message.slice(0,60));b.disabled=false;}});

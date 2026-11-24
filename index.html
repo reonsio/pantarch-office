@@ -355,13 +355,13 @@ html.m .tm{grid-template-columns:64px minmax(0,1fr);padding:4px 8px}
 html.m .vw,html.m #portfolio{align-content:start;grid-auto-rows:min-content}
 html.m .vw .pnl,html.m #portfolio .pnl{height:auto!important;min-height:0!important;max-height:none!important;flex:none!important}
 html.m .day{min-height:56px}
-html.m #mtab .nb{position:absolute;margin:-18px 0 0 34px;font:600 9px 'IBM Plex Mono',monospace}
+html.m #mtab .nb{position:absolute;top:3px;right:3px;min-width:16px;height:16px;line-height:16px;padding:0 4px;border-radius:8px;background:#E2704F;color:#1E150F!important;font:700 10px 'IBM Plex Mono',monospace;text-align:center;box-sizing:border-box}html.m #mtab .nb:empty{display:none}
 #mtab button{position:relative}
 #mtTitle:empty{display:none}
 html.m #boardSum{display:none}
 .apc,.doc2,.sum,.ana span,.ap .t,.cn .mu,.mb{text-align:justify;word-break:break-all}
 .ap .why{font-size:11px;line-height:1.5;color:#BFA98C;text-align:justify;word-break:break-all}
-.ap .aps{font-size:11.5px;line-height:1.55;color:#E6D6BC;background:#1B1410;border-left:2px solid #5A4130;padding:5px 8px 0;border-bottom:5px solid #1B1410;white-space:pre-line;text-align:justify;word-break:break-all;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;max-height:calc(1.55em * 4 + 10px);box-sizing:border-box}
+.ap .aps{font-size:12px;line-height:1.5;color:#F4E6CF;background:#1B1410;border-left:2px solid #D9A441;padding:5px 8px;text-align:justify;word-break:break-all}
 .ap [data-full]{justify-self:start;width:auto;padding:0 10px}
 .apv{line-height:1.35!important}
 .rf{display:grid;gap:5px;padding:8px 10px;border-bottom:1px solid #2C2018}
@@ -370,6 +370,8 @@ html.m #boardSum{display:none}
 .vg{padding:6px 10px;border-bottom:1px solid #2C2018}
 .vh{display:flex;justify-content:space-between;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#D9A441;margin-bottom:3px}.vh em{font-style:normal;color:#7A6654}
 .vi{font-size:12px;line-height:1.55;color:#E6D6BC;padding:2px 0;text-align:justify;word-break:break-all}
+.lgd{display:flex;gap:14px;padding:5px 10px;border-bottom:1px solid #2C2018;font:10px 'IBM Plex Mono',monospace}
+html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 </style>
 </head>
 <body>
@@ -381,7 +383,7 @@ html.m #boardSum{display:none}
 <span class="mono" id="hqSub" style="font-size:10px;color:#8E7861"></span>
 </div>
 <nav aria-label="주 메뉴">
-<a class="on" data-go="office">OFFICE</a><a data-go="missions">MISSIONS</a><a data-go="outputs">OUTPUTS</a><a data-go="portfolio">PORTFOLIO</a><a data-go="refs">REFERENCE</a><a data-go="playbook">PLAYBOOK</a><a data-go="connections">CONNECTIONS</a>
+<a class="on" data-go="office">OFFICE</a><a data-go="missions">MISSIONS</a><a data-go="outputs">OUTPUTS</a><a data-go="portfolio">BUSINESS</a><a data-go="refs">REFERENCE</a><a data-go="playbook">PLAYBOOK</a><a data-go="connections">CONNECTIONS</a>
 </nav>
 <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:4px">
 <button class="btn" id="bWork" title="근무 멈춤/재개"><i class="d" style="background:#7DB79A"></i>근무 중</button><button class="btn" id="bSync">새로고침</button><button class="btn" id="bKey">접근키</button>
@@ -494,7 +496,7 @@ html.m #boardSum{display:none}
 <nav id="mtab" aria-label="모바일 메뉴">
 <button data-m="office" class="on"><b>OFFICE</b>오피스</button><button data-m="approve"><b>DECIDE</b>결재<span class="nb" id="mtabN"></span></button><button data-m="chat"><b>CHAT</b>채팅<span class="nb" id="mtabC"></span></button><button data-m="missions"><b>MISSION</b>미션</button><button data-m="more"><b>MORE</b>더보기</button>
 </nav>
-<div id="morePanel"><button class="btn" data-mm="portfolio">사업 (PORTFOLIO)</button><button class="btn" data-mm="outputs">산출물</button><button class="btn" data-mm="refs">레퍼런스</button><button class="btn" data-mm="playbook">플레이북</button><button class="btn" data-mm="connections">연결·엔진</button><button class="btn" data-mm="meetnew">＋ 회의 소집</button></div>
+<div id="morePanel"><button class="btn" data-mm="portfolio">사업</button><button class="btn" data-mm="outputs">산출물</button><button class="btn" data-mm="refs">레퍼런스</button><button class="btn" data-mm="playbook">플레이북</button><button class="btn" data-mm="connections">연결·엔진</button><button class="btn" data-mm="meetnew">＋ 회의 소집</button></div>
 <div class="toast" id="toast"></div>
 </div>
 
@@ -770,11 +772,15 @@ function renderKpis(){
   const k=[['MISSIONS',S.issues.filter(i=>has(i,'mission')&&i.state==='open').length],['TASKS',t.filter(i=>i.state==='open').length],['DONE',done.length,'#7DB79A'],['AVG QA',avg],['RUNNING',n('RUNNING'),'#E2B04A'],['REVIEW',n('REVIEW'),'#E2704F'],['REWORK',sc.filter(m=>(m.attempts||1)>1).length],['BLOCKED',n('BLOCKED'),n('BLOCKED')?'#E2704F':'#8E7861']];
   $('#kpis').innerHTML=k.map(([a,b,c])=>`<div><span>${a}</span><b${c?` style="color:${c}"`:''}>${b}</b></div>`).join('');
 }
+function decided(){let d={};try{d=JSON.parse(localStorage.getItem('pantarch_dec')||'{}');}catch{}const now=Date.now();
+  for(const k in d){const it=S.issues.find(i=>i.number===+k);if(now-d[k].t>36e5||!it||it.state==='closed'||new Date(it.updated_at)>d[k].t+15e3&&!/review|blocked/.test(statusOf(it).toLowerCase()))delete d[k];}
+  try{localStorage.setItem('pantarch_dec',JSON.stringify(d));}catch{}return d;}
+function markDecided(n,a){let d={};try{d=JSON.parse(localStorage.getItem('pantarch_dec')||'{}');}catch{}d[n]={t:Date.now(),a:a||''};try{localStorage.setItem('pantarch_dec',JSON.stringify(d));}catch{}}
 function renderApprovals(){
   const typing=[...document.querySelectorAll('#approvals .ap.op textarea')].some(t=>t.value.trim()); if(typing)return; // 의견을 쓰는 중이면 새로고침으로 지우지 않는다
-  const rv=S.issues.filter(i=>i.state==='open'&&(has(i,'task')||has(i,'post'))&&(statusOf(i)==='REVIEW'||statusOf(i)==='BLOCKED'));
-  const hires=S.issues.filter(i=>i.state==='open'&&has(i,'hire'));
-  $('#apCap').textContent=`${rv.length+hires.length} PENDING`;const nb=$('#mtabN');if(nb)nb.textContent=rv.length+hires.length?` ${rv.length+hires.length}`:'';
+  const DEC=decided();const rv=S.issues.filter(i=>i.state==='open'&&!DEC[i.number]&&(has(i,'task')||has(i,'post'))&&(statusOf(i)==='REVIEW'||statusOf(i)==='BLOCKED'));
+  const hires=S.issues.filter(i=>i.state==='open'&&!DEC[i.number]&&has(i,'hire'));
+  $('#apCap').textContent=`${rv.length+hires.length} PENDING`;const nb=$('#mtabN');if(nb)nb.textContent=rv.length+hires.length?String(rv.length+hires.length):'';
   const bizName=i=>BIZ[bizOf(i)]?BIZ[bizOf(i)].name:'';
   const card=(i,kind)=>{const m=meta(i);let head,who,b,body='';
     if(kind==='hire'){const a=m.agent||{};head=`<span style="color:#A3ACDB">채용 결재</span>`;who=esc(a.name||'');b=[['승인','채용'],['','의견'],['거절','보류']];
@@ -793,7 +799,7 @@ function renderApprovals(){
     return `<div class="ap" data-n="${i.number}"><div class="h">${head}<span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${who}</span></div>${body}
     <div class="b3">${b.map(([v,l],k)=>`<button class="btn${k===0?' pri':''}" data-act="${v}">${l}</button>`).join('')}</div>
     <div class="fb"><textarea rows="3" placeholder="의견을 적으면 담당 직원이 반영해 다시 합니다"></textarea><div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn" data-act="x">취소</button><button class="btn pri" data-act="send">보내기</button></div></div></div>`;};
-  const sched=S.issues.filter(i=>i.state==='open'&&has(i,'post')&&(has(i,'status:approved')||has(i,'status:scheduled')));
+  const sched=S.issues.filter(i=>i.state==='open'&&!(DEC[i.number]&&/기각|취소/.test(DEC[i.number].a))&&has(i,'post')&&(has(i,'status:approved')||has(i,'status:scheduled')));
   const schedCard=i=>{const m=meta(i);const sc=has(i,'status:scheduled');return `<div class="ap" data-n="${i.number}"><div class="h"><span style="color:${m.pub_error?'#E2704F':sc?'#7DB79A':'#E2B04A'}">POST · ${m.pub_error?'게시 실패':sc?'게시 예약됨':'예약 접수 중'}</span><span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${esc(m.when||'')}</span></div><div class="t ell" data-url="${i.html_url}">${esc(m.caption||i.title)}</div>${m.pub_error?`<div style="font-size:11px;color:#E2704F">${esc(m.pub_error)}</div>`:''}<div class="b3"><button class="btn pri" data-act="지금 올리기">지금 올리기</button><button class="btn" data-act="${m.pub_error?'다시':'취소'}">${m.pub_error?'다시 시도':'예약 취소'}</button><button class="btn" data-act="open">열기</button></div></div>`;};
   $('#approvals').innerHTML=[...rv.map(i=>card(i,has(i,'post')?'post':'task')),...sched.map(schedCard),...hires.map(i=>card(i,'hire'))].join('')||'<div class="empty">결재할 일 없음</div>';
   if(typeof lazy==='function')lazy($('#approvals'));
@@ -803,8 +809,9 @@ function renderApprovals(){
 async function fillSummaries(){
   for(const el of document.querySelectorAll('#approvals [data-sum]')){const n=+el.dataset.sum;
     let txt=VW.out[n];if(txt===undefined){try{const cs=await commentsOf(n);const c=[...cs].reverse().find(x=>/검수 \d+점/.test(x.body))||cs[cs.length-1];txt=c?c.body:'';}catch{txt='';}VW.out[n]=txt;}
-    const plain=strip((txt||'').replace(/\[\[HANDOFF\]\][\s\S]*?\[\[\/HANDOFF\]\]/g,'').replace(/<details>[\s\S]*?<\/details>/g,'')).replace(/^#+\s*/gm,'').replace(/workspace\/[\w\-\/.]+\/([\w\-.]+)/g,'$1').replace(/\n{2,}/g,'\n').trim();
-    el.textContent=plain?plain.slice(0,220)+(plain.length>220?'…':''):'제출된 내용 없음';}
+    const plain=strip((txt||'').replace(/\[\[HANDOFF\]\][\s\S]*?\[\[\/HANDOFF\]\]/g,'').replace(/<details>[\s\S]*?<\/details>/g,'')).replace(/^#+.*$/gm,'').replace(/workspace\/[\w\-\/.]+\/([\w\-.]+)/g,'$1').replace(/\n{2,}/g,'\n').trim();
+    const sm=/^\s*요약\s*[:：]\s*(.+)$/m.exec(plain)||/^\s*결론\s*[:：]\s*(.+)$/m.exec(plain);let one=sm?sm[1]:plain.split('\n').find(l=>l.trim().length>8)||'';one=one.split(/(?<=[.다요])\s/)[0];
+    el.textContent=one?one.slice(0,90)+(one.length>90?'…':''):'제출된 내용 없음';}
 }
 $('#approvals').addEventListener('click',async e=>{
   const pv=e.target.closest('[data-pv]');if(pv&&typeof preview==='function'){const b=bizList().find(x=>x.id===pv.dataset.bz)||bizList()[0];if(!PF.tree){try{await loadTree();}catch{}}preview(b,pv.dataset.pv);return;}
@@ -816,7 +823,7 @@ $('#approvals').addEventListener('click',async e=>{
   if(act==='x'){ap.classList.remove('op');return;}
   const body=act==='send'?ap.querySelector('textarea').value.trim():act;if(!body)return;
   ap.querySelectorAll('button').forEach(x=>x.disabled=true);
-  try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body}});toast(act==='send'?`${codeN(n)} 의견을 보냈습니다`:`${codeN(n)} ${act} 처리했습니다`);ap.remove();if(!$('#approvals .ap'))$('#approvals').innerHTML='<div class="empty">결재할 일 없음</div>';setTimeout(sync,1500);}
+  try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body}});markDecided(n,act);toast(act==='send'?`${codeN(n)} 의견을 보냈습니다`:`${codeN(n)} ${act} 처리했습니다`);ap.remove();if(!$('#approvals .ap'))$('#approvals').innerHTML='<div class="empty">결재할 일 없음</div>';setTimeout(sync,1500);}
   catch(err){toast('실패: '+err.message.slice(0,60));ap.querySelectorAll('button').forEach(x=>x.disabled=false);}
 });
 async function renderMeeting(){
@@ -943,7 +950,7 @@ $('#bMeetSave').onclick=async()=>{
   finally{$('#bMeetSave').disabled=false;}
 };
 $('#bMinutes').onclick=()=>{if(S.meetNum)open(`https://github.com/${REPO}/issues/${S.meetNum}`,'_blank','noopener');};
-$('#bSync').onclick=()=>{sync();toast('새로고침');};
+$('#bSync').onclick=async()=>{const b=$('#bSync');if(b.disabled)return;b.disabled=true;b.textContent='…';try{await sync();}finally{b.textContent='새로고침';b.disabled=false;}};
 function ctlIssue(){return S.issues.find(i=>has(i,'control')&&i.state==='open');}
 function isPaused(){const c=ctlIssue();try{return !!(c&&JSON.parse((/\{[\s\S]*\}/.exec(c.body||'')||['{}'])[0]).paused);}catch{return false;}}
 function renderWork(){const p=isPaused();const b=$('#bWork');b.classList.toggle('paused',p);b.innerHTML=p?'<i class="d" style="background:#E2704F"></i>근무 멈춤':'<i class="d" style="background:#7DB79A"></i>근무 중';b.title=p?'누르면 근무를 다시 시작합니다':'누르면 새 업무 착수를 멈춥니다(결재·채용은 계속 처리)';}
@@ -987,8 +994,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240210"></script>
-<script src="views.js?v=11240210"></script>
-<script src="chat.js?v=11240210"></script>
+<script src="portfolio.js?v=11240256"></script>
+<script src="views.js?v=11240256"></script>
+<script src="chat.js?v=11240256"></script>
 </body>
 </html>
