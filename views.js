@@ -204,8 +204,8 @@ async function renderRefs(){
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">ADD REFERENCE</span></div>
     <form class="rf" id="rfF"><div class="rfr"><label>어디에<select id="rfS">${bizGroups(REF.f==='all'?'_common':REF.f,['_common','회사 공통'])}</select></label>
     <label>종류<select id="rfK">${REF_KINDS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label></div>
-    <div class="libnote">안 넣어도 됩니다. 인스타 사업은 RYAN이 매주 비슷한 계정을 찾아 보관함에 쌓습니다. 꼭 보여 주고 싶은 계정·캡션·캡처만 넣으세요.</div><textarea id="rfT" rows="3" placeholder="@계정 · 링크 · 문구 · 캡처"></textarea>
-    <div class="rfb"><label class="btn sbtn">사진·영상<input type="file" id="rfI" multiple accept="image/*,video/*" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
+    <div class="libnote">안 넣어도 됩니다. 인스타 사업은 RYAN이 매주 비슷한 계정을 찾아 보관함에 쌓습니다. 꼭 보여 주고 싶은 계정·사이트·캡션·시안 파일만 넣으세요.</div><textarea id="rfT" rows="3" placeholder="@계정 · 링크 · 문구 (캡처·시안 HTML·문서는 첨부파일)"></textarea>
+    <div class="rfb"><label class="btn sbtn">첨부파일<input type="file" id="rfI" multiple accept="image/*,video/*,.html,.htm,.pdf,.pptx,.docx" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
     ${REF.stat?`<div class="libnote">${esc(REF.stat)}</div>`:''}</section>
   <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span></div><div class="rfc rfr"><label>보기<select id="rfV">${(()=>{(S.bus||[]).forEach(b=>b._n=cnt({id:b.id}));const h=`<option value="all"${REF.f==='all'?' selected':''}>전체 (${sc.reduce((n,y)=>n+cnt(y),0)})</option><option value="_common"${REF.f==='_common'?' selected':''}>회사 공통 (${cnt({id:'_common'})})</option>`+bizGroups(REF.f,null);(S.bus||[]).forEach(b=>delete b._n);return h;})()}</select></label><label>항목<span class="rfn">${sc.reduce((n,y)=>n+cnt(y),0)}개 · 사업 ${sc.length-1}곳</span></label></div>
     <div class="scroll">${list}</div></section>`;
@@ -215,11 +215,11 @@ async function renderRefs(){
     if(/https?:\/\/(?!(www\.)?instagram\.com)/i.test(v))k.value='비주얼';else if(/@[A-Za-z0-9_.]{2,}|instagram\.com/i.test(v))k.value='영상';});
   $('#rfK').addEventListener('change',e=>{e.target.dataset.touched='1';});
   let files=[];
-  $('#rfI').onchange=e=>{files=[...e.target.files];$('#rfN').textContent=files.length?`${files.length}장`:'';};
+  $('#rfI').onchange=e=>{files=[...e.target.files];$('#rfN').textContent=files.length?(files.length===1?files[0].name:`${files.length}개`):'';};
   $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const scope=$('#rfS').value,kind=$('#rfK').value;const go=$('#rfGo');go.disabled=true;
     try{const paths=[];
-      for(const [k,f] of files.entries()){const vid=/^video/.test(f.type);if(vid&&f.size>40*1048576){toast(`${f.name}: 40MB 넘는 영상은 짧게 잘라 주세요`);continue;}
-        const blob=vid?f:await shrink(f);const ext=vid?((f.name.split('.').pop()||'mp4').toLowerCase()):'jpg';const pth=`workspace/${scope}/refs/${stamp(new Date())}-${k}.${ext}`;$('#rfN').textContent=`올리는 중 ${k+1}/${files.length}`;await putFile(pth,blob,'레퍼런스 자료');paths.push(pth);}
+      for(const [k,f] of files.entries()){const doc=/\.(html?|pdf|pptx|docx)$/i.test(f.name);const vid=!doc&&/^video/.test(f.type);if((vid||doc)&&f.size>40*1048576){toast(`${f.name}: 40MB 넘는 파일은 줄여 주세요`);continue;}
+        const blob=vid||doc?f:await shrink(f);const ext=vid||doc?((f.name.split('.').pop()||'mp4').toLowerCase().replace(/^htm$/,'html')):'jpg';const pth=`workspace/${scope}/refs/${stamp(new Date())}-${k}.${ext}`;$('#rfN').textContent=`올리는 중 ${k+1}/${files.length}`;await putFile(pth,blob,'레퍼런스 자료');paths.push(pth);}
       let num=(typeof CH!=='undefined'&&CH.num)||(S.issues.find(i=>i.state==='open'&&has(i,'chat'))||{}).number;
       if(!num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});num=it.number;}
       await gh(`/issues/${num}/comments`,{method:'POST',body:{body:`레퍼런스 #${scope} !${kind} ${t}${paths.length?'\n'+paths.join('\n'):''}`}});
