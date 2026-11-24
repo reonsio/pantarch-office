@@ -364,7 +364,7 @@ html.m .pp{height:40px}
 .tn{grid-column:1;align-self:start;height:18px;display:flex;align-items:center;padding-left:7px;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#D9A441;white-space:nowrap;overflow:hidden}
 .tc{display:contents}
 .ch{display:flex;align-items:center;gap:5px;height:18px;padding-left:7px;cursor:pointer;white-space:nowrap;overflow:hidden;min-width:0}
-.ch i{width:6px;height:6px;flex:none}.ch b{font:600 11px 'IBM Plex Mono',monospace}.ch em{font:normal 9px 'IBM Plex Mono',monospace;color:#D9A441}
+.ch i{width:6px;height:6px;flex:none}.ch b{font:600 11px 'IBM Plex Mono',monospace;display:inline-block;min-width:4ch}.ch em{font:normal 9px 'IBM Plex Mono',monospace;color:#D9A441}
 /* chat panel */
 .chto{flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:5px 8px;border-bottom:1px solid #2C2018}
 .chto .cg{display:contents}
@@ -985,7 +985,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241013';
+const APPVER='11241025';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 async function sync(){checkVer();
@@ -1114,8 +1114,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241013"></script>
-<script src="views.js?v=11241013"></script>
-<script src="chat.js?v=11241013"></script>
+<script src="portfolio.js?v=11241025"></script>
+<script src="views.js?v=11241025"></script>
+<script src="chat.js?v=11241025"></script>
 </body>
 </html>
