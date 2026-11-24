@@ -59,7 +59,11 @@ function outParts(txt){
   const plain=note.replace(/^#+.*$/gm,'').replace(/\n{2,}/g,'\n').trim();
   const sm=/^\s*\**요약\**\s*[:：]\**\s*(.+)$/m.exec(plain)||/^\s*결론\s*[:：]\s*(.+)$/m.exec(plain);
   let one=sm?sm[1]:plain.split('\n').find(l=>l.trim().length>8)||'';one=one.split(/(?<=[.다요])\s/)[0];
-  return {reel,sec,qa,note,one};
+  const posts=[...txt.matchAll(/\[\[POST\]\]((?:(?!\[\[POST\]\])[\s\S])*?)\[\[\/POST\]\]/g)].map(m=>{const b=m[1];const f=k=>((new RegExp(k+'\\s*[:：]\\s*(.*)')).exec(b)||[])[1]||'';
+    const fs=(/파일\s*[:：]([\s\S]*?)(?:\n\s*캡션\s*[:：]|$)/.exec(b)||[])[1]||'';
+    return {kind:f('형식').trim(),files:[...new Set(fs.match(/workspace\/[^\s,`'"]+/g)||[])],cap:((/캡션\s*[:：]\s*\n?([\s\S]*?)(?:\n해시태그|\n추천 시각|$)/.exec(b)||[])[1]||'').trim(),tags:f('해시태그').trim(),when:f('추천 시각').trim()};});
+  const imgs=posts.length||reel?[]:[...new Set(txt.match(/workspace\/[\w\-\/.가-힣]+\.(?:jpe?g|png|webp)/gi)||[])].filter(p=>!p.includes('/.thumbs/')).slice(0,10);
+  return {reel,sec,qa,note,one,posts,imgs};
 }
 async function renderOutputs(){
   const root=$('#vOutputs');
@@ -73,11 +77,28 @@ async function renderOutputs(){
   if(sel){let txt=VW.out[sel.number];
     if(txt===undefined){try{const cs=await commentsOf(sel.number);const c=[...cs].reverse().find(x=>/검수 \d+점/.test(x.body))||cs[cs.length-1];txt=c?c.body:'';}catch{txt='';}VW.out[sel.number]=txt;}
     const v=$('#outView');if(!v)return;if(!txt){v.innerHTML='<span class="mu">제출된 내용 없음</span>';return;}
+    if(!/\[\[\/POST\]\]/.test(txt)&&!VW.outx)VW.outx={};
+    if(!/\[\[\/POST\]\]/.test(txt)){const k=sel.number;if(VW.outx[k]===undefined){VW.outx[k]='';for(const f of new Set(txt.match(/workspace\/[\w\-.\/가-힣]+\.md/g)||[])){try{VW.outx[k]+='\n'+(await gh('/contents/'+f.split('/').map(encodeURIComponent).join('/'),{raw:true})||'');}catch{}}}
+      txt=txt+(VW.outx[k]||'');}
     const o=outParts(txt);
     v.innerHTML=(o.reel?`<div class="ov"><video controls playsinline preload="metadata" id="outVid"></video><div class="mono mu" style="font-size:10px;margin-top:4px">편집한 릴스${o.sec?' · '+o.sec+'초':''}</div></div>`:'')
+      +o.posts.map((p,k)=>`<div class="opost">${o.posts.length>1?`<div class="mono mu" style="font-size:10px;margin-bottom:4px">게시물 ${k+1}</div>`:''}${p.files.length?`<div class="apcar${p.files.length===1?' one':''}">${p.files.map((f,j)=>/\.(mp4|mov|m4v|webm)$/i.test(f)?`<span data-vid="${esc(f)}" class="ovv">▶ 영상</span>`:`<span><img data-path="${esc(f)}" alt=""><em>${j+1}</em></span>`).join('')}</div>`:''}
+        <div class="ocap">${esc(p.cap||'(캡션 없음)')}</div><div class="mono mu ometa">${esc(p.kind||'')}${p.when?' · '+esc(p.when):''}${p.tags?`<br>첫 댓글 ${esc(p.tags)}`:''}</div></div>`).join('')
+      +(o.imgs.length?`<div class="apcar">${o.imgs.map((f,j)=>`<span><img data-path="${esc(f)}" alt=""><em>${j+1}</em></span>`).join('')}</div>`:'')
       +`<p class="osum">${esc(o.one||'제출된 내용 없음')}</p>`
       +(o.qa&&!/^\s*$/.test(o.qa)&&statusOf(sel)==='REVIEW'?`<div class="oqa"><b>검수 의견</b> ${esc(o.qa)}</div>`:'')
+      +`<div class="ofix"><textarea id="outFb" rows="2" placeholder="고칠 점을 적으면 담당 직원이 다시 합니다"></textarea><div class="ofb">${statusOf(sel)==='REVIEW'?'<button class="btn sbtn pri" id="outOk">승인</button>':''}<button class="btn sbtn" id="outFix">수정 요청</button></div></div>`
       +`<button class="btn sbtn" id="outMore" style="width:100%;margin-top:8px">작업 메모 펼치기</button><div id="outNote" style="display:none;margin-top:8px">${mdLite(o.note)}</div>`;
+    if(typeof lazy==='function')lazy(v);
+    const n=sel.number;
+    const send=async(text,label)=>{try{
+        if(sel.state==='closed'){const ls=(sel.labels||[]).map(l=>l.name).filter(x=>!x.startsWith('status:')).concat('status:review');await gh(`/issues/${n}`,{method:'PATCH',body:{state:'open',labels:ls}});}
+        await gh(`/issues/${n}/comments`,{method:'POST',body:{body:text}});
+        if(typeof markDecided==='function')markDecided(n);toast(label);VW.out[n]=undefined;setTimeout(sync,1500);
+      }catch(e){toast('보내기 실패: '+(e.status===403?'접근키 Issues 권한':String(e.message).slice(0,40)));}};
+    const fx=$('#outFix');if(fx)fx.onclick=()=>{const t=$('#outFb').value.trim();if(!t){toast('고칠 점을 적어 주세요');$('#outFb').focus();return;}fx.disabled=true;send(t,'수정 요청 보냄 · 담당 직원이 다시 합니다');};
+    const okb=$('#outOk');if(okb)okb.onclick=()=>{okb.disabled=true;send('승인','승인했습니다');};
+    v.querySelectorAll('[data-vid]').forEach(el=>el.onclick=async()=>{try{el.outerHTML=`<video controls playsinline autoplay src="${await blobUrl(el.dataset.vid)}" style="width:100%"></video>`;}catch{}});
     $('#outMore').onclick=()=>{const n=$('#outNote');const on=n.style.display==='none';n.style.display=on?'block':'none';$('#outMore').textContent=on?'작업 메모 접기':'작업 메모 펼치기';};
     if(o.reel){try{$('#outVid').src=await blobUrl(o.reel);}catch{const w=$('#outVid');if(w)w.outerHTML='<div class="mu" style="font-size:11px">릴스를 불러오지 못했습니다</div>';}}}
 }
