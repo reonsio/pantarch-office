@@ -113,7 +113,7 @@ async function pLibrary(body,b){
   <span class="chips"><button class="btn sbtn" id="pSort" title="정렬">${PF.asc?'↑ 어릴 때부터':'↓ 지금부터'}</button>${cnt.todo?`<button class="btn sbtn" id="pAna">분석 ${cnt.todo}</button>`:''}<label class="btn sbtn pri" id="pUpL" title="사진은 한 장씩, 영상은 장면 3컷을 Claude가 보고 시기·장면·스토리를 적습니다. 40MB 넘는 영상은 나눠 올려 자동으로 합칩니다.">＋ 올리기<input type="file" id="pUp" multiple accept="image/*,video/*" style="display:none"></label></span></div>
   ${PF.upStat?`<div class="libnote" id="upStat">${esc(PF.upStat)}</div>`:''}
   <div class="scroll">${chron(shown,W).map(([h,xs])=>`<div class="chh2"><b>${esc(h[0])}</b><span>${esc(h[1])}</span><em>${xs.length}</em></div><div class="grid">${xs.map(x=>{const th=(x.thumbs||[])[0];const d=x.desc||{};const cap=x.pending?(x.parts?'합치는 중':'분석 대기'):('age_m' in x?`${x.age_m}개월${x.age_est?' 추정':''}`:'')+(d.scene?` · ${d.scene}`:'');
-    return `<div class="tile${x.analyzed?'':' todo'}" data-p="${esc(x.path)}" title="${esc([md(x.date),d.scene,d.story].filter(Boolean).join(' / '))}">${th?`<img data-path="${esc(th)}" alt="">`:(x.kind==='image'?`<img data-path="${esc(x.path)}" alt="">`:'<div class="vph mono">VIDEO</div>')}${x.kind==='video'?`<span class="vb">${x.duration?Math.round(x.duration)+'s':'REEL'}</span>`:''}${cap?`<span class="cap2">${esc(cap)}</span>`:''}</div>`;}).join('')}</div>`).join('')||'<div class="empty">아직 자료가 없습니다. ＋ 올리기로 넣어 주세요.</div>'}</div>`;
+    return `<div class="tile${x.analyzed?'':' todo'}" data-p="${esc(x.path)}" title="${esc([md(x.date),d.scene,d.story].filter(Boolean).join(' / '))}">${th?`<img data-path="${esc(th)}" alt="">`:(x.kind==='image'?`<img data-path="${esc(x.path)}" alt="">`:'<div class="vph mono">VIDEO</div>')}${x.kind==='video'?`<span class="vb">${x.duration?Math.round(x.duration)+'s':'REEL'}</span>`:''}${cap?`<span class="cap2">${esc(cap)}</span>`:''}</div>`;}).join('')}</div>`).join('')||'<div class="empty">자료 없음</div>'}</div>`;
   body.querySelectorAll('[data-f]').forEach(el=>el.onclick=()=>{PF.folder=el.dataset.f;renderPortfolio(true);});
   $('#pSort').onclick=()=>{PF.asc=!PF.asc;renderPortfolio(true);};
   if($('#pAna'))$('#pAna').onclick=async()=>{try{await gh('/actions/workflows/media.yml/dispatches',{method:'POST',body:{ref:'main'}});PF.upStat='분석을 시작했습니다. 몇 분 뒤 설명이 붙습니다.';renderPortfolio(true);}catch{toast('실패: 접근키 Actions 권한을 확인해 주세요');}};
@@ -130,7 +130,7 @@ function pQueue(body,b){
     <div><div class="cp">${esc(m.caption||i.title)}</div><div class="mono mu" style="font-size:10px;margin-top:2px"><b style="color:#D9A441">${code(i)}</b> · ${esc((m.hashtags||'').slice(0,60))}</div></div>
     <span class="mono" style="font-size:11px">${d?`${d.getMonth()+1}/${d.getDate()} ${WD[d.getDay()]} ${d.toTimeString().slice(0,5)}`:esc(m.when||'—')}</span>
     <span class="mono" style="font-size:11px;color:${c}"><i class="d" style="background:${c}"></i>${l}</span>
-    <div>${st==='REVIEW'?`<div class="b3"><button class="btn pri" data-act="승인">게시 승인</button><button class="btn" data-act="">의견</button><button class="btn" data-act="기각">기각</button></div>`:(st==='APPROVED'||st==='SCHEDULED')?`<div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn pri" data-act="지금 올리기">지금 올리기</button>${m.pub_error?'<button class="btn" data-act="다시">다시 시도</button>':'<button class="btn" data-act="기각">취소</button>'}</div>${m.pub_error?`<div style="font-size:11px;color:#E2704F;margin-top:3px">${esc(m.pub_error)}</div>`:''}`:'<span class="mu" style="font-size:11px">—</span>'}</div></div>`;}).join('')||'<div class="empty">게시물이 없습니다. 직원 결과물의 [[POST]] 블록이나 ＋ 게시물로 생깁니다.</div>'}</div>`;
+    <div>${st==='REVIEW'?`<div class="b3"><button class="btn pri" data-act="승인">게시 승인</button><button class="btn" data-act="">의견</button><button class="btn" data-act="기각">기각</button></div>`:(st==='APPROVED'||st==='SCHEDULED')?`<div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn pri" data-act="지금 올리기">지금 올리기</button>${m.pub_error?'<button class="btn" data-act="다시">다시 시도</button>':'<button class="btn" data-act="기각">취소</button>'}</div>${m.pub_error?`<div style="font-size:11px;color:#E2704F;margin-top:3px">${esc(m.pub_error)}</div>`:''}`:'<span class="mu" style="font-size:11px">—</span>'}</div></div>`;}).join('')||'<div class="empty">게시물 없음</div>'}</div>`;
   body.querySelectorAll('[data-pv2]').forEach(el=>el.onclick=()=>preview(b,el.dataset.pv2));
   body.querySelectorAll('[data-act]').forEach(btn=>btn.onclick=async()=>{const n=+btn.closest('[data-n]').dataset.n;let txt=btn.dataset.act;
     if(!txt){txt=prompt('의견을 적어 주세요. LILY가 반영해서 다시 만듭니다.');if(!txt)return;}
@@ -138,8 +138,7 @@ function pQueue(body,b){
   $('#pNew').onclick=()=>openComposer(b,null);lazy(body);
 }
 function pInsights(body){
-  body.innerHTML=`<div class="ph"><span class="cap">INSIGHTS</span><span class="mono mu" style="font-size:10px">NOT CONNECTED</span></div>
-  <div class="note">인스타그램 반응 지표(도달, 저장, 공유, 팔로워 변화)는 아직 연결 전입니다.<br>엔진이 인스타그램 데이터를 읽으려면 Meta에서 발급하는 인스타 접근키가 GitHub Secrets에 들어가야 합니다. 게시 자동화와 같은 키를 쓰므로, 게시 연결을 정할 때 함께 붙입니다.</div>`;
+  body.innerHTML=`<div class="ph"><span class="cap">INSIGHTS</span><span class="mono mu" style="font-size:10px">첫 게시 후 연결</span></div><div class="empty">반응 지표 없음</div>`;
 }
 
 /* ---------- PRODUCT ---------- */
@@ -153,7 +152,7 @@ function pMilestones(body,b){
   body.innerHTML=`<div class="ph"><span class="cap">MILESTONES</span><button class="btn sbtn pri" id="pM" style="width:84px">＋ 미션</button></div><div class="scroll">
   ${ms.map(m=>block(`${code(m)} ${m.title}`,m.html_url,tasks.filter(t=>meta(t).mission===m.number),has(m,'meeting')?'회의에서 나온 일':'미션')).join('')}
   ${loose.length?block('미션 밖 업무','',loose,'이전 기록'):''}
-  ${!ms.length&&!loose.length?'<div class="empty">아직 마일스톤이 없습니다. ＋ 미션으로 첫 목표를 정해 주세요.</div>':''}</div>`;
+  ${!ms.length&&!loose.length?'<div class="empty">마일스톤 없음</div>':''}</div>`;
   body.querySelectorAll('[data-url]').forEach(el=>el.onclick=()=>{if(el.dataset.url)open(el.dataset.url,'_blank','noopener');});
   body.querySelectorAll('.mh').forEach(el=>el.onclick=()=>{const ms=el.parentElement;ms.classList.toggle('folded');el.querySelector('.mono').textContent=ms.classList.contains('folded')?'▸':'▾';});
   $('#pM').onclick=()=>{openMission();$('#iBiz').value=b.id;};
@@ -161,15 +160,14 @@ function pMilestones(body,b){
 function pDocs(body,b){
   const files=(PF.tree||[]).filter(f=>f.type==='blob'&&f.path.startsWith(b.dir)).sort((a,c)=>a.path.localeCompare(c.path));
   body.innerHTML=`<div class="ph"><span class="cap">DOCS · ${b.dir}</span><span class="mono mu" style="font-size:10px">${files.length} FILES</span></div>
-  <div class="doc"><div class="ls">${files.map(f=>`<div data-doc="${esc(f.path)}" class="${PF.doc===f.path?'on':''}" title="${esc(f.path)}">${esc(f.path.slice(b.dir.length))}</div>`).join('')||'<div class="empty" style="cursor:default">문서가 없습니다.</div>'}</div><pre id="docView" class="mu">왼쪽에서 문서를 고르세요.</pre></div>`;
+  <div class="doc"><div class="ls">${files.map(f=>`<div data-doc="${esc(f.path)}" class="${PF.doc===f.path?'on':''}" title="${esc(f.path)}">${esc(f.path.slice(b.dir.length))}</div>`).join('')||'<div class="empty" style="cursor:default">문서가 없습니다.</div>'}</div><pre id="docView" class="mu"></pre></div>`;
   const show=async p=>{PF.doc=p;body.querySelectorAll('[data-doc]').forEach(x=>x.classList.toggle('on',x.dataset.doc===p));const v=$('#docView');v.textContent='불러오는 중…';
     try{v.textContent=isImg(p)?'':await textOf(p);if(isImg(p)){v.innerHTML=`<img src="${await blobUrl(p)}" style="max-width:100%">`;}v.classList.remove('mu');}catch{v.textContent='불러오기 실패';}};
   body.querySelectorAll('[data-doc]').forEach(el=>el.onclick=()=>show(el.dataset.doc));
   if(PF.doc&&files.some(f=>f.path===PF.doc))show(PF.doc);
 }
 function pBuilds(body,b){
-  body.innerHTML=`<div class="ph"><span class="cap">BUILDS</span><span class="mono mu" style="font-size:10px">0 BUILDS</span></div>
-  <div class="note">아직 빌드가 없습니다. 시제품 코드가 <code>${b.dir}</code>에 생기면 여기서 버전별 플레이 링크와 변경점을 보여줍니다.</div>`;
+  body.innerHTML=`<div class="ph"><span class="cap">BUILDS</span></div><div class="empty">빌드 없음</div>`;
 }
 
 /* ---------- media: preview, upload, composer ---------- */
@@ -184,7 +182,7 @@ async function preview(b,path){
   $('#pvCap').textContent=(it.date||'').slice(0,16)+' · '+path.split('/').pop();m.classList.add('show');
   $('#pvMedia').innerHTML='<div class="empty">불러오는 중…</div>';
   try{const u=await blobUrl(path);$('#pvMedia').innerHTML=it.kind==='image'?`<img src="${u}" alt="">`:`<video src="${u}" controls playsinline></video>`;}catch{$('#pvMedia').innerHTML='<div class="empty">불러오기 실패</div>';}
-  $('#pvBody').innerHTML=!path.startsWith(b.media)?`<div class="mu" style="font-size:12px">직원이 만든 결과물입니다(${esc(path.split('/').slice(-2,-1)[0]||'')}). 재생해 보고 결재함에서 승인하거나 의견을 남기세요.</div><div class="row"><a class="btn" href="https://github.com/${REPO}/blob/main/${encodeURI(path)}" target="_blank" rel="noopener">GitHub에서 보기</a><button class="btn" data-close2>닫기</button></div>`:`${it.analyzed?`<div class="ana"><b>시기</b><span>${esc(d.period)}</span><b>장면</b><span>${esc(d.scene)}</span><b>표정</b><span>${esc(d.expression)}</span><b>스토리</b><span>${esc(d.story)}</span>${(it.tags||[]).length?`<b>태그</b><span>${it.tags.map(esc).join(' · ')}</span>`:''}</div>`:'<div class="mu" style="font-size:12px">아직 분석 전입니다. 엔진이 곧 설명을 붙입니다.</div>'}
+  $('#pvBody').innerHTML=!path.startsWith(b.media)?`<div class="mu" style="font-size:12px">직원이 만든 결과물입니다(${esc(path.split('/').slice(-2,-1)[0]||'')}). 재생해 보고 결재함에서 승인하거나 의견을 남기세요.</div><div class="row"><a class="btn" href="https://github.com/${REPO}/blob/main/${encodeURI(path)}" target="_blank" rel="noopener">GitHub에서 보기</a><button class="btn" data-close2>닫기</button></div>`:`${it.analyzed?`<div class="ana"><b>시기</b><span>${esc(d.period)}</span><b>장면</b><span>${esc(d.scene)}</span><b>표정</b><span>${esc(d.expression)}</span><b>스토리</b><span>${esc(d.story)}</span>${(it.tags||[]).length?`<b>태그</b><span>${it.tags.map(esc).join(' · ')}</span>`:''}</div>`:'<div class="mu" style="font-size:12px">분석 대기</div>'}
   <div class="row"><a class="btn" href="https://github.com/${REPO}/blob/main/${encodeURI(path)}" target="_blank" rel="noopener">GitHub에서 보기</a><button class="btn pri" id="pvUse">이 자료로 게시물 만들기</button></div>`;
   if($('#pvUse'))$('#pvUse').onclick=()=>{m.classList.remove('show');openComposer(b,path);};
   const c2=m.querySelector('[data-close2]');if(c2)c2.onclick=()=>m.classList.remove('show');
@@ -244,7 +242,7 @@ function openComposer(b,path){
     <div class="row" style="grid-template-columns:1fr 1.4fr 1.4fr"><button class="btn" data-close>취소</button><button class="btn" id="cpLily">LILY에게 맡기기</button><button class="btn pri" id="cpSave">승인하고 예약</button></div></div></div>`;
     $('#stage').append(m);m.querySelector('[data-close]').onclick=()=>m.classList.remove('show');}
   $('#cpTitle').textContent='NEW POST · '+b.name;PF.sel=path;const mt=$('#cpMedia');const it0=path&&libItems(b).find(x=>x.path===path);const th0=it0&&(it0.thumbs||[])[0];
-  mt.innerHTML=path?(th0||isImg(path)?`<img data-path="${esc(th0||path)}" alt="">`:'<span class="vb">VIDEO</span>')+`<span class="cap2">${esc(path.split('/').pop())}</span>`:'<div class="empty">LIBRARY에서 자료를 고르면 여기에 붙습니다</div>';lazy(mt);
+  mt.innerHTML=path?(th0||isImg(path)?`<img data-path="${esc(th0||path)}" alt="">`:'<span class="vb">VIDEO</span>')+`<span class="cap2">${esc(path.split('/').pop())}</span>`:'<div class="empty">자료 없음</div>';lazy(mt);
   $('#cpKind').value=!path||isVid(path)?'영상':'사진';
   const d=new Date();d.setDate(d.getDate()+1);d.setHours(18,0,0,0);$('#cpWhen').value=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);
   $('#cpCap').value='';$('#cpErr').textContent='';m.classList.add('show');
