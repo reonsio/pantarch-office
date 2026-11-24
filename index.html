@@ -60,10 +60,10 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .rl{position:absolute;z-index:4;font-size:9px;line-height:14px;padding:0 5px;background:rgba(23,16,12,.82);color:#E9DAC2;white-space:nowrap;pointer-events:none}
 .rl b{font-family:'IBM Plex Mono',monospace;letter-spacing:1px;color:#D9A441;margin-right:4px}
 .rl em{font-style:normal;font-family:'IBM Plex Mono',monospace;color:#A38C72;margin-left:3px}
-.card{position:absolute;right:8px;bottom:8px;width:250px;z-index:6;background:rgba(23,16,12,.96);border:1px solid #5A4130;padding:8px;display:none}
+.card{position:absolute;right:8px;bottom:8px;width:220px;z-index:6;background:#17100C;border:1px solid #5A4130;padding:8px;display:none}
 .card.show{display:block}
-.card h4{margin:0 0 4px;display:flex;align-items:center;gap:6px;font:600 12px 'IBM Plex Mono',monospace}
-.card p{margin:3px 0;font-size:11px;line-height:1.45;color:#D2C0A4}
+.card h4{margin:0;height:24px;display:flex;align-items:center;gap:6px;font:500 9px 'IBM Plex Mono',monospace;letter-spacing:.5px}.card h4 b{font:600 11px 'IBM Plex Mono',monospace;letter-spacing:.5px}.card h4 img{width:20px;height:20px;image-rendering:pixelated}
+.card .cg{display:grid;grid-template-columns:34px minmax(0,1fr);margin:6px 0;border-top:1px solid #33251B}.card .cg>div{height:20px;line-height:20px;border-bottom:1px solid #33251B;font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.card .ck{font-family:'IBM Plex Mono',monospace;color:#8E7861}.card .cv{color:#E6D6BC}.card .cb{display:grid;grid-template-columns:repeat(2,1fr);gap:4px}.card .cb .btn{height:24px;font-size:10.5px}
 .card a{color:#D9A441}
 /* tables */
 .scroll{overflow:auto;min-height:0;flex:1}
@@ -836,10 +836,10 @@ function showCard(id){
   Object.values(AG).forEach(x=>x.el.classList.remove('hl'));g&&g.el.classList.add('hl');
   const c=$('#card');const m=(a.model||'claude').toLowerCase();
   const done=S.issues.filter(i=>has(i,'task')&&lab(i,'agent:')===id&&i.state==='closed').length;
-  c.innerHTML=`<h4><img src="${spriteOf(id)}" style="width:22px;height:22px;image-rendering:pixelated" onerror="this.src='assets/s-ben.png'">${esc(a.name)} <span style="font-size:9px;color:${MC[m]}">${m.toUpperCase()}</span><span style="margin-left:auto;font-size:9px;color:${SC[st]}">${st}</span></h4>
-  <p>${esc((S.team.teams||{})[a.team]||a.team)} · ${esc(a.title||'')} · 완료 ${done}건</p><p>${esc(a.mission||'')}</p>
-  ${task?`<p>지금: <a href="${task.html_url}" target="_blank" rel="noopener">${code(task)} ${esc(task.title)}</a></p>`:'<p>지금: 맡은 일 없음</p>'}
-  <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:4px;margin-top:6px"><button class="btn" onclick="openMission('${id}')">일 맡기기</button><button class="btn" onclick="$('#card').classList.remove('show');Object.values(AG).forEach(x=>x.el.classList.remove('hl'))">닫기</button></div>`;
+  const row=(k,v)=>`<div class="ck">${k}</div><div class="cv">${v}</div>`;
+  c.innerHTML=`<h4><img src="${spriteOf(id)}" alt="" onerror="this.src='assets/s-ben.png'"><b style="color:${teamCol(id)}">${esc(a.name)}</b><span style="color:${MC[m]}">${m.toUpperCase()}</span><span style="margin-left:auto;color:${SC[st]}">${st}</span></h4>
+  <div class="cg">${row('팀',esc((S.team.teams||{})[a.team]||a.team))}${row('역할',esc(a.title||'—'))}${row('지금',task?`<a href="${task.html_url}" target="_blank" rel="noopener">${code(task)} ${esc(task.title)}</a>`:'—')}${row('완료',done+'건')}</div>
+  <div class="cb"><button class="btn" onclick="openMission('${id}')">일 맡기기</button><button class="btn" onclick="$('#card').classList.remove('show');Object.values(AG).forEach(x=>x.el.classList.remove('hl'))">닫기</button></div>`;
   c.classList.add('show');
 }
 plan.addEventListener('click',()=>{$('#card').classList.remove('show');Object.values(AG).forEach(x=>x.el.classList.remove('hl'));});
@@ -1035,7 +1035,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241632';
+const APPVER='11241633';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1193,8 +1193,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241632"></script>
-<script src="views.js?v=11241632"></script>
-<script src="chat.js?v=11241632"></script>
+<script src="portfolio.js?v=11241633"></script>
+<script src="views.js?v=11241633"></script>
+<script src="chat.js?v=11241633"></script>
 </body>
 </html>
