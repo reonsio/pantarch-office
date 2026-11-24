@@ -80,6 +80,30 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .st i{width:5px;height:5px;display:inline-block;margin-right:4px}
 .tr,.th{display:grid;grid-template-columns:48px 100px minmax(0,1fr) 110px 46px 52px 72px 26px 56px 38px;gap:8px;align-items:center;padding:0 10px;height:27px;font-size:12px;border-bottom:1px solid #2C2018}
 .tr{cursor:pointer}.tr:hover{background:#2A1F17}
+.bg{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;background:#241A13;border-bottom:1px solid #2C2018;cursor:pointer;user-select:none}
+.bg:hover{background:#2A1F17}
+.bg .cv{width:10px;flex:none;font:10px 'IBM Plex Mono',monospace;color:#8E7861}
+.bg .bc{flex:none;font:600 11px 'IBM Plex Mono',monospace;color:#D9A441}
+.bg .bt{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:12px;font-weight:600;color:#F4E6CF}
+.bg .bs{flex:none;display:flex;gap:6px;font:10px 'IBM Plex Mono',monospace}.bg .bs b{font-weight:500}
+.bg .bp{flex:none;width:32px;text-align:right;font:10px 'IBM Plex Mono',monospace;color:#8E7861}
+.bg .bb{flex:none;width:40px;height:4px;background:#33251B}.bg .bb i{display:block;height:100%;background:#7DB79A}
+.bd{height:24px;display:flex;align-items:center;padding:0 10px 0 28px;font:10px 'IBM Plex Mono',monospace;color:#8E7861;border-bottom:1px solid #2C2018;cursor:pointer;user-select:none}
+.bd:hover{color:#BFA98C}
+#board .tr,.bth{grid-template-columns:60px minmax(0,1fr) 54px 56px 80px 34px 96px 38px}
+.bg .bz{flex:none;display:flex;align-items:center}
+html.m #board .tr{grid-template-columns:56px minmax(0,1fr) 46px 78px}
+html.m #board .tr>*{display:initial}
+html.m #board .tr>:nth-child(4),html.m #board .tr>:nth-child(6),html.m #board .tr>:nth-child(7),html.m #board .tr>:nth-child(8){display:none}
+html.m #board .tr>.ell:nth-child(2){white-space:normal}
+html.m .bg .bz{display:none}
+
+.bgrp .tr>:first-child{padding-left:18px}
+.bgrp.folded>.tr,.bgrp.folded>.bd{display:none}
+.bgrp:not(.showdone)>.bd~.tr.cl{display:none}
+html.m .bg{height:36px;padding:0 10px}html.m .bg .bb{display:none}html.m .bg .bt{font-size:12px}
+html.m .bgrp .tr>:first-child{padding-left:14px}
+
 .th{height:22px;font:10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#A08A72;background:#271C15}
 .tr .mono{font-size:11px}
 .tr.cl{opacity:.55}
@@ -429,7 +453,7 @@ html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 </section>
 <section class="pnl" data-m="office" style="display:flex;flex-direction:column;flex:1">
 <div class="ph"><span style="display:flex;gap:10px;align-items:center"><span class="cap">MISSION BOARD</span><span class="mono mu" style="font-size:10px" id="boardSum"></span></span><button class="btn sbtn pri" id="bMission" style="width:64px">＋ 미션</button></div>
-<div class="th"><span>#</span><span>BUSINESS</span><span>TASK</span><span>MISSION</span><span>OWNER</span><span>MODEL</span><span>STATUS</span><span class="r">검수</span><span class="r">DEPS</span><span class="r">UPD</span></div>
+<div class="th bth"><span>#</span><span>TASK</span><span>OWNER</span><span>MODEL</span><span>STATUS</span><span class="r">검수</span><span class="r">DEPS</span><span class="r">UPD</span></div>
 <div class="scroll" id="board"></div>
 </section>
 </div>
@@ -768,19 +792,41 @@ let BIZ={kkumi:{kind:'BRAND',name:'꾸미',col:'#E08A5A'},game:{kind:'PRODUCT',n
 const KCOL={BRAND:'#E08A5A',PRODUCT:'#7DB79A',SERVICE:'#A3ACDB'};
 function bizOptions(sel){return (S.bus||[]).map(b=>`<option value="${b.id}"${b.id===sel?' selected':''}>${b.kind} · ${esc(b.name)}</option>`).join('')+`<option value=""${sel===''?' selected':''}>회사 공통</option>`;}
 function bizTag(b){const z=BIZ[b];return z?`<span class="mono" style="font-size:10px;color:${z.col}">${z.kind}</span> <span style="font-size:11px">${z.name}</span>`:'<span class="mu">공통</span>';}
+/* 미션 보드: 미션별로 묶어 진행 중인 미션을 위에, 완료된 업무와 끝난 미션은 접어 둔다 */
+let BFOLD={};try{BFOLD=JSON.parse(localStorage.getItem('pantarch_bfold')||'{}');}catch{}
 function renderBoard(){
   const tasks=S.issues.filter(i=>has(i,'task'));
   const pr={RUNNING:0,REVIEW:1,BLOCKED:2,QUEUED:3,DONE:4};
-  const open=tasks.filter(i=>i.state==='open').sort((a,b)=>(pr[statusOf(a)]??3)-(pr[statusOf(b)]??3)||a.number-b.number);
-  const closed=tasks.filter(i=>i.state==='closed').sort((a,b)=>new Date(b.closed_at)-new Date(a.closed_at)).slice(0,20);
-  const rows=[...open,...closed];
-  $('#board').innerHTML=rows.length?rows.map(i=>{const st=statusOf(i),m=meta(i),aid=lab(i,'agent:'),a=S.team.agents[aid]||{},mo=(a.model||'').toLowerCase();
-    const ms=m.mission?S.issues.find(x=>x.number===m.mission):null;
-    return `<div class="tr${i.state==='closed'?' cl':''}" data-url="${i.html_url}"><span class="mono" style="color:#D9A441">${code(i)}</span><span class="ell">${bizTag(bizOf(i))}</span><span class="ell">${esc(i.title)}</span><span class="ell mu" title="${ms?esc(ms.title):''}">${ms?code(ms)+' '+esc(ms.title):'—'}</span><span class="mono">${esc(a.name||aid||'—')}</span><span class="mono" style="color:${MC[mo]||'#A08A72'}">${mo?mo.toUpperCase():'—'}</span><span class="mono" style="color:${SC[st]}"><i class="d" style="background:${SC[st]}"></i>${st}</span><span class="mono r" style="color:${m.score==null?'#7A6654':m.score>=75?'#7DB79A':'#E2704F'}">${m.score==null?'—':m.score>=75?'통과':'보완'}</span><span class="mono r mu">${(m.deps||[]).length?m.deps.map(codeN).join(' '):'—'}</span><span class="mono r mu">${hhmm(i.updated_at)}</span></div>`;}).join(''):'<div class="empty">진행 중인 업무 없음</div>';
-  const c={};open.forEach(i=>{const s=statusOf(i);c[s]=(c[s]||0)+1;});
-  $('#boardSum').textContent=`${open.length} OPEN · ${c.RUNNING||0} RUNNING · ${c.REVIEW||0} REVIEW · ${c.QUEUED||0} QUEUED`;
+  const row=i=>{const st=statusOf(i),m=meta(i),aid=lab(i,'agent:'),a=S.team.agents[aid]||{},mo=(a.model||'').toLowerCase();
+    return `<div class="tr${i.state==='closed'?' cl':''}" data-url="${i.html_url}"><span class="mono" style="color:#D9A441">${code(i)}</span><span class="ell">${esc(i.title)}</span><span class="mono" style="color:${aid?teamCol(aid):'#A08A72'}">${esc(a.name||aid||'—')}</span><span class="mono" style="color:${MC[mo]||'#A08A72'}">${mo?mo.toUpperCase():'—'}</span><span class="mono" style="color:${SC[st]}"><i class="d" style="background:${SC[st]}"></i>${st}</span><span class="mono r" style="color:${m.score==null?'#7A6654':m.score>=75?'#7DB79A':'#E2704F'}">${m.score==null?'—':m.score>=75?'통과':'보완'}</span><span class="mono r mu ell" title="${(m.deps||[]).map(codeN).join(' ')}">${(m.deps||[]).length?m.deps.map(codeN).join(' '):'—'}</span><span class="mono r mu">${hhmm(i.updated_at)}</span></div>`;};
+  const groups=new Map();
+  for(const t of tasks){const k=meta(t).mission||0;if(!groups.has(k))groups.set(k,[]);groups.get(k).push(t);}
+  const G=[...groups.entries()].map(([k,ts])=>{const ms=k?S.issues.find(x=>x.number===k):null;
+    const open=ts.filter(i=>i.state==='open').sort((a,b)=>(pr[statusOf(a)]??3)-(pr[statusOf(b)]??3)||a.number-b.number);
+    const done=ts.filter(i=>i.state==='closed').sort((a,b)=>new Date(b.closed_at)-new Date(a.closed_at));
+    const top=open.length?Math.min(...open.map(i=>pr[statusOf(i)]??3)):9;
+    const last=Math.max(...ts.map(i=>+new Date(i.updated_at)));
+    return {k,ms,open,done,top,last,n:ts.length};})
+    .sort((a,b)=>a.top-b.top||b.last-a.last);
+  const html=G.map(g=>{const key='m'+g.k;const folded=key in BFOLD?BFOLD[key].f:!g.open.length;const showDone=!!(BFOLD[key]&&BFOLD[key].d);
+    const mc='M-'+String(g.k).padStart(3,'0');const title=g.ms?g.ms.title:g.k?'지난 미션':'미션 없이 맡긴 일';
+    const c={};g.open.forEach(i=>{const s=statusOf(i);c[s]=(c[s]||0)+1;});
+    const sum=[['RUNNING','진행'],['REVIEW','결재'],['BLOCKED','막힘'],['QUEUED','대기']].filter(([s])=>c[s]).map(([s,l])=>`<b style="color:${SC[s]}">${l} ${c[s]}</b>`).join('');
+    const pct=Math.round(100*g.done.length/g.n);
+    return `<div class="bgrp${folded?' folded':''}${showDone?' showdone':''}" data-g="${key}">
+      <div class="bg" data-fg="${key}"><span class="cv">${folded?'▸':'▾'}</span><span class="bc">${g.k?mc:'—'}</span>${g.ms?`<span class="bz">${bizTag(bizOf(g.ms))}</span>`:''}<span class="bt">${esc(title)}</span><span class="bs">${sum||(g.open.length?'':'<b style="color:#7DB79A">완료</b>')}</span><span class="bp">${g.done.length}/${g.n}</span><span class="bb"><i style="width:${pct}%"></i></span></div>
+      ${g.open.map(row).join('')}
+      ${g.done.length?(g.open.length?`<div class="bd" data-dg="${key}">${showDone?'▾':'▸'} 끝난 업무 ${g.done.length}개</div>`:'')+g.done.map(row).join(''):''}
+    </div>`;}).join('');
+  $('#board').innerHTML=html||'<div class="empty">진행 중인 업무 없음</div>';
+  const openAll=tasks.filter(i=>i.state==='open');const c={};openAll.forEach(i=>{const s=statusOf(i);c[s]=(c[s]||0)+1;});
+  $('#boardSum').textContent=`미션 ${G.filter(g=>g.open.length).length}개 진행 · 업무 ${openAll.length}개 (진행 ${c.RUNNING||0} · 결재 ${c.REVIEW||0} · 대기 ${c.QUEUED||0})`;
 }
-$('#board').addEventListener('click',e=>{const r=e.target.closest('[data-url]');if(r)open(r.dataset.url,'_blank','noopener');});
+$('#board').addEventListener('click',e=>{
+  const fg=e.target.closest('[data-fg]');if(fg){const k=fg.dataset.fg;const g=fg.parentElement;const f=!g.classList.contains('folded');BFOLD[k]={...(BFOLD[k]||{}),f};localStorage.setItem('pantarch_bfold',JSON.stringify(BFOLD));g.classList.toggle('folded',f);fg.querySelector('.cv').textContent=f?'▸':'▾';return;}
+  const dg=e.target.closest('[data-dg]');if(dg){const k=dg.dataset.dg;const g=dg.parentElement;const d=!g.classList.contains('showdone');BFOLD[k]={...(BFOLD[k]||{}),f:g.classList.contains('folded'),d};localStorage.setItem('pantarch_bfold',JSON.stringify(BFOLD));g.classList.toggle('showdone',d);dg.textContent=`${d?'▾':'▸'} 끝난 업무 ${g.querySelectorAll('.tr.cl').length}개`;return;}
+  const r=e.target.closest('[data-url]');if(r)open(r.dataset.url,'_blank','noopener');});
+
 function renderKpis(){
   const since=Date.now()-14*864e5;const t=S.issues.filter(i=>has(i,'task'));
   const done=t.filter(i=>i.state==='closed'&&new Date(i.closed_at)>since);
@@ -911,7 +957,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11240639';
+const APPVER='11240641';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 async function sync(){checkVer();
@@ -1039,8 +1085,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240639"></script>
-<script src="views.js?v=11240639"></script>
-<script src="chat.js?v=11240639"></script>
+<script src="portfolio.js?v=11240641"></script>
+<script src="views.js?v=11240641"></script>
+<script src="chat.js?v=11240641"></script>
 </body>
 </html>
