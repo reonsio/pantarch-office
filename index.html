@@ -388,11 +388,12 @@ html.m .pp{height:40px}
 .ch{display:flex;align-items:center;gap:3px;height:18px;padding-left:2px;cursor:pointer;white-space:nowrap;overflow:hidden;min-width:0}
 .ch i{width:6px;height:6px;flex:none}.ch b{font:600 10px 'IBM Plex Mono',monospace;display:inline-block;min-width:4ch}.ch em{font:normal 9px 'IBM Plex Mono',monospace;color:#D9A441;flex:none;letter-spacing:-.3px}.ch b{flex:none}
 /* chat panel */
+.chab{flex:none;display:grid;grid-template-columns:auto minmax(0,1fr);align-items:center;gap:8px;padding:4px 8px;border-bottom:1px solid #2C2018;background:#1B1410}.chab span{font-size:9px;letter-spacing:1px;color:#8E7861}.chab select{width:100%;min-width:0;height:22px;background-color:#17110D;border:1px solid #3A2A1F;color:#EFE2CC;font:11px 'IBM Plex Sans KR',sans-serif;padding:0 6px}html.m .chab select{height:30px;font-size:12px}
 .chb{flex:1;min-height:0;display:grid;grid-template-columns:72px minmax(0,1fr)}
 .chto{min-height:0;overflow-y:auto;scrollbar-width:none;padding:0 0 6px;border-right:1px solid #2C2018;background:#1B1410}.chto::-webkit-scrollbar{display:none}
 .chto .cg{display:block}
-.chto .tl{display:block;height:15px;margin-top:1px;padding-left:10px;background:#2A1F17;border-top:1px solid #33251B;border-bottom:1px solid #33251B;font:500 8px/13px 'IBM Plex Mono',monospace;font-style:normal;letter-spacing:1px;color:#A08A72;white-space:nowrap;overflow:hidden}.chto .cg:first-child .tl{margin-top:0;border-top:0}
-.chto button{display:block;height:17px;width:100%;min-width:0;padding:0 0 0 16px;text-align:left;background:none;border:0;border-left:2px solid transparent;color:var(--c,#BFA98C);font:600 10px 'IBM Plex Mono',monospace;cursor:pointer}.chto button:hover{background:#2A1F17}
+.chto .tl{display:block;height:14px;margin-top:0;padding-left:10px;background:#2A1F17;border-top:1px solid #33251B;border-bottom:1px solid #33251B;font:500 8px/13px 'IBM Plex Mono',monospace;font-style:normal;letter-spacing:1px;color:#A08A72;white-space:nowrap;overflow:hidden}.chto .cg:first-child .tl{margin-top:0;border-top:0}
+.chto button{display:block;height:16px;width:100%;min-width:0;padding:0 0 0 16px;text-align:left;background:none;border:0;border-left:2px solid transparent;color:var(--c,#BFA98C);font:600 10px 'IBM Plex Mono',monospace;cursor:pointer}.chto button:hover{background:#2A1F17}
 
 .chto button.on{background:#2E2219;border-left-color:var(--c,#D9A441);color:#F4E6CF}
 #chatLog{padding:8px;display:flex;flex-direction:column;gap:7px;font-size:11.5px}
@@ -491,6 +492,7 @@ html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 </section>
 <section class="pnl" id="chatPanel" data-m="chat" style="display:flex;flex-direction:column;flex:1;min-height:0">
 <div class="ph"><span class="cap">CHAT</span><span class="mono mu" style="font-size:10px" id="chatWho"></span></div>
+<div class="chab"><span class="mono">어느 일</span><select id="chatAbout"></select></div>
 <div class="chb"><div class="chto" id="chatTo"></div><div class="scroll" id="chatLog"></div></div>
 <div id="chatAtt"></div><form id="chatF"><button type="button" class="btn" id="chatClip" title="사진·영상·문서·프로젝트 파일(zip·코드) 첨부">＋</button><input id="chatIn" autocomplete="off" enterkeyhint="send"><button class="btn pri" id="chatGo">보내기</button><input type="file" id="chatFile" accept="image/*,video/*,.pdf,.pptx,.docx,.zip,.html,.htm,.js,.css,.json,.txt,.md" multiple hidden></form>
 </section>
@@ -1032,7 +1034,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241553';
+const APPVER='11241605';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1190,8 +1192,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241553"></script>
-<script src="views.js?v=11241553"></script>
-<script src="chat.js?v=11241553"></script>
+<script src="portfolio.js?v=11241605"></script>
+<script src="views.js?v=11241605"></script>
+<script src="chat.js?v=11241605"></script>
 </body>
 </html>

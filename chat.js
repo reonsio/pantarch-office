@@ -78,7 +78,7 @@ async function chatSend(){
   if(!t&&!att.length)return;
   if(att.length)t=(t||'첨부한 자료 봐 줘')+'\n첨부(대표님이 고른 자료, 순서대로):\n'+att.join('\n');
   if(!TOKEN){toast('접근키를 먼저 넣어 주세요');return;}
-  const a=S.team.agents[CH.to];const sec=(S.team.roles||{}).secretary;const body=(CH.to==='team'?'@팀 ':CH.to===sec||(!sec&&CH.to==='tom')?'':'@'+a.name+' ')+t;
+  const a=S.team.agents[CH.to];const sec=(S.team.roles||{}).secretary;const ab=+(($('#chatAbout')||{}).value||0);const body=(CH.to==='team'?'@팀 ':CH.to===sec||(!sec&&CH.to==='tom')?'':'@'+a.name+' ')+t+(ab?`\n<!-- about:${ab} -->`:'');
   inp.value='';$('#chatGo').disabled=true;
   try{
     if(!CH.num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});CH.num=it.number;S.issues.unshift(it);}
@@ -89,7 +89,13 @@ async function chatSend(){
   finally{$('#chatGo').disabled=false;}
 }
 $('#chatF').onsubmit=e=>{e.preventDefault();chatSend();};
-window.chatSync=function(){if(!S.team)return;if(!$('#chatTo').children.length){chatTo();chatHead();}
+function chatAbout(){const el=$('#chatAbout');if(!el)return;const cur=el.value;
+  const ms=S.issues.filter(i=>i.state==='open'&&has(i,'mission')&&!has(i,'archived')).sort((a,b)=>b.number-a.number).slice(0,12);
+  const rv=S.issues.filter(i=>i.state==='open'&&has(i,'task')&&has(i,'status:review')).sort((a,b)=>b.number-a.number).slice(0,8);
+  const pad=n=>String(n).padStart(3,'0');const sig=ms.map(i=>i.number).join()+'|'+rv.map(i=>i.number).join();if(el.dataset.sig===sig)return;el.dataset.sig=sig;
+  el.innerHTML='<option value="">전체 · 알아서 찾기</option>'+(ms.length?`<optgroup label="진행 중인 미션">${ms.map(i=>`<option value="${i.number}">M-${pad(i.number)} ${esc(i.title)}</option>`).join('')}</optgroup>`:'')+(rv.length?`<optgroup label="결재 대기 업무">${rv.map(i=>`<option value="${i.number}">T-${pad(i.number)} ${esc(i.title)}</option>`).join('')}</optgroup>`:'');
+  if([...el.options].some(o=>o.value===cur))el.value=cur;}
+window.chatSync=function(){if(!S.team)return;chatAbout();if(!$('#chatTo').children.length){chatTo();chatHead();}
   const it=chatIssue();if(it&&(CH.first||it.comments!==CH.lastCount)){CH.lastCount=it.comments;chatLoad();}else chatRender();};
 
 /* 직원 답을 두 번 누르면 ❤ (다시 두 번 누르면 취소). ❤는 그 직원의 '좋은 답' 기준으로 쌓인다. */
