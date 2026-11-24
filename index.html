@@ -623,7 +623,7 @@ const ROOMS={
  MEETING:{door:[1605,420],label:[1575,72],ko:'회의실'},
  PANTRY:{door:[330,420],label:[95,72],ko:'탕비실'},
  LOUNGE:{door:[300,600],label:[95,952],ko:'라운지'},
- CEO:{door:[1600,600],corr:[1560,CORR],label:[1575,478],ko:'대표실 · OWEN'},
+ CEO:{door:[1600,600],corr:[1560,CORR],label:[1575,478],ko:'대표실'},
 };
 const OFF=[[-105,-45],[110,-45],[-105,40],[110,40]];
 const MEET_SEATS=[[1730,165],[1652,215],[1810,215],[1652,320],[1810,320],[1652,268],[1810,268],[1730,410]];
@@ -714,6 +714,11 @@ function ensureSprite(a,home){
   const g=AG[a.id]={el,img,tag,x:home.pos[0],y:home.pos[1],room:home.room,path:[],trip:null,tripMsg:null,waitUntil:0};
   place(g);return g;
 }
+/* 대표님과 꾸미: 직원이 아니라 대표실에 늘 있는 캐릭터 */
+function ensureOwner(){if(plan.querySelector('.ag.own'))return;
+  [['owen','OWEN',[1762,530],'#D9A441'],['kkumi','꾸미',[1700,655],'#E08A5A']].forEach(([id,name,pos,col])=>{const el=document.createElement('div');el.className='ag own';
+    const img=new Image();img.alt=name;img.src=spriteOf(id);el.append(img);const tag=document.createElement('div');tag.className='tg';tag.style.borderColor=col;tag.textContent=name;el.append(tag);
+    const [l,t]=P(...pos);el.style.left=l+'%';el.style.top=t+'%';el.style.cursor='default';plan.append(el);});}
 function place(g){const [l,t]=P(g.x,g.y);g.el.style.left=l+'%';g.el.style.top=t+'%';}
 function goTo(g,room,pos){if(!g.path.length&&g.room===room&&Math.hypot(g.x-pos[0],g.y-pos[1])<2)return;g.path=route(g,room,pos);g.toRoom=room;}
 let last=performance.now();
@@ -793,6 +798,7 @@ function renderPlan(){
     g.el.title=`${a.name} · ${a.title||''}`;
   }
   for(const id of Object.keys(AG)) if(!HOMES[id]){AG[id].el.remove();delete AG[id];}
+  ensureOwner();
   // seats + labels
   plan.querySelectorAll('.seat,.rl').forEach(n=>n.remove());
   const cnt={};list.forEach(a=>{const h=HOMES[a.id];cnt[h.room]=(cnt[h.room]||0)+1;});
@@ -1012,7 +1018,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241225';
+const APPVER='11241233';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1148,8 +1154,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241225"></script>
-<script src="views.js?v=11241225"></script>
-<script src="chat.js?v=11241225"></script>
+<script src="portfolio.js?v=11241233"></script>
+<script src="views.js?v=11241233"></script>
+<script src="chat.js?v=11241233"></script>
 </body>
 </html>
