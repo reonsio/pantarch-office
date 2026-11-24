@@ -230,7 +230,7 @@ function openComposer(b,path){
     <label>캡션 (한 줄 드립)<textarea id="cpCap" rows="3"></textarea></label>
     <label>해시태그 (첫 댓글)<input id="cpTags" value="#꾸미일기 #강아지 #반려견 #댕스타그램"></label>
     <div class="err" id="cpErr"></div>
-    <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="cpSave">게시 대기열에 넣기</button></div></div></div>`;
+    <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="cpSave">승인하고 예약</button></div></div></div>`;
     $('#stage').append(m);m.querySelector('[data-close]').onclick=()=>m.classList.remove('show');}
   $('#cpTitle').textContent='NEW POST · '+b.name;PF.sel=path;const mt=$('#cpMedia');const it0=path&&libItems(b).find(x=>x.path===path);const th0=it0&&(it0.thumbs||[])[0];
   mt.innerHTML=path?(th0||isImg(path)?`<img data-path="${esc(th0||path)}" alt="">`:'<span class="vb">VIDEO</span>')+`<span class="cap2">${esc(path.split('/').pop())}</span>`:'<div class="empty">LIBRARY에서 자료를 고르면 여기에 붙습니다</div>';lazy(mt);
@@ -243,7 +243,7 @@ function openComposer(b,path){
     const mm={kind,media:PF.sel||'',caption:cap,hashtags:tags,when};
     $('#cpSave').disabled=true;
     try{const r=await gh('/issues',{method:'POST',body:{title:'게시 · '+cap.split('\n')[0].slice(0,24),body:blk+'\n\n```json meta\n'+JSON.stringify(mm)+'\n```',labels:['post','status:approved','biz:'+b.id]}});
-      m.classList.remove('show');toast(`P-${String(r.number).padStart(3,'0')} 게시 대기열에 넣었습니다(대표님 작성분은 바로 승인)`);PF.tab[b.id]='queue';setTimeout(sync,1200);}
+      m.classList.remove('show');toast(`P-${String(r.number).padStart(3,'0')} 승인했습니다. 엔진이 곧 인스타 예약을 겁니다`);PF.tab[b.id]='queue';setTimeout(sync,1200);}
     catch(e){$('#cpErr').textContent='실패: '+e.message.slice(0,80);}finally{$('#cpSave').disabled=false;}};
 }
 
