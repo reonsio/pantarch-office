@@ -211,24 +211,31 @@ async function shrink(file){
     return await new Promise(r=>c.toBlob(r,'image/jpeg',.9));}catch{return file;}
 }
 function setUp(t){PF.upStat=t;const e=$('#upStat');if(e)e.textContent=t;else if(t&&$('#pfBody'))renderPortfolio(true);}
-async function putFile(path,blob,msg){return gh('/contents/'+path.split('/').map(encodeURIComponent).join('/'),{method:'PUT',body:{message:msg,content:await toB64(blob),branch:'main'}});}
+async function putFile(path,blob,msg,sha){return gh('/contents/'+path.split('/').map(encodeURIComponent).join('/'),{method:'PUT',body:Object.assign({message:msg,content:await toB64(blob),branch:'main'},sha?{sha}:{})});}
+/* 같은 파일이 이미 라이브러리에 있으면(깃 내용 지문이 같으면) 새로 만들지 않고 그 자리에 덮어쓴다 */
+async function blobSha(blob){const b=new Uint8Array(await blob.arrayBuffer());const h=new TextEncoder().encode(`blob ${b.length}\0`);const all=new Uint8Array(h.length+b.length);all.set(h);all.set(b,h.length);
+  const d=await crypto.subtle.digest('SHA-1',all);return [...new Uint8Array(d)].map(x=>x.toString(16).padStart(2,'0')).join('');}
+function twinOf(b,sha,name){const t=(PF.tree||[]).filter(x=>x.type==='blob'&&x.path.startsWith(b.media)&&!x.path.includes('/.thumbs/'));
+  return t.find(x=>x.sha===sha)||null;}
 async function upload(b,files){
-  if(!files.length)return;const ym=new Date().toISOString().slice(0,7);let ok=0;const fails=[];const PART=20*1048576;
+  if(!files.length)return;if(!PF.tree){try{await loadTree();}catch{}}const ym=new Date().toISOString().slice(0,7);let ok=0,same=0;const fails=[];const PART=20*1048576;
   for(const [k,f] of files.entries()){
     const shot=await exifDate(f);const when=shot||('u'+Math.random().toString(36).replace(/[^a-z]/g,'').slice(0,6));
     const base=f.name.replace(/\.[^.]+$/,'').replace(/[^\w가-힣\-]+/g,'-').slice(0,40)||'file';
     try{
       if(/^image/.test(f.type)){setUp(`올리는 중 ${k+1}/${files.length} · ${f.name}`);const blob=(!shot&&!/jpe?g/i.test(f.type)&&f.size<25*1048576)?f:await shrink(f);/* 촬영 정보를 못 읽은 HEIC 등은 원본 그대로: 엔진이 직접 읽는다 */const ext=blob===f?(f.name.split('.').pop()||'jpg').toLowerCase():'jpg';
+        let sha='';try{sha=await blobSha(blob);}catch{}const tw=sha&&twinOf(b,sha);
+        if(tw){same++;ok++;continue;}
         await putFile(`${b.media}uploads/${ym}/${when}-${base}.${ext}`,blob,`${b.name} 자료: ${f.name}`);}
       else{const ext=(f.name.split('.').pop()||'mp4').toLowerCase();const path=`${b.media}uploads/${ym}/${when}-${base}.${ext}`;
-        if(f.size<=40*1048576){setUp(`영상 올리는 중 ${k+1}/${files.length} · ${f.name}`);await putFile(path,f,`${b.name} 자료: ${f.name}`);}
+        if(f.size<=40*1048576){setUp(`영상 올리는 중 ${k+1}/${files.length} · ${f.name}`);let sha='';try{sha=await blobSha(f);}catch{}if(sha&&twinOf(b,sha)){same++;ok++;continue;}await putFile(path,f,`${b.name} 자료: ${f.name}`);}
         else{const n=Math.ceil(f.size/PART);
           for(let i=0;i<n;i++){setUp(`큰 영상 나눠 올리는 중 ${i+1}/${n} · ${f.name}`);await putFile(`${path}.part${String(i+1).padStart(3,'0')}`,f.slice(i*PART,(i+1)*PART),`${b.name} 자료 조각 ${i+1}/${n}: ${f.name}`);}
           await putFile(`${path}.parts.json`,new Blob([JSON.stringify({name:f.name,total:n,size:f.size})]),`${b.name} 자료 조각 완료: ${f.name}`);}}
       ok++;
     }catch(e){fails.push(`${f.name} — ${e.status===403?'접근키 Contents 권한이 읽기 전용':e.message.slice(0,60)}`);if(e.status===403)break;}
   }
-  setUp(`${ok}개 올렸어요. 엔진이 몇 분 안에 합치기·분석을 끝냅니다.${fails.length?` 실패 ${fails.length}개: ${fails.join(' / ')}`:''}`);
+  setUp(`${ok-same}개 올렸어요${same?` · ${same}개는 이미 있는 자료라 그대로 둠`:''}. 비슷한 사진(다시 저장·크기만 다른 것)은 엔진이 찾아 기존 자리에 덮어씁니다.${fails.length?` 실패 ${fails.length}개: ${fails.join(' / ')}`:''}`);
   PF.folder='all';await loadTree();renderPortfolio(true);
 }
 function openComposer(b,path){

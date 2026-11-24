@@ -398,11 +398,15 @@ html.m #mtab .nb{position:absolute;top:19px;left:calc(50% + 17px);right:auto;min
 #mtab button{position:relative}
 #mtTitle:empty{display:none}
 html.m #boardSum{display:none}
-.apc,.doc2,.sum,.ana span,.ap .t,.cn .mu,.mb{text-align:justify;word-break:break-all}
+.apc,.doc2,.sum,.ana span,.ap .t,.cn .mu,.mb{text-align:justify;word-break:normal;overflow-wrap:anywhere}
 .ap .why{font-size:11px;line-height:1.5;color:#BFA98C;text-align:justify;word-break:break-all}
 .ap .aps{font-size:12px;line-height:1.5;color:#F4E6CF;background:#1B1410;border-left:2px solid #D9A441;padding:5px 8px;text-align:justify;word-break:break-all}
 .ap [data-full]{justify-self:start;width:auto;padding:0 10px}
 .apv{line-height:1.35!important}
+.apcar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin:4px 0}
+.apcar span{position:relative;cursor:pointer;aspect-ratio:1}.apcar img{width:100%;height:100%;object-fit:cover;background:#17110D;border:1px solid #3A2A1F;display:block}
+.apcar em{position:absolute;left:2px;top:2px;font:600 9px 'IBM Plex Mono',monospace;font-style:normal;color:#1E150F;background:#D9A441;padding:0 3px}
+.apc2{margin:2px 0 4px;-webkit-line-clamp:4}
 .rf{display:grid;gap:5px;padding:8px 10px;border-bottom:1px solid #2C2018}
 .rf textarea{width:100%;background:#17110D;border:1px solid #4A3626;color:#EFE2CC;font:12px 'IBM Plex Sans KR',sans-serif;padding:6px 8px;resize:vertical;box-sizing:border-box}
 .rfb{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center}.rfb .btn{width:auto;padding:0 12px}.rfb .mu{font:10px 'IBM Plex Mono',monospace}
@@ -865,7 +869,10 @@ function renderApprovals(){
       const it=vid&&typeof CAT!=='undefined'&&CAT[bizOf(i)]?(CAT[bizOf(i)].items||[]).find(x=>x.path===md):null;const dur=it&&it.duration?` ${Math.round(it.duration)}초`:'';
       const label=!md?'파일 없음':vid?(edited?`편집한 릴스${dur}`:`원본 영상${dur}`):'사진';
       head=`<span style="color:#E08A5A">게시 결재 · ${esc(bizName(i))}</span>`;who=esc(m.when||'');b=[['승인','게시 승인'],['','의견'],['기각','기각']];
-      body=`<div class="apm" data-pv="${esc(md)}" data-bz="${esc(bizOf(i)||'')}">${vid?`<span class="apv">▶<br>${esc(label)}</span>`:md?`<img data-path="${esc(md)}" alt="">`:'<span class="apv">없음</span>'}<span class="apc">${esc(m.caption||'')}</span></div>
+      const fl=(m.files||[]).filter(Boolean);const bz=esc(bizOf(i)||'');
+      body=fl.length>1?`<div class="apcar">${fl.map((f,k)=>`<span data-pv="${esc(f)}" data-bz="${bz}"><img data-path="${esc(f)}" alt=""><em>${k+1}</em></span>`).join('')}</div><div class="apc apc2">${esc(m.caption||'')}</div>
+      <div class="why">사진 ${fl.length}장을 한 게시물로 올립니다(넘겨 보는 캐러셀, 순서대로). 사진을 누르면 크게 봅니다. 승인하면 ${esc(m.when||'추천 시각')}에 인스타 예약, 해시태그는 첫 댓글.</div>`
+      :`<div class="apm" data-pv="${esc(md)}" data-bz="${bz}">${vid?`<span class="apv">▶<br>${esc(label)}</span>`:md?`<img data-path="${esc(md)}" alt="">`:'<span class="apv">없음</span>'}<span class="apc">${esc(m.caption||'')}</span></div>
       <div class="why">${vid&&!edited?'<b style="color:#E2704F">편집 전 원본 영상입니다.</b> ':''}눌러서 올라갈 ${vid?'영상':'사진'}을 확인하세요. 승인하면 ${esc(m.when||'추천 시각')}에 인스타 예약, 해시태그는 첫 댓글.</div>`;}
     else{const aid=lab(i,'agent:');const a=S.team.agents[aid]||{};head=`<span style="color:#D9A441">업무 확인 · ${esc(bizName(i))}</span>`;who=`${esc(a.name||aid||'')} <span class="mu">${esc(a.title||'')}</span>`;b=[['승인','승인'],['','의견'],['기각','기각']];
       const why=m.replaces?'의견을 반영한 수정본입니다.':m.needs_approval?'최종 결과물입니다. 확인하고 승인해 주세요.':'검수를 여러 번 넘지 못했습니다. 이대로 쓸지 판단해 주세요.';
@@ -959,7 +966,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11240710';
+const APPVER='11240724';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 async function sync(){checkVer();
@@ -1087,8 +1094,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240710"></script>
-<script src="views.js?v=11240710"></script>
-<script src="chat.js?v=11240710"></script>
+<script src="portfolio.js?v=11240724"></script>
+<script src="views.js?v=11240724"></script>
+<script src="chat.js?v=11240724"></script>
 </body>
 </html>
