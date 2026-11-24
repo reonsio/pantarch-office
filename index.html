@@ -1027,7 +1027,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241342';
+const APPVER='11241448';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1099,8 +1099,8 @@ document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.m
 let missionFor=null;
 window.openMission=function(agentId,hire){
   missionFor=agentId||null;$('#eMission').textContent='';
-  $('#iBiz').innerHTML=bizOptions((S.bus&&S.bus[0]||{}).id);
   const a=agentId&&S.team.agents[agentId];
+  $('#iBiz').innerHTML=bizOptions(a&&a.team==='TECH'?'':(S.bus&&S.bus[0]||{}).id);
   $('#msCap').textContent=hire?'HIRE REQUEST':(a?`ASSIGN · ${a.name}`:'NEW MISSION');
   $('#iMTitle').value=hire?'채용 제안: ':'';$('#iMBody').value=hire?'어떤 일이 막히는지, 어떤 사람이 필요한지 적어 주세요. TOM이 검토해서 채용 결재를 올립니다.\n\n':(a?`${a.name}에게 맡깁니다.\n\n`:'');
   $('#bMissionSave').textContent=hire?'TOM에게 제안 요청':(a?`${a.name}에게 맡기기`:'TOM에게 맡기기');
@@ -1110,10 +1110,10 @@ $('#bMission').onclick=()=>openMission();$('#bMission2').onclick=()=>openMission
 $('#bMissionSave').onclick=async()=>{
   const title=$('#iMTitle').value.trim(),body=$('#iMBody').value.trim(),biz=$('#iBiz').value;
   if(!title){$('#eMission').textContent='제목을 적어 주세요.';return;}
-  const lbl=['mission'];if(biz)lbl.push('biz:'+biz);
+  const tech=missionFor&&(S.team.agents[missionFor]||{}).team==='TECH';const lbl=['mission'];if(biz&&!tech)lbl.push('biz:'+biz);
   const extra=missionFor?`\n\n담당 지정: ${missionFor} (${S.team.agents[missionFor].name})`:'';
   $('#bMissionSave').disabled=true;
-  try{const r=await gh('/issues',{method:'POST',body:{title,body:`사업: ${BIZ[biz]?BIZ[biz].kind+' · '+BIZ[biz].name:'회사 공통'}\n\n${body}${extra}`,labels:lbl}});$('#mMission').classList.remove('show');toast(`M-${String(r.number).padStart(3,'0')} 등록 · TOM이 곧 업무로 나눕니다`);setTimeout(sync,1500);}
+  try{const r=await gh('/issues',{method:'POST',body:{title,body:`사업: ${BIZ[biz]&&!tech?BIZ[biz].kind+' · '+BIZ[biz].name:'회사 공통'}\n\n${body}${extra}`,labels:lbl}});$('#mMission').classList.remove('show');toast(`M-${String(r.number).padStart(3,'0')} 등록 · TOM이 곧 업무로 나눕니다`);setTimeout(sync,1500);}
   catch(e){$('#eMission').textContent='등록 실패: '+e.message.slice(0,80);}
   finally{$('#bMissionSave').disabled=false;}
 };
@@ -1184,8 +1184,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241342"></script>
-<script src="views.js?v=11241342"></script>
-<script src="chat.js?v=11241342"></script>
+<script src="portfolio.js?v=11241448"></script>
+<script src="views.js?v=11241448"></script>
+<script src="chat.js?v=11241448"></script>
 </body>
 </html>
