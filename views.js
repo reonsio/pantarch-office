@@ -173,7 +173,7 @@ async function renderRefs(){
   await Promise.all(sc.filter(x=>x.id!=='_common').map(async x=>{if(REF.lib[x.id]===undefined){try{REF.lib[x.id]=JSON.parse(await gh(`/contents/workspace/${x.id}/refs/library.json`,{raw:true})||'{}');}catch{REF.lib[x.id]={};}}}));
   REF.sites=REF.sites||{};
   await Promise.all(sc.map(async x=>{if(REF.sites[x.id]===undefined){try{REF.sites[x.id]=JSON.parse(await gh(`/contents/workspace/${x.id}/refs/sites.json`,{raw:true})||'[]');}catch{REF.sites[x.id]=[];}}}));
-  const sitesOf=x=>{const a=REF.sites[x.id]||[];return a.length?`<div class="vsub">기준 사이트 <em>${a.length}곳</em></div><div class="rsite">${a.map(i=>`<a href="${esc(i.url)}" target="_blank" rel="noopener">${(i.shots||[])[0]?`<img data-path="${esc(i.shots[0])}" alt="">`:''}<b class="mono">${esc(i.url.replace(/^https?:\/\/(www\.)?/,'').slice(0,40))}</b><p>${esc(i.note||'')}</p></a>`).join('')}</div>`:'';};
+  const sitesOf=x=>{const a=REF.sites[x.id]||[];return a.length?`<div class="vsub">기준 사이트 <em>${a.length}곳</em></div><div class="rsite">${a.map(i=>`<a ${/^https?:/.test(i.url)?`href="${esc(i.url)}" target="_blank" rel="noopener"`:''}>${(i.shots||[])[0]?`<img data-path="${esc(i.shots[0])}" alt="">`:''}<b class="mono">${esc(/^https?:/.test(i.url)?i.url.replace(/^https?:\/\/(www\.)?/,'').slice(0,40):'첨부 시안 · '+i.url.split('/').pop())}</b><p>${esc(i.note||'')}</p></a>`).join('')}</div>`:'';};
   const num=n=>n==null?'—':n>=1e4?(n/1e4).toFixed(n>=1e5?0:1)+'만':Number(n).toLocaleString();
   const libOf=(x,failed=[])=>{const L=REF.lib[x.id]||{};const its=(L.items||[]).slice().sort((a,b)=>(b.mult||0)-(a.mult||0));const ac=Object.entries(L.accounts||{});
     if(!ac.length&&!failed.length)return '';
@@ -191,7 +191,7 @@ async function renderRefs(){
       ${its.length?`<div class="lbc">${its.map(i=>`<button type="button" class="lbi${i.id===REF.open?' on':''}" data-lb="${i.id}">${(i.thumb||(i.frames||[])[0])?`<img data-path="${esc(i.thumb||i.frames[0])}" alt="">`:`<span class="lbx mono">${esc(i.type)}</span>`}<em class="mono">${i.mult}×</em><b>${esc(i.title||(i.caption||'').slice(0,18)||i.type)}</b><span class="mono">@${esc(i.handle)} · ${i.metric} ${num(i.value)}${i.analyzed?'':' · 분석 전'}</span></button>`).join('')}</div>`:'<div class="empty">아직 기준(평소의 2배)을 넘은 게시물이 없습니다</div>'}${det}</div>`;};
   const cnt=x=>Object.values(parseVoice(REF.cache[x.id])).reduce((n,a)=>n+a.length,0);
   const shown=sc.filter(x=>REF.f==='all'||REF.f===x.id);
-  const REFK=[['레퍼런스 예시','예시'],['레퍼런스 캡션(대표님이 준 예)','예시'],['레퍼런스 링크','링크'],['레퍼런스 스크린샷','스크린샷'],['레퍼런스 영상','영상'],['레퍼런스 계정','계정 메모']];
+  const REFK=[['레퍼런스 예시','예시'],['레퍼런스 캡션(대표님이 준 예)','예시'],['레퍼런스 링크','링크'],['레퍼런스 스크린샷','스크린샷'],['레퍼런스 영상','영상'],['레퍼런스 문서','문서'],['레퍼런스 계정','계정 메모']];
   const STDK=[['대표님이 통과시킨 캡션','통과시킨 캡션'],['대표님이 싫어한 캡션','기각한 캡션'],['대표님 의견','대표님 의견'],['기본','기본 원칙']];
   const bad=v=>/볼 수 없음|찾지 못함|가져오지 못/.test(v);
   const grp=(sec,K)=>K.filter(([k])=>(sec[k]||[]).filter(v=>!bad(v)).length).map(([k,l])=>{const a=sec[k].filter(v=>!bad(v));return `<div class="vg"><div class="vh"><b>${l}</b><em>${a.length}</em></div>${(k==='기본'?a:a.slice().reverse()).map(v=>`<div class="vi">${esc(v)}</div>`).join('')}</div>`;}).join('');
