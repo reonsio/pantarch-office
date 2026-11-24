@@ -97,12 +97,12 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .empty{padding:10px 8px;color:#8E7861;font-size:11px}
 .tk{display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;padding:7px 10px;border-bottom:1px solid #2C2018}
 .tk img{width:24px;height:24px;image-rendering:pixelated}
-.tk b{font:600 11px 'IBM Plex Mono',monospace;color:#F4E6CF}
+.tk b{font:600 11px 'IBM Plex Mono',monospace;color:var(--c,#F4E6CF)}.tk{border-left:2px solid var(--c,transparent)}
 .tk .mono{font-size:9px}
 .ov video{width:auto;max-width:100%;height:56vh;margin:0 auto;background:#000;border:1px solid #3A2A1F;display:block}
-.osum{font-size:14px;font-weight:600;color:#F4E6CF;margin:10px 0 0;line-height:1.5;text-align:justify;word-break:keep-all}
-.oqa{margin-top:8px;padding:8px 10px;background:#2A1A14;border-left:2px solid #E2704F;font-size:12px;line-height:1.5;color:#E6D6BC;text-align:justify;word-break:keep-all}.oqa b{color:#E2704F;font-weight:600;margin-right:4px}
-.tk p{margin:2px 0 0;font-size:12px;line-height:1.5;color:#E6D6BC;text-align:justify;word-break:keep-all}
+.osum{font-size:14px;font-weight:600;color:#F4E6CF;margin:10px 0 0;line-height:1.5;text-align:justify;word-break:normal;overflow-wrap:anywhere}
+.oqa{margin-top:8px;padding:8px 10px;background:#2A1A14;border-left:2px solid #E2704F;font-size:12px;line-height:1.5;color:#E6D6BC;text-align:justify;word-break:normal;overflow-wrap:anywhere}.oqa b{color:#E2704F;font-weight:600;margin-right:4px}
+.tk p{margin:2px 0 0;font-size:12px;line-height:1.5;color:#E6D6BC;text-align:justify;word-break:normal;overflow-wrap:anywhere}
 .tk .dt{display:none;margin-top:4px;color:#B9A68A;font-size:11px;white-space:pre-line}
 .tk.open .dt{display:block}.tk[data-x]{cursor:pointer}
 .tk .to{font:500 9px 'IBM Plex Mono',monospace;color:#9C8670;margin-left:4px}
@@ -339,18 +339,21 @@ html.m .pp{height:40px}
 .ch{display:flex;align-items:center;gap:5px;height:18px;cursor:pointer;white-space:nowrap;overflow:hidden;min-width:0}
 .ch i{width:6px;height:6px;flex:none}.ch b{font:600 11px 'IBM Plex Mono',monospace}.ch em{font:normal 9px 'IBM Plex Mono',monospace;color:#D9A441}
 /* chat panel */
-.chto{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:3px;padding:5px 8px;border-bottom:1px solid #2C2018}
-.chto button{height:20px;padding:0;min-width:0;background:#1B1410;border:1px solid #3A2A1F;color:#BFA98C;font:600 10px 'IBM Plex Mono',monospace;cursor:pointer}
-.chto button.on{background:#D9A441;border-color:#D9A441;color:#1E150F}
+.chto{flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:5px 8px;border-bottom:1px solid #2C2018}
+.chto .cg{display:contents}
+.chto .tl{display:none}
+.chto button{height:20px;width:100%;min-width:0;padding:0;background:#1B1410;border:1px solid #3A2A1F;border-bottom:2px solid var(--c,#3A2A1F);color:#BFA98C;font:600 10px 'IBM Plex Mono',monospace;cursor:pointer}
+
+.chto button.on{background:var(--c,#D9A441);border-color:var(--c,#D9A441);color:#1E150F}
 #chatLog{padding:8px;display:flex;flex-direction:column;gap:8px;font-size:12px}
 .cm{display:flex;flex-direction:column;align-items:flex-start;max-width:100%}
-.cm .who{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.8px;margin:0 0 3px 2px}
+.cm .who{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.8px;margin:0 0 3px 2px}.cm .who i{font-style:normal;font-weight:500;color:#7A6654;margin-left:5px;letter-spacing:0}
 .cm .row{display:flex;align-items:flex-end;gap:5px;max-width:86%}
-.cm .bub{padding:6px 9px;background:#2A1F17;border:1px solid #3A2A1F;color:#EFE2CC;line-height:1.55;text-align:justify;word-break:break-all;min-width:0}
+.cm .bub{padding:6px 9px;background:#2A1F17;border:1px solid #3A2A1F;border-left:2px solid var(--c,#3A2A1F);color:#EFE2CC;line-height:1.55;text-align:justify;word-break:normal;overflow-wrap:anywhere;min-width:0}
 .cm em{flex:none;font:normal 9px 'IBM Plex Mono',monospace;color:#7A6654}
 .cm.me{align-items:flex-end}
 .cm.me .row{flex-direction:row-reverse}
-.cm.me .bub{background:#D9A441;border-color:#D9A441;color:#1E150F}
+.cm.me .bub{background:#D9A441;border-color:#D9A441;border-left-color:#D9A441;color:#1E150F}
 .cm.sys{align-self:center;color:#8E7861;font-size:10.5px}
 #chatF{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:4px;padding:6px 8px;border-top:1px solid #3A2A1F}
 #chatIn{height:26px;font-size:11.5px;background:#17110D;color:#F4E6CF;border:1px solid #3A2A1F;padding:0 6px;min-width:0}
@@ -358,7 +361,7 @@ html.m .pp{height:40px}
 html.m #chatPanel.mon{height:calc(100dvh - 116px)!important;flex:none!important}
 html.m #chatPanel.mon .scroll{overflow:auto!important;flex:1!important;min-height:0}
 html.m #chatIn{height:34px}html.m #chatGo{height:34px}
-html.m .chto{grid-template-columns:repeat(6,minmax(0,1fr))}html.m .chto button{height:24px;font-size:11px}
+html.m .chto{display:flex;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;align-items:center}html.m .chto::-webkit-scrollbar{display:none}html.m .chto button{height:28px;width:52px;font-size:11px;flex:none}
 html.m .tm{grid-template-columns:64px minmax(0,1fr);padding:4px 8px}
 /* 빈 공간 없애기: 모바일 화면은 내용만큼만 */
 html.m .vw,html.m #portfolio{align-content:start;grid-auto-rows:min-content}
@@ -425,7 +428,7 @@ html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 </section>
 <section class="pnl" data-m="office" style="display:flex;flex-direction:column;flex:1">
 <div class="ph"><span style="display:flex;gap:10px;align-items:center"><span class="cap">MISSION BOARD</span><span class="mono mu" style="font-size:10px" id="boardSum"></span></span><button class="btn sbtn pri" id="bMission" style="width:64px">＋ 미션</button></div>
-<div class="th"><span>#</span><span>BUSINESS</span><span>TASK</span><span>MISSION</span><span>OWNER</span><span>MODEL</span><span>STATUS</span><span class="r">QA</span><span class="r">DEPS</span><span class="r">UPD</span></div>
+<div class="th"><span>#</span><span>BUSINESS</span><span>TASK</span><span>MISSION</span><span>OWNER</span><span>MODEL</span><span>STATUS</span><span class="r">검수</span><span class="r">DEPS</span><span class="r">UPD</span></div>
 <div class="scroll" id="board"></div>
 </section>
 </div>
@@ -514,6 +517,11 @@ html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 const REPO='reonsio/pantarch-hq', OWNER='reonsio', API='https://api.github.com/repos/'+REPO;
 const LEGACY={archon:'tom',krites:'kate',praxis:'jake',eikon:'emma',kairos:'max'};
 const MC={claude:'#E08A5A',gpt:'#7DB79A',grok:'#A3ACDB'};
+/* 팀 색: 채팅·회의실·활동 기록에서 누가 어느 팀인지 한눈에 */
+const TC={COMMAND:'#D9A441',CHECK:'#D9776A',BUILD:'#7FAFD6',MUSE:'#D69AC0',SCOUT:'#79C0B4',CHANNEL:'#9CC07A',GAME:'#B29CDB'};
+function teamOf(id){const a=(S.team&&S.team.agents||{})[id];return a?a.team:'';}
+function teamCol(id){return TC[teamOf(id)]||'#B9A68A';}
+function teamName(id){const k=teamOf(id);return ((S.team||{}).teams||{})[k]||'';}
 const SC={APPROVED:'#7DB79A',RUNNING:'#E2B04A',REVIEW:'#E2704F',MEETING:'#79B8C9',QUEUED:'#9C8670',BLOCKED:'#E2704F',IDLE:'#7A6654',BREAK:'#B79C7E',DONE:'#7A6654'};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -681,7 +689,7 @@ function events(){
       continue;}
     if(p.st===c.st) continue;
     if(p.st==='RUNNING'&&c.st!=='RUNNING'&&c.aid&&deskOf(c.aid)&&qa!==c.aid) // 검수관이 담당자 자리로 와서 검수
-      trip(qa,[{go:[deskOf(c.aid).room,deskOf(c.aid).pos.map((v,k)=>v+(k?0:34))]},{wait:5000}],`${cd} 검수 ${meta(it).score??''}점`);
+      trip(qa,[{go:[deskOf(c.aid).room,deskOf(c.aid).pos.map((v,k)=>v+(k?0:34))]},{wait:5000}],`${cd} 검수 ${meta(it).score==null?'':meta(it).score>=75?'통과':'보완'}`);
     if(c.st==='REVIEW') trip(c.aid,[{go:['CEO',CEO_SPOT]},{wait:4000}],`${cd} 결재 올림`);
     if(c.st==='DONE'){ // 다음 업무 담당자에게 인계 편지를 들고 간다
       const nxt=S.issues.filter(i=>has(i,'task')&&i.state==='open'&&(meta(i).deps||[]).includes(+n));
@@ -745,8 +753,8 @@ function renderRoster(){
   const order=[...Object.keys(teams),...new Set(list.map(a=>a.team).filter(t=>!(t in teams)))];
   let h='';let busy=0;
   for(const t of order){const mem=list.filter(a=>a.team===t);if(!mem.length)continue;
-    h+=`<div class="tm"><span class="tn" title="${esc(teams[t]||t)}">${esc(t)}</span><span class="tc">${mem.map(a=>{const {st,task}=agentState(a.id);if(st!=='IDLE')busy++;
-      return `<span class="ch" data-ag="${a.id}" title="${esc(a.name)} · ${esc(a.title||'')} · ${a.model.toUpperCase()} · ${st}${task?' · '+code(task)+' '+esc(task.title):''}"><i style="background:${SC[st]||'#7A6654'}"></i><b style="color:${MC[a.model]}">${esc(a.name)}</b>${task?`<em>${code(task)}</em>`:''}</span>`;}).join('')}</span></div>`;}
+    h+=`<div class="tm"><span class="tn" style="color:${TC[t]||'#D9A441'}" title="${esc(teams[t]||t)}">${esc(t)}</span><span class="tc">${mem.map(a=>{const {st,task}=agentState(a.id);if(st!=='IDLE')busy++;
+      return `<span class="ch" data-ag="${a.id}" title="${esc(a.name)} · ${esc(a.title||'')} · ${a.model.toUpperCase()} · ${st}${task?' · '+code(task)+' '+esc(task.title):''}"><i style="background:${SC[st]||'#7A6654'}"></i><b style="color:${TC[a.team]||'#EFE2CC'}">${esc(a.name)}</b>${task?`<em>${code(task)}</em>`:''}</span>`;}).join('')}</span></div>`;}
   $('#roster').innerHTML=h;
   $('#pplCap').textContent='PEOPLE';
   $('#seatCap').textContent=`${list.length}명${busy?` · 일하는 중 ${busy}`:''}`;
@@ -767,7 +775,7 @@ function renderBoard(){
   const rows=[...open,...closed];
   $('#board').innerHTML=rows.length?rows.map(i=>{const st=statusOf(i),m=meta(i),aid=lab(i,'agent:'),a=S.team.agents[aid]||{},mo=(a.model||'').toLowerCase();
     const ms=m.mission?S.issues.find(x=>x.number===m.mission):null;
-    return `<div class="tr${i.state==='closed'?' cl':''}" data-url="${i.html_url}"><span class="mono" style="color:#D9A441">${code(i)}</span><span class="ell">${bizTag(bizOf(i))}</span><span class="ell">${esc(i.title)}</span><span class="ell mu" title="${ms?esc(ms.title):''}">${ms?code(ms)+' '+esc(ms.title):'—'}</span><span class="mono">${esc(a.name||aid||'—')}</span><span class="mono" style="color:${MC[mo]||'#A08A72'}">${mo?mo.toUpperCase():'—'}</span><span class="mono" style="color:${SC[st]}"><i class="d" style="background:${SC[st]}"></i>${st}</span><span class="mono r">${m.score??'—'}</span><span class="mono r mu">${(m.deps||[]).length?m.deps.map(codeN).join(' '):'—'}</span><span class="mono r mu">${hhmm(i.updated_at)}</span></div>`;}).join(''):'<div class="empty">진행 중인 업무 없음</div>';
+    return `<div class="tr${i.state==='closed'?' cl':''}" data-url="${i.html_url}"><span class="mono" style="color:#D9A441">${code(i)}</span><span class="ell">${bizTag(bizOf(i))}</span><span class="ell">${esc(i.title)}</span><span class="ell mu" title="${ms?esc(ms.title):''}">${ms?code(ms)+' '+esc(ms.title):'—'}</span><span class="mono">${esc(a.name||aid||'—')}</span><span class="mono" style="color:${MC[mo]||'#A08A72'}">${mo?mo.toUpperCase():'—'}</span><span class="mono" style="color:${SC[st]}"><i class="d" style="background:${SC[st]}"></i>${st}</span><span class="mono r" style="color:${m.score==null?'#7A6654':m.score>=75?'#7DB79A':'#E2704F'}">${m.score==null?'—':m.score>=75?'통과':'보완'}</span><span class="mono r mu">${(m.deps||[]).length?m.deps.map(codeN).join(' '):'—'}</span><span class="mono r mu">${hhmm(i.updated_at)}</span></div>`;}).join(''):'<div class="empty">진행 중인 업무 없음</div>';
   const c={};open.forEach(i=>{const s=statusOf(i);c[s]=(c[s]||0)+1;});
   $('#boardSum').textContent=`${open.length} OPEN · ${c.RUNNING||0} RUNNING · ${c.REVIEW||0} REVIEW · ${c.QUEUED||0} QUEUED`;
 }
@@ -776,9 +784,9 @@ function renderKpis(){
   const since=Date.now()-14*864e5;const t=S.issues.filter(i=>has(i,'task'));
   const done=t.filter(i=>i.state==='closed'&&new Date(i.closed_at)>since);
   const sc=t.map(meta).filter(m=>typeof m.score==='number');
-  const avg=sc.length?Math.round(sc.reduce((s,m)=>s+m.score,0)/sc.length):'—';
+  const avg=sc.length?Math.round(100*sc.filter(m=>m.score>=75).length/sc.length)+'%':'—';
   const n=s=>t.filter(i=>i.state==='open'&&statusOf(i)===s).length;
-  const k=[['MISSIONS',S.issues.filter(i=>has(i,'mission')&&i.state==='open').length],['TASKS',t.filter(i=>i.state==='open').length],['DONE',done.length,'#7DB79A'],['AVG QA',avg],['RUNNING',n('RUNNING'),'#E2B04A'],['REVIEW',n('REVIEW'),'#E2704F'],['REWORK',sc.filter(m=>(m.attempts||1)>1).length],['BLOCKED',n('BLOCKED'),n('BLOCKED')?'#E2704F':'#8E7861']];
+  const k=[['MISSIONS',S.issues.filter(i=>has(i,'mission')&&i.state==='open').length],['TASKS',t.filter(i=>i.state==='open').length],['DONE',done.length,'#7DB79A'],['PASS',avg],['RUNNING',n('RUNNING'),'#E2B04A'],['REVIEW',n('REVIEW'),'#E2704F'],['REWORK',sc.filter(m=>(m.attempts||1)>1).length],['BLOCKED',n('BLOCKED'),n('BLOCKED')?'#E2704F':'#8E7861']];
   $('#kpis').innerHTML=k.map(([a,b,c])=>`<div><span>${a}</span><b${c?` style="color:${c}"`:''}>${b}</b></div>`).join('');
 }
 function decided(){let d={};try{d=JSON.parse(localStorage.getItem('pantarch_dec')||'{}');}catch{}const now=Date.now();
@@ -873,7 +881,7 @@ async function renderMeeting(){
     if(c.user&&c.user.login===OWNER){rows.push({id:null,name:'OWEN',rnd:0,model:'',h:strip(b),d:''});}
   }
   const lead=(S.team.roles||{}).lead||'tom';
-  const row=(r,cls='')=>`<div class="tk ${cls}"${r.d?' data-x':''}>${r.id?`<img src="${spriteOf(r.id)}" alt="" onerror="this.src='assets/s-ben.png'">`:'<span></span>'}<div><b>${esc(r.name)}</b>${r.to?`<span class="to">→ ${esc(r.to)}</span>`:''} <span class="mono" style="color:${MC[r.model]||'#8E7861'}">${(r.model||'').toUpperCase()}</span>${r.d?'<span class="mr">자세히</span>':''}<p>${esc(r.h)}</p>${r.d?`<div class="dt">${esc(r.d)}</div>`:''}</div></div>`;
+  const row=(r,cls='')=>`<div class="tk ${cls}"${r.d?' data-x':''} style="--c:${cls?'#D9A441':teamCol(r.id)}">${r.id?`<img src="${spriteOf(r.id)}" alt="" onerror="this.src='assets/s-ben.png'">`:'<span></span>'}<div><b>${esc(r.name)}</b>${r.to?`<span class="to">→ ${esc(r.to)}</span>`:''} <span class="mono mu">${esc(cls?'':teamName(r.id))}</span>${r.d?'<span class="mr">자세히</span>':''}<p>${esc(r.h)}</p>${r.d?`<div class="dt">${esc(r.d)}</div>`:''}</div></div>`;
   let html='';
   if(concl)html+=row({id:lead,name:'결론',model:'',h:concl.h+(concl.go?` → ${concl.go} 진행 중`:''),d:concl.d},'cc');
   let last=-1;for(const r of rows){if(r.rnd&&r.rnd!==last){html+=`<div class="rnd">${r.rnd===1?'1라운드 · 각자 제안':'2라운드 · 반박·보완'}</div>`;last=r.rnd;}html+=row(r);}
@@ -885,8 +893,8 @@ function renderLog(){
   const rows=(S.comments||[]).slice(0,30).map(c=>{const it=im[c.issue_url];const b=c.body||'';let who,col;
     const m=/^\*\*([A-Za-z\-]+)\*\*/.exec(b);
     if(c.user&&c.user.login===OWNER&&!/<!-- pantarch -->/.test(b)){who='OWEN';col='#F4E6CF';}
-    else if(m){who=m[1].toUpperCase();const id=Object.keys(S.team.agents).find(k=>(S.team.agents[k].name||'').toUpperCase()===who);col=MC[((S.team.agents[id]||{}).model||'').toLowerCase()];}
-    else{const id=it&&lab(it,'agent:');const a=S.team.agents[id]||S.team.agents[(S.team.roles||{}).lead||'tom']||{};who=(a.name||'ENGINE').toUpperCase();col=MC[(a.model||'').toLowerCase()];}
+    else if(m){who=m[1].toUpperCase();const id=Object.keys(S.team.agents).find(k=>(S.team.agents[k].name||'').toUpperCase()===who);col=id?teamCol(id):'#EFE2CC';}
+    else{const id=(it&&lab(it,'agent:'))||(S.team.roles||{}).lead||'tom';const a=S.team.agents[id]||{};who=(a.name||'ENGINE').toUpperCase();col=teamCol(id);}
     let msg=strip(b).replace(/[#*>`_]/g,'').split('\n').find(x=>x.trim())||'';const sc=/검수 (\d+)점/.exec(b);if(sc)msg=`결과 제출 · 검수 ${sc[1]}점`;
     return `<div class="lg"><span class="mono mu">${hhmm(c.created_at)}</span><b style="color:${col||'#EFE2CC'}">${esc(who.slice(0,6))}</b><span class="ell" title="${esc(msg)}">${it?`<b class="mono" style="font-size:10px;color:#D9A441">${code(it)}</b> `:''}${esc(msg.replace(/#(\d+)/g,(m,n)=>codeN(n)).slice(0,80))}</span></div>`;});
   $('#log').innerHTML=rows.join('')||'<div class="empty">기록 없음</div>';
@@ -902,7 +910,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11240523';
+const APPVER='11240630';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 async function sync(){checkVer();
@@ -1030,8 +1038,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240523"></script>
-<script src="views.js?v=11240523"></script>
-<script src="chat.js?v=11240523"></script>
+<script src="portfolio.js?v=11240630"></script>
+<script src="views.js?v=11240630"></script>
+<script src="chat.js?v=11240630"></script>
 </body>
 </html>
