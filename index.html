@@ -112,12 +112,12 @@ html.m .lbg{grid-template-columns:1fr}html.m .lbh{grid-template-columns:minmax(0
 .bdn{height:24px;display:flex;align-items:center;padding:0 10px 0 28px;font:10px 'IBM Plex Mono',monospace;color:#8E7861;border-bottom:1px solid #2C2018;cursor:pointer;user-select:none}
 .bdn:hover{color:#BFA98C}
 #board .tr,.bth{grid-template-columns:80px minmax(0,1fr) 54px 56px 84px 34px 150px 40px}
-.bg .bz{flex:none;display:flex;align-items:center}
+.bg .bzt{flex:none;display:grid;grid-template-columns:46px 96px;gap:8px;align-items:center;height:100%}.bg .bzt>span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:10px;line-height:16px;padding-top:1px}.bg .bzt>.mono{letter-spacing:0}
 html.m #board .tr{grid-template-columns:76px minmax(0,1fr) 46px 78px}
 html.m #board .tr>*{display:initial}
 html.m #board .tr>:nth-child(4),html.m #board .tr>:nth-child(6),html.m #board .tr>:nth-child(7),html.m #board .tr>:nth-child(8){display:none}
 html.m #board .tr>.ell:nth-child(2){white-space:normal}
-html.m .bg .bz{display:none}
+html.m .bg .bzt{display:none}
 
 .bgrp .tr>:first-child{padding-left:34px}/* 업무 번호는 미션 번호보다 한 단 더 들여씀 */
 .bgrp.folded>.tr,.bgrp.folded>.bdn{display:none}
@@ -129,9 +129,9 @@ html.m .bgrp .tr>:first-child{padding-left:34px}
 .tr .mono{font-size:11px}
 .tr.cl{opacity:.55}
 .kp{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:4px;padding:6px 8px}
-.kp div{height:38px;padding:4px 6px;background:#271C15;border:1px solid #33251B;display:flex;flex-direction:column;justify-content:space-between}
-.kp span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:10px 'IBM Plex Mono',monospace;color:#8E7861;letter-spacing:.8px}
-.kp b{font:600 14px 'IBM Plex Mono',monospace;color:#F4E6CF}
+.kp div{height:22px;padding:0 6px;background:#271C15;border:1px solid #33251B;display:flex;align-items:center;justify-content:space-between;gap:4px}
+.kp span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font:9px 'IBM Plex Mono',monospace;color:#8E7861;letter-spacing:.4px;min-width:0}
+.kp b{font:600 11px 'IBM Plex Mono',monospace;color:#F4E6CF;flex:none}
 .ap{padding:8px 10px;border-bottom:1px solid #2C2018;display:grid;gap:4px}
 .ap .h{display:flex;justify-content:space-between;gap:6px;font:10px 'IBM Plex Mono',monospace;letter-spacing:.8px}
 .ap .t{font-size:13px;font-weight:500;color:#F4E6CF;cursor:pointer}
@@ -227,7 +227,7 @@ html.m .tr{font-size:11px}
 html.m .tr .mono{font-size:10px}
 html.m .ap .t{font-size:12px}
 html.m .tk p,html.m .lg{font-size:11px}
-html.m .kp b{font-size:13px}
+html.m .kp b{font-size:12px}
 html.m #stage{position:relative;left:0!important;top:0!important;transform:none!important;width:100%;height:100dvh;grid-template-rows:44px minmax(0,1fr) 56px}
 html.m header{grid-template-columns:minmax(0,1fr) auto;padding:0 10px}
 html.m header nav{display:none}
@@ -381,22 +381,23 @@ html.m .pp{height:40px}
 
 /* roster: team rows */
 /* 직원 명단: 아래 COMPANY METRICS와 같은 4칸(같은 바깥 여백·칸 사이·안쪽 여백). 1칸 팀, 2~4칸 직원, 3명 넘으면 다음 줄 */
-.tm{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:4px;row-gap:2px;align-items:center;padding:4px 8px;border-bottom:1px solid #2C2018}
+.tm{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:4px;row-gap:0;align-items:center;padding:1px 8px;border-bottom:1px solid #2C2018}
 .tn{grid-column:1;align-self:start;height:18px;display:flex;align-items:center;padding-left:7px;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#D9A441;white-space:nowrap;overflow:hidden}
 .tc{display:contents}
 .ch{display:flex;align-items:center;gap:3px;height:18px;padding-left:2px;cursor:pointer;white-space:nowrap;overflow:hidden;min-width:0}
-.ch i{width:6px;height:6px;flex:none}.ch b{font:600 11px 'IBM Plex Mono',monospace;display:inline-block;min-width:4ch}.ch em{font:normal 9px 'IBM Plex Mono',monospace;color:#D9A441;flex:none;letter-spacing:-.3px}.ch b{flex:none}
+.ch i{width:6px;height:6px;flex:none}.ch b{font:600 10px 'IBM Plex Mono',monospace;display:inline-block;min-width:4ch}.ch em{font:normal 9px 'IBM Plex Mono',monospace;color:#D9A441;flex:none;letter-spacing:-.3px}.ch b{flex:none}
 /* chat panel */
-.chto{flex:none;display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:3px;padding:5px 8px;border-bottom:1px solid #2C2018}
-.chto .cg{display:contents}
-.chto .tl{display:none}
-.chto button{height:20px;width:100%;min-width:0;padding:0;background:#1B1410;border:1px solid #3A2A1F;border-bottom:2px solid var(--c,#3A2A1F);color:#BFA98C;font:600 10px 'IBM Plex Mono',monospace;cursor:pointer}
+.chb{flex:1;min-height:0;display:grid;grid-template-columns:72px minmax(0,1fr)}
+.chto{min-height:0;overflow-y:auto;scrollbar-width:none;padding:2px 0 6px;border-right:1px solid #2C2018;background:#1B1410}.chto::-webkit-scrollbar{display:none}
+.chto .cg{display:block}
+.chto .tl{display:block;height:13px;margin-top:3px;padding-left:8px;font:500 8px/13px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#7A6654;white-space:nowrap;overflow:hidden}
+.chto button{display:block;height:17px;width:100%;min-width:0;padding:0 0 0 8px;text-align:left;background:none;border:0;border-left:2px solid transparent;color:var(--c,#BFA98C);font:600 10px 'IBM Plex Mono',monospace;cursor:pointer}.chto button:hover{background:#2A1F17}
 
-.chto button.on{background:var(--c,#D9A441);border-color:var(--c,#D9A441);color:#1E150F}
-#chatLog{padding:8px;display:flex;flex-direction:column;gap:8px;font-size:12px}
+.chto button.on{background:#2E2219;border-left-color:var(--c,#D9A441);color:#F4E6CF}
+#chatLog{padding:8px;display:flex;flex-direction:column;gap:7px;font-size:11.5px}
 .cm{display:flex;flex-direction:column;align-items:flex-start;max-width:100%}
 .cm .who{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.8px;margin:0 0 3px 2px}.cm .who i{font-style:normal;font-weight:500;color:#7A6654;margin-left:5px;letter-spacing:0}
-.cm .row{display:flex;align-items:flex-end;gap:5px;max-width:86%}
+.cm .row{display:flex;align-items:flex-end;gap:5px;max-width:94%}
 .cm .bub{padding:6px 9px;background:#2A1F17;border:1px solid #3A2A1F;border-left:2px solid var(--c,#3A2A1F);color:#EFE2CC;line-height:1.55;text-align:justify;word-break:normal;overflow-wrap:anywhere;min-width:0}
 .cm em{flex:none;font:normal 9px 'IBM Plex Mono',monospace;color:#7A6654}
 .cm.me{align-items:flex-end}
@@ -422,7 +423,7 @@ html.m .pp{height:40px}
 html.m #chatPanel.mon{height:calc(100dvh - 116px)!important;flex:none!important}
 html.m #chatPanel.mon .scroll{overflow:auto!important;flex:1!important;min-height:0}
 html.m #chatIn{height:34px}html.m #chatGo{height:34px}html.m #chatClip{height:34px}html.m #chatF{grid-template-columns:38px minmax(0,1fr) 60px}
-html.m .chto{display:flex;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;align-items:center}html.m .chto::-webkit-scrollbar{display:none}html.m .chto button{height:28px;width:52px;font-size:11px;flex:none}
+html.m .chb{grid-template-columns:76px minmax(0,1fr)}html.m .chto button{height:24px;font-size:11px}html.m .chto .tl{font-size:9px}
 html.m .tm{padding:5px 8px}
 /* 빈 공간 없애기: 모바일 화면은 내용만큼만 */
 html.m .vw,html.m #portfolio{align-content:start;grid-auto-rows:min-content}
@@ -487,8 +488,7 @@ html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 </section>
 <section class="pnl" id="chatPanel" data-m="chat" style="display:flex;flex-direction:column;flex:1;min-height:0">
 <div class="ph"><span class="cap">CHAT</span><span class="mono mu" style="font-size:10px" id="chatWho"></span></div>
-<div class="chto" id="chatTo"></div>
-<div class="scroll" id="chatLog"></div>
+<div class="chb"><div class="chto" id="chatTo"></div><div class="scroll" id="chatLog"></div></div>
 <div id="chatAtt"></div><form id="chatF"><button type="button" class="btn" id="chatClip" title="사진·영상·문서(PDF·PPT·워드) 첨부">＋</button><input id="chatIn" autocomplete="off" enterkeyhint="send"><button class="btn pri" id="chatGo">보내기</button><input type="file" id="chatFile" accept="image/*,video/*,.pdf,.pptx,.docx" multiple hidden></form>
 </section>
 </aside>
@@ -881,7 +881,7 @@ function renderBoard(){
     const sum=[['RUNNING','진행'],['REVIEW','결재'],['BLOCKED','막힘'],['QUEUED','대기']].filter(([s])=>c[s]).map(([s,l])=>`<b style="color:${SC[s]}">${l} ${c[s]}</b>`).join('');
     const pct=Math.round(100*g.done.length/g.n);
     return `<div class="bgrp${folded?' folded':''}${showDone?' showdone':''}" data-g="${key}">
-      <div class="bg" data-fg="${key}"><span class="cv">${folded?'▸':'▾'}</span><span class="bc">${g.k?mc:'—'}</span>${g.ms?`<span class="bz">${bizTag(bizOf(g.ms))}</span>`:''}<span class="bt">${esc(title)}</span><span class="bs">${sum||(g.open.length?'':'<b style="color:#7DB79A">완료</b>')}</span><span class="bp">${g.done.length}/${g.n}</span><span class="bb"><i style="width:${pct}%"></i></span></div>
+      <div class="bg" data-fg="${key}"><span class="cv">${folded?'▸':'▾'}</span><span class="bc">${g.k?mc:'—'}</span>${g.ms?(z=>`<span class="bzt"><span class="mono" style="color:${z?z.col:'#8E7861'}">${z?z.kind:'COMMON'}</span><span>${z?esc(z.name):'회사 공통'}</span></span>`)(BIZ[bizOf(g.ms)]):''}<span class="bt">${esc(title)}</span><span class="bs">${sum||(g.open.length?'':'<b style="color:#7DB79A">완료</b>')}</span><span class="bp">${g.done.length}/${g.n}</span><span class="bb"><i style="width:${pct}%"></i></span></div>
       ${g.open.map(row).join('')}
       ${g.done.length?(g.open.length?`<div class="bdn" data-dg="${key}">${showDone?'▾':'▸'} 끝난 업무 ${g.done.length}개</div>`:'')+g.done.map(row).join(''):''}
     </div>`;}).join('');
@@ -1027,7 +1027,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241448';
+const APPVER='11241501';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1184,8 +1184,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241448"></script>
-<script src="views.js?v=11241448"></script>
-<script src="chat.js?v=11241448"></script>
+<script src="portfolio.js?v=11241501"></script>
+<script src="views.js?v=11241501"></script>
+<script src="chat.js?v=11241501"></script>
 </body>
 </html>

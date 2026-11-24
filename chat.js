@@ -10,8 +10,8 @@ function chatTo(){const box=$('#chatTo');if(!box||!S.team)return;
   const btn=(id,n,c)=>`<button type="button" data-to="${id}" class="${id===CH.to?'on':''}" style="--c:${c}" title="${id==='team'?'TOM이 필요한 직원을 골라 묻고 정리':esc((S.team.agents[id]||{}).title||'')}">${esc(n)}</button>`;
   const sec=(S.team.roles||{}).secretary;if(!CH.to)CH.to=sec||'team';
   const order=Object.keys((S.team&&S.team.teams)||{});const groups={};agents().filter(a=>a.id!==sec).forEach(a=>{(groups[a.team]=groups[a.team]||[]).push(a);});
-  const row=(label,c,items)=>`<div class="cg" title="${esc(label)}">${items.join('')}</div>`;
-  box.innerHTML=row('비서·전체','#D9A441',[...(sec?[btn(sec,(S.team.agents[sec]||{}).name||'비서','#E6C07A')]:[]),btn('team','팀','#D9A441')])+order.filter(k=>groups[k]).map(k=>row(S.team.teams[k],TC[k]||'#8E7861',groups[k].map(a=>btn(a.id,a.name,TC[k]||'#8E7861')))).join('');
+  const row=(label,c,items)=>`<div class="cg"><i class="tl">${esc(label)}</i>${items.join('')}</div>`;
+  box.innerHTML=row('DESK','#D9A441',[...(sec?[btn(sec,(S.team.agents[sec]||{}).name||'비서','#E6C07A')]:[]),btn('team','팀','#D9A441')])+order.filter(k=>groups[k]).map(k=>row(k,TC[k]||'#8E7861',groups[k].map(a=>btn(a.id,a.name,TC[k]||'#8E7861')))).join('');
   box.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{CH.to=b.dataset.to;chatTo();chatHead();$('#chatIn').focus();});
 }
 function chatHead(){const a=S.team&&S.team.agents[CH.to];const sec=(S.team.roles||{}).secretary;
