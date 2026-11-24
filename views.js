@@ -171,6 +171,9 @@ async function renderRefs(){
   const ORDER=[['레퍼런스 계정','계정'],['레퍼런스 예시','예시'],['레퍼런스 캡션(대표님이 준 예)','예시'],['레퍼런스 링크','링크'],['레퍼런스 스크린샷','스크린샷'],['레퍼런스 영상','영상'],['대표님이 통과시킨 캡션','통과시킨 것'],['대표님이 싫어한 캡션','싫어한 것'],['대표님 의견','대표님 의견'],['기본','기본 원칙']];
   REF.lib=REF.lib||{};
   await Promise.all(sc.filter(x=>x.id!=='_common').map(async x=>{if(REF.lib[x.id]===undefined){try{REF.lib[x.id]=JSON.parse(await gh(`/contents/workspace/${x.id}/refs/library.json`,{raw:true})||'{}');}catch{REF.lib[x.id]={};}}}));
+  REF.sites=REF.sites||{};
+  await Promise.all(sc.map(async x=>{if(REF.sites[x.id]===undefined){try{REF.sites[x.id]=JSON.parse(await gh(`/contents/workspace/${x.id}/refs/sites.json`,{raw:true})||'[]');}catch{REF.sites[x.id]=[];}}}));
+  const sitesOf=x=>{const a=REF.sites[x.id]||[];return a.length?`<div class="vsub">기준 사이트 <em>${a.length}곳</em></div><div class="rsite">${a.map(i=>`<a href="${esc(i.url)}" target="_blank" rel="noopener">${(i.shots||[])[0]?`<img data-path="${esc(i.shots[0])}" alt="">`:''}<b class="mono">${esc(i.url.replace(/^https?:\/\/(www\.)?/,'').slice(0,40))}</b><p>${esc(i.note||'')}</p></a>`).join('')}</div>`:'';};
   const num=n=>n==null?'—':n>=1e4?(n/1e4).toFixed(n>=1e5?0:1)+'만':Number(n).toLocaleString();
   const libOf=(x,failed=[])=>{const L=REF.lib[x.id]||{};const its=(L.items||[]).slice().sort((a,b)=>(b.mult||0)-(a.mult||0));const ac=Object.entries(L.accounts||{});
     if(!ac.length&&!failed.length)return '';
@@ -196,7 +199,7 @@ async function renderRefs(){
     const failed=[...new Set((sec['레퍼런스 계정']||[]).filter(bad).map(v=>(/@([A-Za-z0-9_.]+)/.exec(v)||[])[1]).filter(Boolean))];
     const lib=x.id==='_common'?'':libOf(x,failed);const mine=grp(sec,REFK),std=grp(sec,STDK);
     const ig=(S.bus||[]).some(b=>b.id===x.id&&(b.channel||{}).platform==='instagram');
-    const body=(lib||'')+(mine?`<div class="vsub">직접 넣은 레퍼런스</div>${mine}`:'')+(std?`<div class="vsub">캡션 기준 · 대표님 결재에서 쌓임</div>${std}`:'');
+    const body=(lib||'')+sitesOf(x)+(mine?`<div class="vsub">직접 넣은 레퍼런스</div>${mine}`:'')+(std?`<div class="vsub">캡션 기준 · 대표님 결재에서 쌓임</div>${std}`:'');
     return `<div class="vs"><span style="color:${x.col}">${x.kind}</span><span style="color:#F4E6CF">${esc(x.name)}</span></div>${body||`<div class="empty">${ig?'수집 준비 중':'아직 없음 · 인스타 채널이 없는 사업은 직접 넣은 것만 쌓입니다'}</div>`}`;}).join('');
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">ADD REFERENCE</span></div>
     <form class="rf" id="rfF"><div class="rfr"><label>어디에<select id="rfS">${sc.map(x=>`<option value="${x.id}"${x.id===(REF.f==='all'?'_common':REF.f)?' selected':''}>${x.id==='_common'?'회사 공통':`${x.kind} · ${esc(x.name)}`}</option>`).join('')}</select></label>

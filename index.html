@@ -88,6 +88,7 @@ select{-webkit-appearance:none;appearance:none;border-radius:0!important;backgro
 .vsub{display:flex;justify-content:space-between;align-items:center;padding:10px 10px 4px;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#A38C72;border-top:1px solid #2C2018}.vsub em{font-style:normal;font-weight:400;color:#7A6654}
 .lba{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px;padding:4px 10px 8px;white-space:normal}
 .acc{display:grid;gap:1px;padding:4px 6px;border:1px solid #33251B;background:#1A120E;text-decoration:none;min-width:0}.acc b{font:600 11px 'IBM Plex Mono',monospace;color:#E6D6BC;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.acc span{font-size:9px;color:#8E7861;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.acc.bad b{color:#7A6654;text-decoration:line-through}.acc.bad span{color:#C0604F}
+.rsite{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:8px;padding:4px 10px 10px}.rsite a{display:grid;gap:4px;border:1px solid #33251B;background:#1A120E;text-decoration:none;min-width:0;padding-bottom:6px}.rsite img{width:100%;aspect-ratio:16/10;object-fit:cover;object-position:top;display:block;background:#241A14}.rsite b{font-size:10px;color:#D9A441;padding:0 8px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.rsite p{margin:0;padding:0 8px;font-size:11px;line-height:1.5;color:#B9A285;text-align:justify;overflow-wrap:anywhere}
 .lbc{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:6px;padding:0 10px 10px}
 .lbi{position:relative;display:grid;grid-template-rows:170px 16px 14px;gap:3px;padding:0 0 5px;background:#1A120E;border:1px solid #33251B;color:inherit;text-align:left;cursor:pointer;font:inherit;min-width:0}
 .lbi.on{border-color:#D9A441}.lbi img,.lbi .lbx{width:100%;height:170px;object-fit:cover;display:flex;align-items:center;justify-content:center;background:#241A14;color:#7A6654;font-size:10px}
@@ -1023,7 +1024,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241238';
+const APPVER='11241245';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1179,8 +1180,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241238"></script>
-<script src="views.js?v=11241238"></script>
-<script src="chat.js?v=11241238"></script>
+<script src="portfolio.js?v=11241245"></script>
+<script src="views.js?v=11241245"></script>
+<script src="chat.js?v=11241245"></script>
 </body>
 </html>
