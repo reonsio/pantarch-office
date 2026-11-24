@@ -173,7 +173,7 @@ async function renderRefs(){
   await Promise.all(sc.filter(x=>x.id!=='_common').map(async x=>{if(REF.lib[x.id]===undefined){try{REF.lib[x.id]=JSON.parse(await gh(`/contents/workspace/${x.id}/refs/library.json`,{raw:true})||'{}');}catch{REF.lib[x.id]={};}}}));
   REF.sites=REF.sites||{};
   await Promise.all(sc.map(async x=>{if(REF.sites[x.id]===undefined){try{REF.sites[x.id]=JSON.parse(await gh(`/contents/workspace/${x.id}/refs/sites.json`,{raw:true})||'[]');}catch{REF.sites[x.id]=[];}}}));
-  const sitesOf=x=>{const a=REF.sites[x.id]||[];return a.length?`<div class="vsub">기준 사이트 <em>${a.length}곳</em></div><div class="rsite">${a.map(i=>`<a ${/^https?:/.test(i.url)?`href="${esc(i.url)}" target="_blank" rel="noopener"`:''}>${(i.shots||[])[0]?`<img data-path="${esc(i.shots[0])}" alt="">`:''}<b class="mono">${esc(/^https?:/.test(i.url)?i.url.replace(/^https?:\/\/(www\.)?/,'').slice(0,40):'첨부 시안 · '+i.url.split('/').pop())}</b><p>${esc(i.note||'')}</p></a>`).join('')}</div>`:'';};
+  const sitesOf=x=>{const a=REF.sites[x.id]||[];return a.length?`<div class="vsub">기준 사이트 <em>${a.length}곳</em></div><div class="rsite">${a.map(i=>`<a ${/^https?:/.test(i.url)?`href="${esc(i.url)}" target="_blank" rel="noopener"`:''}>${(i.shots||[])[0]?`<img data-path="${esc(i.shots[0])}" alt="">`:''}<b class="mono">${esc(/^https?:/.test(i.url)?i.url.replace(/^https?:\/\/(www\.)?/,'').slice(0,40):'대표님 시안 · '+(i.url.split('/').pop().replace(/^\d{8}-\d{4}-\d+-?/,'').replace(/^\.html$/,'')||i.url.split('/').pop()))}</b><p>${esc(i.note||'')}</p></a>`).join('')}</div>`:'';};
   const num=n=>n==null?'—':n>=1e4?(n/1e4).toFixed(n>=1e5?0:1)+'만':Number(n).toLocaleString();
   const libOf=(x,failed=[])=>{const L=REF.lib[x.id]||{};const its=(L.items||[]).slice().sort((a,b)=>(b.mult||0)-(a.mult||0));const ac=Object.entries(L.accounts||{});
     if(!ac.length&&!failed.length)return '';
@@ -189,7 +189,7 @@ async function renderRefs(){
     return `<div class="vsub">보관함 · 평소 조회의 2배 넘게 터진 것 <em>${its.length}편 · 계정 ${ac.length}개</em></div><div class="vg" style="border:0;padding:0">
       <div class="lba">${ac.map(([h,a])=>`<a class="acc${a.problem?' bad':''}" href="https://www.instagram.com/${esc(h)}/" target="_blank" rel="noopener"><b>@${esc(h)}</b><span class="mono">${a.problem?'볼 수 없음':a.base_views?'평소 조회 '+num(a.base_views):a.base_likes?'평소 좋아요 '+num(a.base_likes):'확인 중'}${a.by?' · '+esc(a.by):''}</span></a>`).join('')}${failed.filter(h=>!ac.some(([k])=>k===h.toLowerCase())).map(h=>`<span class="acc bad"><b>@${esc(h)}</b><span class="mono">볼 수 없음 · 개인 계정</span></span>`).join('')}</div>
       ${its.length?`<div class="lbc">${its.map(i=>`<button type="button" class="lbi${i.id===REF.open?' on':''}" data-lb="${i.id}">${(i.thumb||(i.frames||[])[0])?`<img data-path="${esc(i.thumb||i.frames[0])}" alt="">`:`<span class="lbx mono">${esc(i.type)}</span>`}<em class="mono">${i.mult}×</em><b>${esc(i.title||(i.caption||'').slice(0,18)||i.type)}</b><span class="mono">@${esc(i.handle)} · ${i.metric} ${num(i.value)}${i.analyzed?'':' · 분석 전'}</span></button>`).join('')}</div>`:'<div class="empty">아직 기준(평소의 2배)을 넘은 게시물이 없습니다</div>'}${det}</div>`;};
-  const cnt=x=>Object.values(parseVoice(REF.cache[x.id])).reduce((n,a)=>n+a.length,0);
+  const cnt=x=>((REF.sites||{})[x.id]||[]).length+(((REF.lib||{})[x.id]||{}).items||[]).length+Object.values(parseVoice(REF.cache[x.id])).reduce((n,a)=>n+a.length,0);
   const shown=sc.filter(x=>REF.f==='all'||REF.f===x.id);
   const REFK=[['레퍼런스 예시','예시'],['레퍼런스 캡션(대표님이 준 예)','예시'],['레퍼런스 링크','링크'],['레퍼런스 스크린샷','스크린샷'],['레퍼런스 영상','영상'],['레퍼런스 문서','문서'],['레퍼런스 계정','계정 메모']];
   const STDK=[['대표님이 통과시킨 캡션','통과시킨 캡션'],['대표님이 싫어한 캡션','기각한 캡션'],['대표님 의견','대표님 의견'],['기본','기본 원칙']];
@@ -219,13 +219,13 @@ async function renderRefs(){
   $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const scope=$('#rfS').value,kind=$('#rfK').value;const go=$('#rfGo');go.disabled=true;
     try{const paths=[];
       for(const [k,f] of files.entries()){const doc=/\.(html?|pdf|pptx|docx)$/i.test(f.name);const vid=!doc&&/^video/.test(f.type);if((vid||doc)&&f.size>40*1048576){toast(`${f.name}: 40MB 넘는 파일은 줄여 주세요`);continue;}
-        const blob=vid||doc?f:await shrink(f);const ext=vid||doc?((f.name.split('.').pop()||'mp4').toLowerCase().replace(/^htm$/,'html')):'jpg';const pth=`workspace/${scope}/refs/${stamp(new Date())}-${k}.${ext}`;$('#rfN').textContent=`올리는 중 ${k+1}/${files.length}`;await putFile(pth,blob,'레퍼런스 자료');paths.push(pth);}
+        const blob=vid||doc?f:await shrink(f);const ext=vid||doc?((f.name.split('.').pop()||'mp4').toLowerCase().replace(/^htm$/,'html')):'jpg';const nm=doc?f.name.replace(/\.[^.]+$/,'').replace(/[^\w가-힣\-]+/g,'-').slice(0,40):'';const pth=`workspace/${scope}/refs/${stamp(new Date())}-${k}${nm?'-'+nm:''}.${ext}`;$('#rfN').textContent=`올리는 중 ${k+1}/${files.length}`;await putFile(pth,blob,'레퍼런스 자료');paths.push(pth);}
       let num=(typeof CH!=='undefined'&&CH.num)||(S.issues.find(i=>i.state==='open'&&has(i,'chat'))||{}).number;
       if(!num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});num=it.number;}
       await gh(`/issues/${num}/comments`,{method:'POST',body:{body:`레퍼런스 #${scope} !${kind} ${t}${paths.length?'\n'+paths.join('\n'):''}`}});
       const name=(sc.find(x=>x.id===scope)||{}).name;
-      REF.stat=`${name}에 넣는 중… 엔진이 화면을 찍고 정리하는 데 1~2분 걸립니다. 끝나면 여기 저절로 나타납니다.`;REF.f=scope;REF.cache[scope]=undefined;REF.sites&&(REF.sites[scope]=undefined);REF.lib&&(REF.lib[scope]=undefined);REF.wait=Date.now();
-      const poll=async(n)=>{try{const t=await gh(`/contents/workspace/${scope}/refs/sites.json`,{raw:true});const a=JSON.parse(t||'[]');const had=(REF.sites[scope]||[]).length;if(a.length>had||n>=12){REF.cache[scope]=undefined;REF.sites[scope]=undefined;REF.lib&&(REF.lib[scope]=undefined);REF.stat=n>=12?'':`${name}에 반영됐습니다.`;if(VIEW==='refs')renderRefs();if(n<12)setTimeout(()=>{REF.stat='';if(VIEW==='refs')renderRefs();},6000);return;}}catch{}setTimeout(()=>poll(n+1),15000);};
-      REF.sites[scope]=REF.sites[scope]||[];setTimeout(()=>poll(1),20000);renderRefs();
+      REF.stat=`${name}에 넣는 중… 엔진이 화면을 찍고 정리하는 데 1~2분 걸립니다. 끝나면 여기 저절로 나타납니다.`;REF.f=scope;const had0=(REF.sites&&REF.sites[scope]||[]).length,voice0=(REF.cache[scope]||'').length;
+      const poll=async(n)=>{try{const t=await gh(`/contents/workspace/${scope}/refs/sites.json`,{raw:true});const a=JSON.parse(t||'[]');let v='';try{v=await gh(`/contents/workspace/${scope}/voice.md`,{raw:true})||'';}catch{}if(a.length>had0||v.length!==voice0||n>=12){REF.cache[scope]=undefined;REF.sites[scope]=undefined;REF.lib&&(REF.lib[scope]=undefined);REF.stat=n>=12?'':`${name}에 반영됐습니다.`;if(VIEW==='refs')renderRefs();if(n<12)setTimeout(()=>{REF.stat='';if(VIEW==='refs')renderRefs();},6000);return;}}catch{}setTimeout(()=>poll(n+1),15000);};
+      setTimeout(()=>poll(1),20000);renderRefs();
     }catch(err){toast('실패: '+(err.status===403?'접근키 권한(Contents·Issues 쓰기)':err.message.slice(0,60)));go.disabled=false;}};
 }
