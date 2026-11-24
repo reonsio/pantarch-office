@@ -46,7 +46,7 @@ function chatRender(){
   l.innerHTML=CH.msgs.slice(-60).map(m=>{const a=A[m.aid]||{};const col=teamCol(m.aid);
     const to=m.mine&&(refLabel(m.t)?'레퍼런스':((/^@(\S+)/.exec(m.t)||[])[1]||(((S.team.agents||{})[(S.team.roles||{}).secretary]||{}).name)||'TOM'));
     const ap=m.mine?attOf(m.t):[];const tx=ap.length?m.t.split(/\n첨부\(/)[0]:m.t;
-    return m.mine?`<div class="cm me">${to?`<span class="who" style="color:#A08A72">→ ${esc(to==='팀'?'팀 토론':to)}</span>`:''}<div class="row"><span class="bub">${mdChat(tx)}${ap.length?`<span class="ath">${ap.map(p=>/\.(mp4|mov|m4v|webm)$/i.test(p)?'<span>▶ 영상</span>':`<img data-path="${esc(p)}" alt="">`).join('')}</span>`:''}</span><em>${hhmm(m.at)}</em></div></div>`
+    return m.mine?`<div class="cm me">${to?`<span class="who" style="color:#A08A72">→ ${esc(to==='팀'?'팀 토론':to)}</span>`:''}<div class="row"><span class="bub">${mdChat(tx)}${ap.length?`<span class="ath">${ap.map(p=>/\.(pdf|pptx|docx)$/i.test(p)?`<span class="dcf">${esc(p.split('/').pop().replace(/^u[a-z]{6}-|^\d{8}-\d{4}-/,''))}</span>`:/\.(mp4|mov|m4v|webm)$/i.test(p)?'<span>▶ 영상</span>':`<img data-path="${esc(p)}" alt="">`).join('')}</span>`:''}</span><em>${hhmm(m.at)}</em></div></div>`
       :`<div class="cm" style="--c:${col}"><span class="who" style="color:${col}">${esc(a.name||m.aid)}<i>${esc(teamName(m.aid))}</i></span><div class="row"><span class="bub${m.t.length>420?' lng':''}${CH.open.has(m.id)?' open':''}" data-cid="${m.id}" title="두 번 눌러 ❤">${m.t.length>420?`<span class="bc">${mdChat(m.t)}</span><button type="button" class="more">${CH.open.has(m.id)?'접기':'더 보기'}</button>`:mdChat(m.t)}${m.heart&&!CH.unheart.has(m.id)?'<b class="hrt">❤</b>':''}</span><em>${hhmm(m.at)}</em></div></div>`;}).join('')
     +(CH.pending?`<div class="cm sys">${/^@팀/.test((CH.msgs.filter(m=>m.mine).pop()||{}).t||'')?'의논 중…':'답변 준비 중…'}</div>`:'');
   if(typeof lazy==='function')lazy(l);
@@ -111,21 +111,21 @@ async function chatHeart(id){const m=CH.msgs.find(x=>x.id===id);if(!m||m.mine)re
 /* 첨부: 대표님이 고른 사진·영상을 라이브러리에 올리고(같은 파일이면 기존 것 사용) 메시지에 경로를 붙인다 */
 function attOf(t){const m=/\n첨부\([^)]*\):\n([\s\S]*)$/.exec(t||'');return m?(m[1].match(/workspace\/\S+/g)||[]):[];}
 function attRender(){const box=$('#chatAtt');if(!box)return;box.classList.toggle('on',CH.att.length>0);
-  box.innerHTML=CH.att.map((a,k)=>`<span class="at${a.path?'':' up'}">${a.url?`<img src="${a.url}" alt="">`:a.vid?'▶ 영상':''}${a.path?'':'<i class="upl">올리는 중</i>'}<em>${k+1}</em>${a.path?`<b data-rm="${k}">×</b>`:''}</span>`).join('');
+  box.innerHTML=CH.att.map((a,k)=>`<span class="at${a.path?'':' up'}">${a.url?`<img src="${a.url}" alt="">`:a.doc?`<i class="dc">${esc(a.name.split('.').pop().toUpperCase())}</i>`:a.vid?'▶ 영상':''}${a.path?'':'<i class="upl">올리는 중</i>'}<em>${k+1}</em>${a.path?`<b data-rm="${k}">×</b>`:''}</span>`).join('');
   box.querySelectorAll('[data-rm]').forEach(x=>x.onclick=()=>{CH.att.splice(+x.dataset.rm,1);attRender();});if(typeof lazy==='function')lazy(box);}
 async function attAdd(files){if(!TOKEN){toast('접근키를 먼저 넣어 주세요');return;}
   const b={media:'workspace/',name:'채팅'};/* 채팅 첨부는 어느 사업 라이브러리에도 넣지 않고 workspace/_inbox 에 둔다(라이브러리에 이미 있는 자료면 그걸 씀) */
   if(!PF.tree){try{await loadTree();}catch{}}
   const ym=new Date().toISOString().slice(0,7);
   for(const f of files){if(CH.att.length>=10){toast('한 번에 10개까지');break;}
-    const a={name:f.name,path:'',vid:!/^image/.test(f.type),url:/^image/.test(f.type)?URL.createObjectURL(f):''};CH.att.push(a);attRender();CH.busy++;
+    const doc=/\.(pdf|pptx|docx)$/i.test(f.name);const a={name:f.name,path:'',doc,vid:!doc&&!/^image/.test(f.type),url:/^image/.test(f.type)?URL.createObjectURL(f):''};CH.att.push(a);attRender();CH.busy++;
     try{
       if(!a.vid&&f.size>40*1048576)throw new Error('너무 큼');
-      if(a.vid&&f.size>40*1048576)throw new Error('40MB 넘는 영상은 라이브러리에서 올려 주세요');
+      if((a.vid||a.doc)&&f.size>40*1048576)throw new Error(a.doc?'40MB 넘는 문서는 PDF로 줄여 주세요':'40MB 넘는 영상은 라이브러리에서 올려 주세요');
       const shot=await exifDate(f);const when=shot||('u'+Math.random().toString(36).replace(/[^a-z]/g,'').slice(0,6));
       const base=f.name.replace(/\.[^.]+$/,'').replace(/[^\w가-힣\-]+/g,'-').slice(0,40)||'file';
-      const blob=a.vid?f:((!shot&&!/jpe?g/i.test(f.type)&&f.size<25*1048576)?f:await shrink(f));
-      const ext=a.vid||blob===f?(f.name.split('.').pop()||'jpg').toLowerCase():'jpg';
+      const blob=a.vid||a.doc?f:((!shot&&!/jpe?g/i.test(f.type)&&f.size<25*1048576)?f:await shrink(f));
+      const ext=a.vid||a.doc||blob===f?(f.name.split('.').pop()||'jpg').toLowerCase():'jpg';
       let sha='',sha0='';try{sha0=await blobSha(f);sha=blob===f?sha0:await blobSha(blob);}catch{}
       const tw=(sha0&&twinOf(b,sha0))||(sha&&twinOf(b,sha));
       if(tw)a.path=tw.path;
