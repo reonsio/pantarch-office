@@ -1027,7 +1027,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241256';
+const APPVER='11241317';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1156,7 +1156,7 @@ function renderLegend(){const c={};agents().forEach(a=>{const s=agentState(a.id)
   $('#legend').innerHTML=['RUNNING','REVIEW','BLOCKED','MEETING','QUEUED','IDLE'].map(k=>`<span style="color:${c[k]?SC[k]:'#6E5B4A'}"><i class="d" style="background:${SC[k]}"></i>${k} ${c[k]||0}</span>`).join('')+'<span style="color:#E08A5A">■ CLAUDE</span><span style="color:#7DB79A">■ GPT</span><span style="color:#A3ACDB">■ GROK</span>';}
 const VIEWS={portfolio:['#portfolio',()=>window.renderPortfolio&&renderPortfolio()],missions:['#vMissions',()=>renderMissions()],outputs:['#vOutputs',()=>renderOutputs()],refs:['#vRefs',()=>renderRefs()],playbook:['#vPlaybook',()=>renderPlaybook()],connections:['#vConn',()=>renderConnections()]};
 let VIEW='office';
-function setView(v){VIEW=v;document.querySelectorAll('header nav a').forEach(x=>x.classList.toggle('on',x.dataset.go===v));$('main').style.display=v==='office'?'':'none';
+function setView(v){VIEW=v;if(v==='refs'&&typeof REF!=='undefined'){REF.cache={};REF.sites={};REF.lib={};}document.querySelectorAll('header nav a').forEach(x=>x.classList.toggle('on',x.dataset.go===v));$('main').style.display=v==='office'?'':'none';
   for(const [k,[sel]] of Object.entries(VIEWS)) $(sel).style.display=k===v?'grid':'none';
   if(VIEWS[v]&&S.team){try{const r=VIEWS[v][1]();if(r&&r.catch)r.catch(viewErr(v));}catch(e){viewErr(v)(e);}}}
 function viewErr(v){return e=>{console.error(e);const el=$(VIEWS[v][0]);if(el)el.innerHTML=`<section class="pnl"><div class="empty">화면을 불러오지 못했습니다. 새로고침해 주세요. (${esc(String(e&&e.message||e).slice(0,80))})</div></section>`;};}
@@ -1184,8 +1184,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241256"></script>
-<script src="views.js?v=11241256"></script>
-<script src="chat.js?v=11241256"></script>
+<script src="portfolio.js?v=11241317"></script>
+<script src="views.js?v=11241317"></script>
+<script src="chat.js?v=11241317"></script>
 </body>
 </html>

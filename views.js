@@ -224,7 +224,8 @@ async function renderRefs(){
       if(!num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});num=it.number;}
       await gh(`/issues/${num}/comments`,{method:'POST',body:{body:`레퍼런스 #${scope} !${kind} ${t}${paths.length?'\n'+paths.join('\n'):''}`}});
       const name=(sc.find(x=>x.id===scope)||{}).name;
-      REF.stat=`${name}에 넣었습니다. 1~2분 뒤 목록에 반영됩니다.`;REF.f=scope;REF.cache[scope]=undefined;
-      setTimeout(()=>{REF.cache[scope]=undefined;REF.stat='';if(VIEW==='refs')renderRefs();},90000);renderRefs();
+      REF.stat=`${name}에 넣는 중… 엔진이 화면을 찍고 정리하는 데 1~2분 걸립니다. 끝나면 여기 저절로 나타납니다.`;REF.f=scope;REF.cache[scope]=undefined;REF.sites&&(REF.sites[scope]=undefined);REF.lib&&(REF.lib[scope]=undefined);REF.wait=Date.now();
+      const poll=async(n)=>{try{const t=await gh(`/contents/workspace/${scope}/refs/sites.json`,{raw:true});const a=JSON.parse(t||'[]');const had=(REF.sites[scope]||[]).length;if(a.length>had||n>=12){REF.cache[scope]=undefined;REF.sites[scope]=undefined;REF.lib&&(REF.lib[scope]=undefined);REF.stat=n>=12?'':`${name}에 반영됐습니다.`;if(VIEW==='refs')renderRefs();if(n<12)setTimeout(()=>{REF.stat='';if(VIEW==='refs')renderRefs();},6000);return;}}catch{}setTimeout(()=>poll(n+1),15000);};
+      REF.sites[scope]=REF.sites[scope]||[];setTimeout(()=>poll(1),20000);renderRefs();
     }catch(err){toast('실패: '+(err.status===403?'접근키 권한(Contents·Issues 쓰기)':err.message.slice(0,60)));go.disabled=false;}};
 }
