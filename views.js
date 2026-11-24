@@ -203,8 +203,9 @@ async function renderRefs(){
     const body=(lib||'')+sitesOf(x)+(mine?`<div class="vsub">직접 넣은 레퍼런스</div>${mine}`:'')+(std?`<div class="vsub">캡션 기준 · 대표님 결재에서 쌓임</div>${std}`:'');
     return `<div class="vs"><span style="color:${x.col}">${x.kind}</span><span style="color:#F4E6CF">${esc(x.name)}</span></div>${body||`<div class="empty">${ig?'수집 준비 중':'아직 없음 · 인스타 채널이 없는 사업은 직접 넣은 것만 쌓입니다'}</div>`}`;}).join('');
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">ADD REFERENCE</span></div>
-    <form class="rf" id="rfF"><div class="rfr"><label>어디에<select id="rfS">${bizGroups(REF.f==='all'?'_common':REF.f,['_common','회사 공통'])}</select></label>
-    <label>종류<select id="rfK">${REF_KINDS.map(([g,a])=>`<optgroup label="${g}">${a.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</optgroup>`).join('')}</select></label></div>
+    <form class="rf" id="rfF"><div class="rfr rf3"><label>어디에<select id="rfS">${bizGroups(REF.f==='all'?'_common':REF.f,['_common','회사 공통'])}</select></label>
+    <label>종류<select id="rfK">${REF_KINDS.map(([g,a])=>`<optgroup label="${g}">${a.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</optgroup>`).join('')}</select></label>
+    <label>프로젝트<input id="rfP" maxlength="30" list="rfPL" autocomplete="off"><datalist id="rfPL"></datalist></label></div>
     <div class="libnote">안 넣어도 됩니다. 인스타 사업은 RYAN이 매주 비슷한 계정을 찾아 보관함에 쌓습니다. 꼭 보여 주고 싶은 계정·사이트·캡션·시안 파일만 넣으세요.</div><textarea id="rfT" rows="3" placeholder="@계정 · 링크 · 문구 (캡처·시안 HTML·문서는 첨부파일)"></textarea>
     <div class="rfb"><label class="btn sbtn">첨부파일<input type="file" id="rfI" multiple accept="image/*,video/*,.html,.htm,.pdf,.pptx,.docx" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
     ${REF.stat?`<div class="libnote">${esc(REF.stat)}</div>`:''}</section>
@@ -215,15 +216,19 @@ async function renderRefs(){
   $('#rfT').addEventListener('input',e=>{const v=e.target.value,k=$('#rfK');if(k.dataset.touched)return;
     if(/https?:\/\/(?!(www\.)?instagram\.com)/i.test(v))k.value='비주얼/사이트';else if(/@[A-Za-z0-9_.]{2,}|instagram\.com/i.test(v))k.value='영상/릴스';});
   $('#rfK').addEventListener('change',e=>{e.target.dataset.touched='1';});
+  const pjSet=()=>{const sc_=$('#rfS').value,b=(S.bus||[]).find(x=>x.id===sc_);$('#rfP').placeholder=sc_==='_common'?'비워 두면 전체':b&&b.kind==='PRODUCT'?'어느 게임? 예: 서울 한 바퀴':'비워 두면 사업 전체';
+    const skip=new Set(['media','refs','site','shots','reels','uploads','view','ideation']);const names=new Set(((typeof PF!=='undefined'&&PF.tree)||[]).map(x=>(new RegExp('^workspace/'+sc_+'/([^/.]+)/')).exec(x.path)).filter(m=>m&&!skip.has(m[1])).map(m=>m[1].replace(/-/g,' ')));
+    $('#rfPL').innerHTML=[...names].map(n=>`<option value="${esc(n)}">`).join('');};
+  pjSet();$('#rfS').addEventListener('change',pjSet);
   let files=[];
   $('#rfI').onchange=e=>{files=[...e.target.files];$('#rfN').textContent=files.length?(files.length===1?files[0].name:`${files.length}개`):'';};
-  $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const scope=$('#rfS').value,kind=$('#rfK').value;const go=$('#rfGo');go.disabled=true;
+  $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const scope=$('#rfS').value,kind=$('#rfK').value;const pj=$('#rfP').value.trim().replace(/[~#!@]/g,'').replace(/\s+/g,'-');const go=$('#rfGo');go.disabled=true;
     try{const paths=[];
       for(const [k,f] of files.entries()){const doc=/\.(html?|pdf|pptx|docx)$/i.test(f.name);const vid=!doc&&/^video/.test(f.type);if((vid||doc)&&f.size>40*1048576){toast(`${f.name}: 40MB 넘는 파일은 줄여 주세요`);continue;}
         const blob=vid||doc?f:await shrink(f);const ext=vid||doc?((f.name.split('.').pop()||'mp4').toLowerCase().replace(/^htm$/,'html')):'jpg';const nm=doc?f.name.replace(/\.[^.]+$/,'').replace(/[^\w가-힣\-]+/g,'-').slice(0,40):'';const pth=`workspace/${scope}/refs/${stamp(new Date())}-${k}${nm?'-'+nm:''}.${ext}`;$('#rfN').textContent=`올리는 중 ${k+1}/${files.length}`;await putFile(pth,blob,'레퍼런스 자료');paths.push(pth);}
       let num=(typeof CH!=='undefined'&&CH.num)||(S.issues.find(i=>i.state==='open'&&has(i,'chat'))||{}).number;
       if(!num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});num=it.number;}
-      await gh(`/issues/${num}/comments`,{method:'POST',body:{body:`레퍼런스 #${scope} !${kind} ${t}${paths.length?'\n'+paths.join('\n'):''}`}});
+      await gh(`/issues/${num}/comments`,{method:'POST',body:{body:`레퍼런스 #${scope} !${kind} ${pj?'~'+pj+' ':''}${t}${paths.length?'\n'+paths.join('\n'):''}`}});
       const name=(sc.find(x=>x.id===scope)||{}).name;
       REF.stat=`${name}에 넣는 중… 엔진이 화면을 찍고 정리하는 데 1~2분 걸립니다. 끝나면 여기 저절로 나타납니다.`;REF.f=scope;const had0=(REF.sites&&REF.sites[scope]||[]).length,voice0=(REF.cache[scope]||'').length;
       const poll=async(n)=>{try{const t=await gh(`/contents/workspace/${scope}/refs/sites.json`,{raw:true});const a=JSON.parse(t||'[]');let v='';try{v=await gh(`/contents/workspace/${scope}/voice.md`,{raw:true})||'';}catch{}if(a.length>had0||v.length!==voice0||n>=12){REF.cache[scope]=undefined;REF.sites[scope]=undefined;REF.lib&&(REF.lib[scope]=undefined);REF.stat=n>=12?'':`${name}에 반영됐습니다.`;if(VIEW==='refs')renderRefs();if(n<12)setTimeout(()=>{REF.stat='';if(VIEW==='refs')renderRefs();},6000);return;}}catch{}setTimeout(()=>poll(n+1),15000);};

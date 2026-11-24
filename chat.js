@@ -53,9 +53,9 @@ function chatRender(){
   if(stick||CH.pending)l.scrollTop=l.scrollHeight;
   const nb=$('#mtabC');if(nb){if(chatVisible())CH.unread=0;nb.textContent=CH.unread?String(CH.unread):'';}
 }
-function refLabel(t){const m=/^(?:@\S+\s+)?레퍼런스\s+(?:#(\S+)\s*)?(?:!(\S+)\s*)?([\s\S]*)$/.exec(t);if(!m)return null;
+function refLabel(t){const m=/^(?:@\S+\s+)?레퍼런스\s+(?:#(\S+)\s*)?(?:!(\S+)\s*)?(?:~(\S+)\s*)?([\s\S]*)$/.exec(t);if(!m)return null;const pjn=m[3]?m[3].replace(/-/g,' '):'';m.splice(3,1);
   const sc=m[1]==='_common'?'회사 공통':((S.bus||[]).find(b=>b.id===m[1])||{}).name||'회사 공통';const files=(m[3].match(/workspace\/\S+/g)||[]).length;
-  return `레퍼런스 · ${sc} · ${m[2]||'말투'}\n${m[3].replace(/workspace\/\S+/g,'').trim()}${files?`${m[3].replace(/workspace\/\S+/g,'').trim()?'\n':''}자료 ${files}개`:''}`.trim();}
+  return `레퍼런스 · ${sc}${pjn?' · '+pjn:''} · ${m[2]||'말투'}\n${m[3].replace(/workspace\/\S+/g,'').trim()}${files?`${m[3].replace(/workspace\/\S+/g,'').trim()?'\n':''}자료 ${files}개`:''}`.trim();}
 function mdChat(t){const r=refLabel(t);if(r)t=r;
   t=t.replace(/`([^`]+)`/g,'$1').replace(/workspace\/\S+?\/([^\/\s]+\.(mp4|mov|jpe?g|png))/gi,'$1')
     .replace(/\[\[\d+\]\]\([^)]*\)/g,'').replace(/^\s*출처\s*[:：]?\s*$[\s\S]*$/m,'');   /* 검색 직원이 붙이는 [[1]](url) 중복·출처 목록 정리 */
