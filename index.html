@@ -325,22 +325,26 @@ html.m .pp{height:40px}
 .ch{display:flex;align-items:center;gap:5px;height:18px;cursor:pointer;white-space:nowrap;overflow:hidden;min-width:0}
 .ch i{width:6px;height:6px;flex:none}.ch b{font:600 11px 'IBM Plex Mono',monospace}.ch em{font:normal 9px 'IBM Plex Mono',monospace;color:#D9A441}
 /* chat panel */
-.chto{display:flex;gap:3px;padding:4px 8px;overflow-x:auto;border-bottom:1px solid #2C2018;scrollbar-width:none}.chto::-webkit-scrollbar{display:none}
-.chto button{flex:none;height:20px;padding:0 7px;background:#1B1410;border:1px solid #3A2A1F;color:#BFA98C;font:600 10px 'IBM Plex Mono',monospace;cursor:pointer}
+.chto{display:grid;grid-template-columns:repeat(auto-fill,minmax(52px,1fr));gap:3px;padding:5px 8px;border-bottom:1px solid #2C2018}
+.chto button{height:20px;padding:0;min-width:0;background:#1B1410;border:1px solid #3A2A1F;color:#BFA98C;font:600 10px 'IBM Plex Mono',monospace;cursor:pointer}
 .chto button.on{background:#D9A441;border-color:#D9A441;color:#1E150F}
-#chatLog{padding:6px 8px;display:flex;flex-direction:column;gap:5px;font-size:11.5px}
-.cm{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:baseline;line-height:1.45;color:#E9DCC5}
-.cm b{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.6px}
-.cm em{font:normal 9px 'IBM Plex Mono',monospace;color:#7A6654}
-.cm.me{grid-template-columns:minmax(0,1fr) auto;padding:3px 6px;background:#2A1F17;border-left:2px solid #D9A441;color:#F4E6CF}
-.cm.sys{display:block;color:#8E7861;font-size:10.5px}
+#chatLog{padding:8px;display:flex;flex-direction:column;gap:8px;font-size:12px}
+.cm{display:flex;flex-direction:column;align-items:flex-start;max-width:100%}
+.cm .who{font:600 10px 'IBM Plex Mono',monospace;letter-spacing:.8px;margin:0 0 3px 2px}
+.cm .row{display:flex;align-items:flex-end;gap:5px;max-width:86%}
+.cm .bub{padding:6px 9px;background:#2A1F17;border:1px solid #3A2A1F;color:#EFE2CC;line-height:1.55;text-align:justify;word-break:break-all;min-width:0}
+.cm em{flex:none;font:normal 9px 'IBM Plex Mono',monospace;color:#7A6654}
+.cm.me{align-items:flex-end}
+.cm.me .row{flex-direction:row-reverse}
+.cm.me .bub{background:#D9A441;border-color:#D9A441;color:#1E150F}
+.cm.sys{align-self:center;color:#8E7861;font-size:10.5px}
 #chatF{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:4px;padding:6px 8px;border-top:1px solid #3A2A1F}
 #chatIn{height:26px;font-size:11.5px;background:#17110D;color:#F4E6CF;border:1px solid #3A2A1F;padding:0 6px;min-width:0}
 #chatGo{height:26px;font-size:11px;width:auto;padding:0}
 html.m #chatPanel.mon{height:calc(100dvh - 116px)!important;flex:none!important}
 html.m #chatPanel.mon .scroll{overflow:auto!important;flex:1!important;min-height:0}
 html.m #chatIn{height:34px}html.m #chatGo{height:34px}
-html.m .chto button{height:24px;font-size:11px}
+html.m .chto{grid-template-columns:repeat(6,minmax(0,1fr))}html.m .chto button{height:24px;font-size:11px}
 html.m .tm{grid-template-columns:64px minmax(0,1fr);padding:4px 8px}
 /* 빈 공간 없애기: 모바일 화면은 내용만큼만 */
 html.m .vw,html.m #portfolio{align-content:start;grid-auto-rows:min-content}
@@ -350,6 +354,7 @@ html.m #mtab .nb{position:absolute;margin:-18px 0 0 34px;font:600 9px 'IBM Plex 
 #mtab button{position:relative}
 #mtTitle:empty{display:none}
 html.m #boardSum{display:none}
+.apc,.doc2,.sum,.ana span,.ap .t,.cn .mu,.mb{text-align:justify;word-break:break-all}
 </style>
 </head>
 <body>
@@ -750,7 +755,7 @@ function renderKpis(){
   $('#kpis').innerHTML=k.map(([a,b,c])=>`<div><span>${a}</span><b${c?` style="color:${c}"`:''}>${b}</b></div>`).join('');
 }
 function renderApprovals(){
-  if(document.querySelector('#approvals .ap.op'))return; // 의견을 쓰는 중이면 새로고침으로 지우지 않는다
+  const typing=[...document.querySelectorAll('#approvals .ap.op textarea')].some(t=>t.value.trim()); if(typing)return; // 의견을 쓰는 중이면 새로고침으로 지우지 않는다
   const rv=S.issues.filter(i=>i.state==='open'&&(has(i,'task')||has(i,'post'))&&(statusOf(i)==='REVIEW'||statusOf(i)==='BLOCKED'));
   const hires=S.issues.filter(i=>i.state==='open'&&has(i,'hire'));
   $('#apCap').textContent=`${rv.length+hires.length} PENDING`;const nb=$('#mtabN');if(nb)nb.textContent=rv.length+hires.length?` ${rv.length+hires.length}`:'';
@@ -777,7 +782,7 @@ $('#approvals').addEventListener('click',async e=>{
   if(act==='x'){ap.classList.remove('op');return;}
   const body=act==='send'?ap.querySelector('textarea').value.trim():act;if(!body)return;
   ap.querySelectorAll('button').forEach(x=>x.disabled=true);
-  try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body}});toast(act==='send'?'의견을 보냈습니다':`${codeN(n)} ${act} 처리했습니다`);setTimeout(sync,1500);}
+  try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body}});toast(act==='send'?`${codeN(n)} 의견을 보냈습니다`:`${codeN(n)} ${act} 처리했습니다`);ap.remove();if(!$('#approvals .ap'))$('#approvals').innerHTML='<div class="empty">결재할 일 없음</div>';setTimeout(sync,1500);}
   catch(err){toast('실패: '+err.message.slice(0,60));ap.querySelectorAll('button').forEach(x=>x.disabled=false);}
 });
 async function renderMeeting(){

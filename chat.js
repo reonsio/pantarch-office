@@ -7,7 +7,7 @@ function chatAgent(body){const m=/<!-- chat:(\w+) -->/.exec(body||'');return m?m
 function chatVisible(){const p=$('#chatPanel');return p&&(!document.documentElement.classList.contains('m')||p.classList.contains('mon'));}
 
 function chatTo(){const box=$('#chatTo');if(!box||!S.team)return;
-  const opts=[['team','팀 토론']].concat(agents().map(a=>[a.id,a.name]));
+  const opts=[['team','팀']].concat(agents().map(a=>[a.id,a.name]));
   box.innerHTML=opts.map(([id,n])=>`<button type="button" data-to="${id}" class="${id===CH.to?'on':''}" title="${id==='team'?'필요한 직원이 모여 의논하고 TOM이 정리':esc((S.team.agents[id]||{}).title||'')}">${esc(n)}</button>`).join('');
   box.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{CH.to=b.dataset.to;chatTo();chatHead();$('#chatIn').focus();});
 }
@@ -38,13 +38,14 @@ function chatRender(){
   const l=$('#chatLog');if(!l)return;const stick=l.scrollHeight-l.scrollTop-l.clientHeight<40;
   const A=(S.team&&S.team.agents)||{};
   l.innerHTML=CH.msgs.slice(-60).map(m=>{const a=A[m.aid]||{};const col=MC[(a.model||'claude').toLowerCase()]||'#D9A441';
-    return m.mine?`<div class="cm me"><span>${mdChat(m.t)}</span><em>${hhmm(m.at)}</em></div>`
-      :`<div class="cm"><b style="color:${col}">${esc(a.name||m.aid)}</b><span>${mdChat(m.t)}</span><em>${hhmm(m.at)}</em></div>`;}).join('')
+    const to=m.mine&&((/^@(\S+)/.exec(m.t)||[])[1]||'TOM');
+    return m.mine?`<div class="cm me">${to?`<span class="who" style="color:#A08A72">→ ${esc(to==='팀'?'팀 토론':to)}</span>`:''}<div class="row"><span class="bub">${mdChat(m.t)}</span><em>${hhmm(m.at)}</em></div></div>`
+      :`<div class="cm"><span class="who" style="color:${col}">${esc(a.name||m.aid)}</span><div class="row"><span class="bub">${mdChat(m.t)}</span><em>${hhmm(m.at)}</em></div></div>`;}).join('')
     +(CH.pending?`<div class="cm sys">${/^@팀/.test((CH.msgs.filter(m=>m.mine).pop()||{}).t||'')?'의논 중…':'답변 준비 중…'}</div>`:'');
   if(stick||CH.pending)l.scrollTop=l.scrollHeight;
   const nb=$('#mtabC');if(nb){if(chatVisible())CH.unread=0;nb.textContent=CH.unread?String(CH.unread):'';}
 }
-function mdChat(t){return esc(t).replace(/^@팀\s*/,'').replace(/M-(\d{3})/g,'<b>M-$1</b>').replace(/\n{2,}/g,'\n').replace(/\n/g,'<br>');}
+function mdChat(t){return esc(t).replace(/^@\S+\s*/,'').replace(/M-(\d{3})/g,'<b>M-$1</b>').replace(/\n{2,}/g,'\n').replace(/\n/g,'<br>');}
 
 async function chatSend(){
   const inp=$('#chatIn');const t=inp.value.trim();if(!t)return;
