@@ -109,3 +109,41 @@ async function renderConnections(){
   $('#cnCheck').onclick=async()=>{try{await gh('/actions/workflows/connect.yml/dispatches',{method:'POST',body:{ref:'main'}});toast('연결 점검을 시작했습니다. 1분 뒤 새로고침하세요');}catch{toast('실패: Actions 권한을 확인해 주세요');}};
   $('#cnMedia').onclick=async()=>{try{await gh('/actions/workflows/media.yml/dispatches',{method:'POST',body:{ref:'main'}});toast('자료 분석을 시작했습니다');setTimeout(renderConnections,4000);}catch{toast('실패: Actions 권한을 확인해 주세요');}};
 }
+
+/* ---------- REFERENCE (회사 공통 기능) ----------
+   계정·링크·예시·스크린샷을 '회사 공통' 또는 사업별로 쌓는다. 직원·검수는 공통 + 자기 사업 기준을 함께 읽는다. */
+const REF={f:'all',cache:{},stat:''};
+const REF_KINDS=[['말투','말투·캡션'],['영상','영상·편집'],['비주얼','비주얼'],['기획','기획·기타']];
+function refScopes(){return [{id:'_common',name:'회사 공통',kind:'COMMON',col:'#D9A441'}].concat((S.bus||[]).map(b=>({id:b.id,name:b.name,kind:b.kind,col:b.color||KCOL[b.kind]||'#A08A72'})));}
+function parseVoice(txt){const sec={};let cur=null;(txt||'').split('\n').forEach(l=>{const h=/^##\s+(.+)/.exec(l);if(h){cur=h[1].trim();sec[cur]=[];return;}if(cur&&/^- /.test(l))sec[cur].push(l.slice(2));});return sec;}
+async function renderRefs(){
+  const root=$('#vRefs');const sc=refScopes();
+  await Promise.all(sc.map(async x=>{if(REF.cache[x.id]===undefined){try{REF.cache[x.id]=await gh(`/contents/workspace/${x.id}/voice.md`,{raw:true})||'';}catch{REF.cache[x.id]='';}}}));
+  const ORDER=[['레퍼런스 계정','계정'],['레퍼런스 예시','예시'],['레퍼런스 캡션(대표님이 준 예)','예시'],['레퍼런스 링크','링크'],['레퍼런스 스크린샷','스크린샷'],['대표님이 통과시킨 캡션','통과시킨 것'],['대표님이 싫어한 캡션','싫어한 것'],['대표님 의견','대표님 의견'],['기본','기본 원칙']];
+  const cnt=x=>Object.values(parseVoice(REF.cache[x.id])).reduce((n,a)=>n+a.length,0);
+  const shown=sc.filter(x=>REF.f==='all'||REF.f===x.id);
+  const list=shown.map(x=>{const sec=parseVoice(REF.cache[x.id]);
+    const groups=ORDER.filter(([k])=>sec[k]&&sec[k].length).map(([k,l])=>`<div class="vg"><div class="vh"><b>${l}</b><em>${sec[k].length}</em></div>${(k==='기본'?sec[k]:sec[k].slice().reverse()).map(v=>`<div class="vi">${esc(v)}</div>`).join('')}</div>`).join('');
+    return `<div class="vs"><span style="color:${x.col}">${x.kind}</span><span style="color:#F4E6CF">${esc(x.name)}</span></div>${groups||'<div class="empty">없음</div>'}`;}).join('');
+  root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">ADD REFERENCE</span></div>
+    <form class="rf" id="rfF"><div class="rfr"><label>어디에<select id="rfS">${sc.map(x=>`<option value="${x.id}"${x.id===(REF.f==='all'?'_common':REF.f)?' selected':''}>${x.id==='_common'?'회사 공통':`${x.kind} · ${esc(x.name)}`}</option>`).join('')}</select></label>
+    <label>종류<select id="rfK">${REF_KINDS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label></div>
+    <textarea id="rfT" rows="3" placeholder="@계정아이디, 링크, 마음에 드는 문구"></textarea>
+    <div class="rfb"><label class="btn sbtn">스크린샷<input type="file" id="rfI" multiple accept="image/*" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
+    ${REF.stat?`<div class="libnote">${esc(REF.stat)}</div>`:''}</section>
+  <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span><span class="chips">${[{id:'all',name:'전체'}].concat(sc).map(x=>`<button class="btn sbtn${REF.f===x.id?' on':''}" data-rf="${x.id}" style="width:auto;padding:0 10px">${esc(x.id==='_common'?'공통':x.name)} ${x.id==='all'?sc.reduce((n,y)=>n+cnt(y),0):cnt(x)}</button>`).join('')}</span></div>
+    <div class="scroll">${list}</div></section>`;
+  root.querySelectorAll('[data-rf]').forEach(el=>el.onclick=()=>{REF.f=el.dataset.rf;renderRefs();});
+  let files=[];
+  $('#rfI').onchange=e=>{files=[...e.target.files];$('#rfN').textContent=files.length?`${files.length}장`:'';};
+  $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const scope=$('#rfS').value,kind=$('#rfK').value;const go=$('#rfGo');go.disabled=true;
+    try{const paths=[];
+      for(const [k,f] of files.entries()){const blob=await shrink(f);const pth=`workspace/${scope}/refs/${stamp(new Date())}-${k}.jpg`;await putFile(pth,blob,'레퍼런스 스크린샷');paths.push(pth);}
+      let num=(typeof CH!=='undefined'&&CH.num)||(S.issues.find(i=>i.state==='open'&&has(i,'chat'))||{}).number;
+      if(!num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});num=it.number;}
+      await gh(`/issues/${num}/comments`,{method:'POST',body:{body:`레퍼런스 #${scope} !${kind} ${t}${paths.length?'\n'+paths.join('\n'):''}`}});
+      const name=(sc.find(x=>x.id===scope)||{}).name;
+      REF.stat=`${name}에 넣었습니다. 1~2분 뒤 목록에 반영됩니다.`;REF.f=scope;REF.cache[scope]=undefined;
+      setTimeout(()=>{REF.cache[scope]=undefined;REF.stat='';if(VIEW==='refs')renderRefs();},90000);renderRefs();
+    }catch(err){toast('실패: '+(err.status===403?'접근키 권한(Contents·Issues 쓰기)':err.message.slice(0,60)));go.disabled=false;}};
+}
