@@ -99,6 +99,9 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .tk img{width:24px;height:24px;image-rendering:pixelated}
 .tk b{font:600 11px 'IBM Plex Mono',monospace;color:#F4E6CF}
 .tk .mono{font-size:9px}
+.ov video{width:auto;max-width:100%;height:56vh;margin:0 auto;background:#000;border:1px solid #3A2A1F;display:block}
+.osum{font-size:14px;font-weight:600;color:#F4E6CF;margin:10px 0 0;line-height:1.5;text-align:justify;word-break:keep-all}
+.oqa{margin-top:8px;padding:8px 10px;background:#2A1A14;border-left:2px solid #E2704F;font-size:12px;line-height:1.5;color:#E6D6BC;text-align:justify;word-break:keep-all}.oqa b{color:#E2704F;font-weight:600;margin-right:4px}
 .tk p{margin:2px 0 0;font-size:12px;line-height:1.5;color:#E6D6BC;text-align:justify;word-break:keep-all}
 .tk .dt{display:none;margin-top:4px;color:#B9A68A;font-size:11px;white-space:pre-line}
 .tk.open .dt{display:block}.tk[data-x]{cursor:pointer}
@@ -827,7 +830,9 @@ async function fillSummaries(){
     let txt=VW.out[n];if(txt===undefined){try{const cs=await commentsOf(n);const c=[...cs].reverse().find(x=>/검수 \d+점/.test(x.body))||cs[cs.length-1];txt=c?c.body:'';}catch{txt='';}VW.out[n]=txt;}
     const plain=strip((txt||'').replace(/\[\[HANDOFF\]\][\s\S]*?\[\[\/HANDOFF\]\]/g,'').replace(/<details>[\s\S]*?<\/details>/g,'')).replace(/^#+.*$/gm,'').replace(/workspace\/[\w\-\/.]+\/([\w\-.]+)/g,'$1').replace(/\n{2,}/g,'\n').trim();
     const sm=/^\s*요약\s*[:：]\s*(.+)$/m.exec(plain)||/^\s*결론\s*[:：]\s*(.+)$/m.exec(plain);let one=sm?sm[1]:plain.split('\n').find(l=>l.trim().length>8)||'';one=one.split(/(?<=[.다요])\s/)[0];
-    el.textContent=one?one.slice(0,90)+(one.length>90?'…':''):'제출된 내용 없음';}
+    el.textContent=one?one.slice(0,90)+(one.length>90?'…':''):'제출된 내용 없음';
+    const o=typeof outParts==='function'?outParts(txt||''):{};
+    if(o.reel&&!el.parentNode.querySelector('.rv')){const bt=document.createElement('button');bt.className='btn rv';bt.style.cssText='width:100%;margin-top:6px';bt.dataset.pv=o.reel;bt.dataset.bz=o.reel.split('/')[1];bt.textContent='▶ 편집한 릴스 보기'+(o.sec?` · ${o.sec}초`:'');el.after(bt);}}
 }
 $('#approvals').addEventListener('click',async e=>{
   const pv=e.target.closest('[data-pv]');if(pv&&typeof preview==='function'){const b=bizList().find(x=>x.id===pv.dataset.bz)||bizList()[0];if(!PF.tree){try{await loadTree();}catch{}}preview(b,pv.dataset.pv);return;}
@@ -1022,8 +1027,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240517"></script>
-<script src="views.js?v=11240517"></script>
-<script src="chat.js?v=11240517"></script>
+<script src="portfolio.js?v=11240521"></script>
+<script src="views.js?v=11240521"></script>
+<script src="chat.js?v=11240521"></script>
 </body>
 </html>

@@ -50,6 +50,17 @@ async function renderMissions(){
 }
 
 /* ---------- OUTPUTS ---------- */
+function outParts(txt){
+  const reel=(/완성 릴스\s*[:：]\s*(workspace\/\S+?\.mp4)/.exec(txt)||/\[엔진 편집 결과\]\s*(workspace\/\S+?\.mp4)/.exec(txt)||[])[1]||'';
+  const sec=(/\.mp4\s*[·(]\s*([\d.]+)초/.exec(txt)||[])[1]||'';
+  const qaRaw=(/<summary>[^<]*<\/summary>\s*([\s\S]*?)<\/details>/.exec(txt)||[])[1]||'';
+  const qa=strip(qaRaw).replace(/^\s*1\)\s*/,'').split(/\s2\)\s/)[0].split(/(?<=[.다요])\s/).slice(0,2).join(' ').trim();
+  const note=strip(txt.replace(/\[\[HANDOFF\]\][\s\S]*?\[\[\/HANDOFF\]\]/g,'').replace(/\[\[EDIT\]\][\s\S]*?\[\[\/EDIT\]\]/g,'').replace(/<details>[\s\S]*?<\/details>/g,'').replace(/\[엔진 편집 결과\].*$/gm,'')).replace(/`?workspace\/[\w\-\/.]+\/([\w\-.]+)`?/g,'$1').trim();
+  const plain=note.replace(/^#+.*$/gm,'').replace(/\n{2,}/g,'\n').trim();
+  const sm=/^\s*\**요약\**\s*[:：]\**\s*(.+)$/m.exec(plain)||/^\s*결론\s*[:：]\s*(.+)$/m.exec(plain);
+  let one=sm?sm[1]:plain.split('\n').find(l=>l.trim().length>8)||'';one=one.split(/(?<=[.다요])\s/)[0];
+  return {reel,sec,qa,note,one};
+}
 async function renderOutputs(){
   const root=$('#vOutputs');
   const ts=S.issues.filter(i=>has(i,'task')&&(i.state==='closed'||statusOf(i)==='REVIEW')).sort((a,b)=>new Date(b.updated_at)-new Date(a.updated_at));
@@ -61,7 +72,14 @@ async function renderOutputs(){
   root.querySelectorAll('[data-on]').forEach(el=>el.onclick=()=>{VW.sel=+el.dataset.on;renderOutputs();});
   if(sel){let txt=VW.out[sel.number];
     if(txt===undefined){try{const cs=await commentsOf(sel.number);const c=[...cs].reverse().find(x=>/검수 \d+점/.test(x.body))||cs[cs.length-1];txt=c?c.body:'';}catch{txt='';}VW.out[sel.number]=txt;}
-    const v=$('#outView');if(v)v.innerHTML=txt?mdLite(strip(txt).replace(/<\/?details>|<\/?summary>/g,'\n')):'<span class="mu">제출된 내용 없음</span>';}
+    const v=$('#outView');if(!v)return;if(!txt){v.innerHTML='<span class="mu">제출된 내용 없음</span>';return;}
+    const o=outParts(txt);
+    v.innerHTML=(o.reel?`<div class="ov"><video controls playsinline preload="metadata" id="outVid"></video><div class="mono mu" style="font-size:10px;margin-top:4px">편집한 릴스${o.sec?' · '+o.sec+'초':''}</div></div>`:'')
+      +`<p class="osum">${esc(o.one||'제출된 내용 없음')}</p>`
+      +(o.qa&&!/^\s*$/.test(o.qa)&&statusOf(sel)==='REVIEW'?`<div class="oqa"><b>검수 의견</b> ${esc(o.qa)}</div>`:'')
+      +`<button class="btn sbtn" id="outMore" style="width:100%;margin-top:8px">작업 메모 펼치기</button><div id="outNote" style="display:none;margin-top:8px">${mdLite(o.note)}</div>`;
+    $('#outMore').onclick=()=>{const n=$('#outNote');const on=n.style.display==='none';n.style.display=on?'block':'none';$('#outMore').textContent=on?'작업 메모 접기':'작업 메모 펼치기';};
+    if(o.reel){try{$('#outVid').src=await blobUrl(o.reel);}catch{const w=$('#outVid');if(w)w.outerHTML='<div class="mu" style="font-size:11px">릴스를 불러오지 못했습니다</div>';}}}
 }
 
 /* ---------- PLAYBOOK ---------- */
