@@ -1,6 +1,22 @@
 'use strict';
 /* MISSIONS · OUTPUTS · PLAYBOOK · CONNECTIONS 화면 */
 const VW={open:{},plan:{},out:{},sel:null};
+/* 보고서 본문: 제목·목록·표·링크를 읽기 좋게. 링크는 눌러서 출처를 바로 확인할 수 있게 */
+function mdDoc(t){
+  const host=u=>{try{return new URL(u).hostname.replace(/^www\./,'');}catch{return '링크';}};
+  const inl=x=>esc(x).replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,(m,a,u)=>`<a href="${u}" target="_blank" rel="noopener">${a}</a>`)
+    .replace(/(^|[\s(>])(https?:\/\/[^\s)<]+)/g,(m,p,u)=>`${p}<a href="${u}" target="_blank" rel="noopener">${host(u)}</a>`)
+    .replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>');
+  let out='',tb=null,ul=false;const endUl=()=>{if(ul){out+='</ul>';ul=false;}};
+  const endTb=()=>{if(tb){out+=`<div class="rtw"><table class="rtb"><thead><tr>${tb[0].map(c=>`<th>${inl(c)}</th>`).join('')}</tr></thead><tbody>${tb.slice(1).map(r=>`<tr>${r.map(c=>`<td>${inl(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;tb=null;}};
+  for(const l of String(t||'').split('\n')){
+    const m=/^\s*\|(.+)\|\s*$/.exec(l);
+    if(m){endUl();if(/^[\s\-:|]+$/.test(m[1]))continue;(tb=tb||[]).push(m[1].split('|').map(c=>c.trim()));continue;}
+    endTb();
+    const h=/^(#{1,3})\s+(.*)$/.exec(l);if(h){endUl();out+=`<b class="h${h[1].length}">${inl(h[2])}</b>`;continue;}
+    const li=/^\s*(?:[-•*]|\d+[.)])\s+(.*)$/.exec(l);if(li){if(!ul){out+='<ul>';ul=true;}out+=`<li>${inl(li[1])}</li>`;continue;}
+    endUl();if(l.trim())out+=`<p>${inl(l)}</p>`;}
+  endUl();endTb();return out;}
 const mdLite=t=>esc(t||'').replace(/^### (.*)$/gm,'<b class="h3">$1</b>').replace(/^## (.*)$/gm,'<b class="h2">$1</b>').replace(/^# (.*)$/gm,'<b class="h1">$1</b>').replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<code>$1</code>');
 async function commentsOf(n){return await gh(`/issues/${n}/comments?per_page=100`)||[];}
 
@@ -91,7 +107,9 @@ async function renderOutputs(){
       +`<p class="osum">${esc(o.one||'제출된 내용 없음')}</p>`
       +(o.qa&&!/^\s*$/.test(o.qa)&&statusOf(sel)==='REVIEW'?`<div class="oqa"><b>검수 의견</b> ${esc(o.qa)}</div>`:'')
       +`<div class="ofix"><textarea id="outFb" rows="2" placeholder="고칠 점을 적으면 담당 직원이 다시 합니다"></textarea><div class="ofb">${statusOf(sel)==='REVIEW'?'<button class="btn sbtn pri" id="outOk">승인</button>':''}<button class="btn sbtn" id="outFix">수정 요청</button></div></div>`
-      +`<button class="btn sbtn" id="outMore" style="width:100%;margin-top:8px">작업 메모 펼치기</button><div id="outNote" style="display:none;margin-top:8px">${mdLite(o.note)}</div>`;
+      +(()=>{const vis=o.reel||o.posts.length||o.imgs.length;const links=(o.note.match(/https?:\/\/[^\s)<\]]+/g)||[]).length;
+        return vis?`<button class="btn sbtn" id="outMore" style="width:100%;margin-top:8px">작업 메모 펼치기</button><div id="outNote" class="orep" style="display:none;margin-top:8px">${mdDoc(o.note)}</div>`
+          :`<div class="orh"><span class="mono">보고 내용</span><span class="mono mu">출처 링크 ${links}개</span></div><div id="outNote" class="orep">${mdDoc(o.note)}</div><button id="outMore" hidden></button>`;})();
     if(typeof lazy==='function')lazy(v);
     const n=sel.number;
     const send=async(text,label)=>{try{

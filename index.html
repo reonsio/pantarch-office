@@ -441,6 +441,7 @@ html.m #boardSum{display:none}
 .ap [data-full]{justify-self:start;width:auto;padding:0 10px}
 .apv{line-height:1.35!important}
 .fatt{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:10px;min-height:24px}.fatt .btn{width:auto;padding:0 10px;cursor:pointer}.fac{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 6px 0 8px;border:1px solid #6B5233;color:#E6D6BC;font:10px 'IBM Plex Mono',monospace;white-space:nowrap}.fac b{cursor:pointer;color:#BFA98C;font-weight:500}.fac i{font-style:normal;color:#D9A441}.fac.up{border-color:#3A2A1F;color:#8E7861}
+.orh{display:flex;justify-content:space-between;align-items:center;margin:10px 0 4px;font-size:10px;letter-spacing:1px;color:#C2A988}.orep{border:1px solid #33251B;background:#1B1410;padding:10px 12px;font-size:12px;line-height:1.65;color:#E6D6BC;overflow-wrap:anywhere}.orep p{margin:0 0 6px}.orep ul{margin:0 0 8px;padding-left:16px}.orep li{margin:2px 0}.orep b.h1,.orep b.h2,.orep b.h3{display:block;margin:10px 0 4px;color:#F4E6CF;font-size:12.5px}.orep b.h1:first-child,.orep b.h2:first-child,.orep b.h3:first-child{margin-top:0}.orep a{color:#E6C07A;text-decoration:underline;text-underline-offset:2px}.orep code{font:11px 'IBM Plex Mono',monospace;color:#D9A441}.rtw{overflow-x:auto;margin:6px 0 10px}.rtb{border-collapse:collapse;width:100%;font-size:11.5px}.rtb th,.rtb td{border:1px solid #3A2A1F;padding:4px 6px;text-align:left;vertical-align:top}.rtb th{background:#271C15;color:#C2A988;font-weight:600;white-space:nowrap}
 .oopen{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0}.oopen .btn{width:auto;padding:0 10px}
 .oshots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:6px 0;align-items:start}.oshots figure{margin:0;border:1px solid #3A2A1F;background:#17110D;min-width:0}.oshots figure.top{grid-column:1/-1}.oshots figure.mo{max-width:300px}.oshots figcaption{font-size:10px;color:#A38C72;padding:4px 6px;border-bottom:1px solid #2C2018;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.oshots img{width:100%;display:block}
 html.m .oshots{grid-template-columns:1fr}
@@ -1034,7 +1035,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241605';
+const APPVER='11241611';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1192,8 +1193,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241605"></script>
-<script src="views.js?v=11241605"></script>
-<script src="chat.js?v=11241605"></script>
+<script src="portfolio.js?v=11241611"></script>
+<script src="views.js?v=11241611"></script>
+<script src="chat.js?v=11241611"></script>
 </body>
 </html>
