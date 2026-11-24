@@ -979,7 +979,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11240821';
+const APPVER='11240952';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 async function sync(){checkVer();
@@ -988,7 +988,8 @@ async function sync(){checkVer();
     const team=await gh('/contents/config/team.json',{raw:true});S.team=typeof team==='string'?JSON.parse(team):team;
     try{const bj=await gh('/contents/config/business.json',{raw:true});S.bus=(typeof bj==='string'?JSON.parse(bj):bj).businesses||[];}catch{S.bus=S.bus||[{id:'kkumi',kind:'BRAND',name:'꾸미',color:'#E08A5A'},{id:'game',kind:'PRODUCT',name:'게임 개발',color:'#7DB79A'}];}
     BIZ={};S.bus.forEach(b=>BIZ[b.id]={kind:b.kind,name:b.name,col:b.color||KCOL[b.kind]||'#A08A72',desc:b.desc||''});
-    const iss=await gh('/issues?state=all&per_page=100&sort=updated&direction=desc');S.issues=(iss||[]).filter(i=>!i.pull_request&&i.state_reason!=='not_planned');
+    const iss=await gh('/issues?state=all&per_page=100&sort=updated&direction=desc');const all_=(iss||[]).filter(i=>!i.pull_request);const gone=new Set(all_.filter(i=>i.state_reason==='not_planned'||(i.labels||[]).some(l=>l.name==='archived')).map(i=>i.number));
+    S.issues=all_.filter(i=>!gone.has(i.number)&&!gone.has((meta(i)||{}).mission)); /* 보관·취소한 미션과 그 업무는 어디에도 안 보이게 */
     S.comments=await gh('/issues/comments?sort=created&direction=desc&per_page=40')||[];
     try{const r=await gh('/actions/workflows/engine.yml/runs?per_page=1');S.runs=r&&r.workflow_runs;}catch{}
     S.lastSync=Date.now();
@@ -1107,8 +1108,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240821"></script>
-<script src="views.js?v=11240821"></script>
-<script src="chat.js?v=11240821"></script>
+<script src="portfolio.js?v=11240952"></script>
+<script src="views.js?v=11240952"></script>
+<script src="chat.js?v=11240952"></script>
 </body>
 </html>
