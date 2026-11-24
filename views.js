@@ -162,7 +162,7 @@ async function renderConnections(){
 /* ---------- REFERENCE (회사 공통 기능) ----------
    계정·링크·예시·스크린샷을 '회사 공통' 또는 사업별로 쌓는다. 직원·검수는 공통 + 자기 사업 기준을 함께 읽는다. */
 const REF={f:'all',cache:{},stat:''};
-const REF_KINDS=[['말투','말투·캡션'],['영상','영상·편집'],['비주얼','비주얼'],['기획','기획·기타']];
+const REF_KINDS=[['말투','캡션 · 문구'],['영상','릴스 · 영상 편집'],['비주얼','디자인 · 사이트'],['기획','기획 아이디어']];
 function refScopes(){return [{id:'_common',name:'회사 공통',kind:'COMMON',col:'#D9A441'}].concat((S.bus||[]).map(b=>({id:b.id,name:b.name,kind:b.kind,col:b.color||KCOL[b.kind]||'#A08A72'})));}
 function parseVoice(txt){const sec={};let cur=null;(txt||'').split('\n').forEach(l=>{const h=/^##\s+(.+)/.exec(l);if(h){cur=h[1].trim();sec[cur]=[];return;}if(cur&&/^- /.test(l))sec[cur].push(l.slice(2));});return sec;}
 async function renderRefs(){
@@ -202,15 +202,18 @@ async function renderRefs(){
     const body=(lib||'')+sitesOf(x)+(mine?`<div class="vsub">직접 넣은 레퍼런스</div>${mine}`:'')+(std?`<div class="vsub">캡션 기준 · 대표님 결재에서 쌓임</div>${std}`:'');
     return `<div class="vs"><span style="color:${x.col}">${x.kind}</span><span style="color:#F4E6CF">${esc(x.name)}</span></div>${body||`<div class="empty">${ig?'수집 준비 중':'아직 없음 · 인스타 채널이 없는 사업은 직접 넣은 것만 쌓입니다'}</div>`}`;}).join('');
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">ADD REFERENCE</span></div>
-    <form class="rf" id="rfF"><div class="rfr"><label>어디에<select id="rfS">${sc.map(x=>`<option value="${x.id}"${x.id===(REF.f==='all'?'_common':REF.f)?' selected':''}>${x.id==='_common'?'회사 공통':`${x.kind} · ${esc(x.name)}`}</option>`).join('')}</select></label>
+    <form class="rf" id="rfF"><div class="rfr"><label>어디에<select id="rfS">${bizGroups(REF.f==='all'?'_common':REF.f,['_common','회사 공통'])}</select></label>
     <label>종류<select id="rfK">${REF_KINDS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label></div>
     <div class="libnote">안 넣어도 됩니다. 인스타 사업은 RYAN이 매주 비슷한 계정을 찾아 보관함에 쌓습니다. 꼭 보여 주고 싶은 계정·캡션·캡처만 넣으세요.</div><textarea id="rfT" rows="3" placeholder="@계정 · 링크 · 문구 · 캡처"></textarea>
     <div class="rfb"><label class="btn sbtn">사진·영상<input type="file" id="rfI" multiple accept="image/*,video/*" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
     ${REF.stat?`<div class="libnote">${esc(REF.stat)}</div>`:''}</section>
-  <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span></div><div class="rfc rfr"><label>보기<select id="rfV">${[{id:'all',name:'전체'}].concat(sc).map(x=>`<option value="${x.id}"${REF.f===x.id?' selected':''}>${esc(x.id==='all'?'전체':x.id==='_common'?'회사 공통':`${x.kind} · ${x.name}`)} (${x.id==='all'?sc.reduce((n,y)=>n+cnt(y),0):cnt(x)})</option>`).join('')}</select></label><label>항목<span class="rfn">${sc.reduce((n,y)=>n+cnt(y),0)}개 · 사업 ${sc.length-1}곳</span></label></div>
+  <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span></div><div class="rfc rfr"><label>보기<select id="rfV">${(()=>{(S.bus||[]).forEach(b=>b._n=cnt({id:b.id}));const h=`<option value="all"${REF.f==='all'?' selected':''}>전체 (${sc.reduce((n,y)=>n+cnt(y),0)})</option><option value="_common"${REF.f==='_common'?' selected':''}>회사 공통 (${cnt({id:'_common'})})</option>`+bizGroups(REF.f,null);(S.bus||[]).forEach(b=>delete b._n);return h;})()}</select></label><label>항목<span class="rfn">${sc.reduce((n,y)=>n+cnt(y),0)}개 · 사업 ${sc.length-1}곳</span></label></div>
     <div class="scroll">${list}</div></section>`;
   const rv=root.querySelector('#rfV');if(rv)rv.onchange=()=>{REF.f=rv.value;renderRefs();};
   root.querySelectorAll('[data-lb]').forEach(el=>el.onclick=()=>{REF.open=REF.open===el.dataset.lb?null:el.dataset.lb;renderRefs();});if(typeof lazy==='function')lazy(root);
+  $('#rfT').addEventListener('input',e=>{const v=e.target.value,k=$('#rfK');if(k.dataset.touched)return;
+    if(/https?:\/\/(?!(www\.)?instagram\.com)/i.test(v))k.value='비주얼';else if(/@[A-Za-z0-9_.]{2,}|instagram\.com/i.test(v))k.value='영상';});
+  $('#rfK').addEventListener('change',e=>{e.target.dataset.touched='1';});
   let files=[];
   $('#rfI').onchange=e=>{files=[...e.target.files];$('#rfN').textContent=files.length?`${files.length}장`:'';};
   $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const scope=$('#rfS').value,kind=$('#rfK').value;const go=$('#rfGo');go.disabled=true;
