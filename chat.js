@@ -1,6 +1,6 @@
 'use strict';
 /* CHAT: 대표님 ↔ 직원 메신저. 'chat' 이슈 하나에 댓글로 주고받는다. 기본은 팀 토론, 직원을 고르면 그 직원이 답한다. */
-const CH={num:null,msgs:[],to:'team',pending:0,seen:new Set(),timer:null,first:true,lastCount:null,unread:0,hearts:new Set(),unheart:new Set(),att:[],busy:0};
+const CH={num:null,msgs:[],to:'',pending:0,seen:new Set(),timer:null,first:true,lastCount:null,unread:0,hearts:new Set(),unheart:new Set(),att:[],busy:0};
 
 function chatIssue(){return S.issues.find(i=>i.state==='open'&&has(i,'chat'));}
 function chatAgent(body){const m=/<!-- chat:(\w+) -->/.exec(body||'');return m?m[1]:null;}
@@ -8,14 +8,15 @@ function chatVisible(){const p=$('#chatPanel');return p&&(!document.documentElem
 
 function chatTo(){const box=$('#chatTo');if(!box||!S.team)return;
   const btn=(id,n,c)=>`<button type="button" data-to="${id}" class="${id===CH.to?'on':''}" style="--c:${c}" title="${id==='team'?'TOM이 필요한 직원을 골라 묻고 정리':esc((S.team.agents[id]||{}).title||'')}">${esc(n)}</button>`;
-  const order=Object.keys((S.team&&S.team.teams)||{});const groups={};agents().forEach(a=>{(groups[a.team]=groups[a.team]||[]).push(a);});
+  const sec=(S.team.roles||{}).secretary;if(!CH.to)CH.to=sec||'team';
+  const order=Object.keys((S.team&&S.team.teams)||{});const groups={};agents().filter(a=>a.id!==sec).forEach(a=>{(groups[a.team]=groups[a.team]||[]).push(a);});
   const row=(label,c,items)=>`<div class="cg" title="${esc(label)}">${items.join('')}</div>`;
-  box.innerHTML=row('전체','#D9A441',[btn('team','팀','#D9A441')])+order.filter(k=>groups[k]).map(k=>row(S.team.teams[k],TC[k]||'#8E7861',groups[k].map(a=>btn(a.id,a.name,TC[k]||'#8E7861')))).join('');
+  box.innerHTML=row('비서·전체','#D9A441',[...(sec?[btn(sec,(S.team.agents[sec]||{}).name||'비서','#E6C07A')]:[]),btn('team','팀','#D9A441')])+order.filter(k=>groups[k]).map(k=>row(S.team.teams[k],TC[k]||'#8E7861',groups[k].map(a=>btn(a.id,a.name,TC[k]||'#8E7861')))).join('');
   box.querySelectorAll('[data-to]').forEach(b=>b.onclick=()=>{CH.to=b.dataset.to;chatTo();chatHead();$('#chatIn').focus();});
 }
-function chatHead(){const a=S.team&&S.team.agents[CH.to];
-  $('#chatWho').textContent=CH.to==='team'?'TOM이 사람을 골라 묻고 정리':a?`${a.name} · ${a.title}`:'';
-  $('#chatIn').placeholder=CH.to==='team'?'팀에게':a?`${a.name}에게`:'';}
+function chatHead(){const a=S.team&&S.team.agents[CH.to];const sec=(S.team.roles||{}).secretary;
+  $('#chatWho').textContent=CH.to==='team'?'TOM이 사람을 골라 묻고 정리':CH.to===sec?'편하게 말하면 알아서 미션으로':a?`${a.name} · ${a.title}`:'';
+  $('#chatIn').placeholder=CH.to==='team'?'팀에게':CH.to===sec?'하고 싶은 걸 편하게':a?`${a.name}에게`:'';}
 
 async function chatLoad(){
   const it=chatIssue();if(!it){CH.num=null;chatRender();return;}
@@ -43,7 +44,7 @@ function chatRender(){
   const l=$('#chatLog');if(!l)return;const stick=l.scrollHeight-l.scrollTop-l.clientHeight<40;
   const A=(S.team&&S.team.agents)||{};
   l.innerHTML=CH.msgs.slice(-60).map(m=>{const a=A[m.aid]||{};const col=teamCol(m.aid);
-    const to=m.mine&&(refLabel(m.t)?'레퍼런스':((/^@(\S+)/.exec(m.t)||[])[1]||'TOM'));
+    const to=m.mine&&(refLabel(m.t)?'레퍼런스':((/^@(\S+)/.exec(m.t)||[])[1]||(((S.team.agents||{})[(S.team.roles||{}).secretary]||{}).name)||'TOM'));
     const ap=m.mine?attOf(m.t):[];const tx=ap.length?m.t.split(/\n첨부\(/)[0]:m.t;
     return m.mine?`<div class="cm me">${to?`<span class="who" style="color:#A08A72">→ ${esc(to==='팀'?'팀 토론':to)}</span>`:''}<div class="row"><span class="bub">${mdChat(tx)}${ap.length?`<span class="ath">${ap.map(p=>/\.(mp4|mov|m4v|webm)$/i.test(p)?'<span>▶ 영상</span>':`<img data-path="${esc(p)}" alt="">`).join('')}</span>`:''}</span><em>${hhmm(m.at)}</em></div></div>`
       :`<div class="cm" style="--c:${col}"><span class="who" style="color:${col}">${esc(a.name||m.aid)}<i>${esc(teamName(m.aid))}</i></span><div class="row"><span class="bub" data-cid="${m.id}" title="두 번 눌러 ❤">${mdChat(m.t)}${m.heart&&!CH.unheart.has(m.id)?'<b class="hrt">❤</b>':''}</span><em>${hhmm(m.at)}</em></div></div>`;}).join('')
@@ -64,7 +65,7 @@ async function chatSend(){
   if(!t&&!att.length)return;
   if(att.length)t=(t||'첨부한 자료 봐 줘')+'\n첨부(대표님이 고른 자료, 순서대로):\n'+att.join('\n');
   if(!TOKEN){toast('접근키를 먼저 넣어 주세요');return;}
-  const a=S.team.agents[CH.to];const body=(CH.to==='team'?'@팀 ':CH.to==='tom'?'':'@'+a.name+' ')+t;
+  const a=S.team.agents[CH.to];const sec=(S.team.roles||{}).secretary;const body=(CH.to==='team'?'@팀 ':CH.to===sec||(!sec&&CH.to==='tom')?'':'@'+a.name+' ')+t;
   inp.value='';$('#chatGo').disabled=true;
   try{
     if(!CH.num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});CH.num=it.number;S.issues.unshift(it);}
