@@ -99,7 +99,13 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .tk img{width:24px;height:24px;image-rendering:pixelated}
 .tk b{font:600 11px 'IBM Plex Mono',monospace;color:#F4E6CF}
 .tk .mono{font-size:9px}
-.tk p{margin:2px 0 0;font-size:12px;line-height:1.5;color:#E6D6BC;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.tk p{margin:2px 0 0;font-size:12px;line-height:1.5;color:#E6D6BC;text-align:justify;word-break:keep-all}
+.tk .dt{display:none;margin-top:4px;color:#B9A68A;font-size:11px;white-space:pre-line}
+.tk.open .dt{display:block}.tk[data-x]{cursor:pointer}
+.tk .to{font:500 9px 'IBM Plex Mono',monospace;color:#9C8670;margin-left:4px}
+.tk .mr{font:500 9px 'IBM Plex Mono',monospace;color:#9C8670;margin-left:auto;float:right}
+.tk.cc{background:#2A2117;border-left:2px solid #D9A441}.tk.cc p{color:#F4E6CF;font-weight:500}
+.rnd{padding:4px 10px;font:500 9px 'IBM Plex Mono',monospace;color:#8E7861;letter-spacing:.08em;border-bottom:1px solid #2C2018;background:#1A140F}
 .lg{height:23px;display:grid;grid-template-columns:38px 46px minmax(0,1fr);gap:8px;align-items:center;padding:0 10px;font-size:12px}
 .lg b{font:600 11px 'IBM Plex Mono',monospace}
 .lg .ell{color:#E0CFB4}
@@ -847,16 +853,27 @@ async function renderMeeting(){
   $('#mtCap').innerHTML=isLive?'<span style="color:#79B8C9"><i class="d" style="background:#79B8C9"></i>LIVE</span>':(live?'<span style="color:#9C8670">대기 · 엔진 시작 전</span>':'<span class="mu">지난 회의</span>');
   let cs=[];try{cs=await gh(`/issues/${it.number}/comments?per_page=100`)||[];}catch{}
   const byName={ARCHON:'tom',KRITES:'kate',PRAXIS:'jake',EIKON:'emma',KAIROS:'max'};Object.entries(S.team.agents).forEach(([id,a])=>byName[(a.name||'').toUpperCase()]=id);
-  const rows=[];
+  const rows=[];let concl=null;
+  const split=t=>{t=t.replace(/^\**[A-Za-z]+\**\s*(\(\d라운드\))?\s*[:：]\s*/,'').replace(/`?workspace\/\S+?\/([^\/\s`]+?)\.(mp4|mov|jpe?g|png|heic)`?/gi,'영상').trim();
+    const h=/^한줄\s*[:：]\s*(.+)\n?([\s\S]*)$/.exec(t);if(h)return [h[1].trim(),h[2].trim()];
+    const f=(t.match(/^[\s\S]*?[.!?。](\s|$)/)||[t])[0].trim();return [f.length>90?f.slice(0,88)+'…':f,t.slice(f.length).trim()||(f.length>90?t:'')];};
+  const add=(name,rnd,txt)=>{const id=byName[name.toUpperCase()]||name.toLowerCase();const a=S.team.agents[id]||{};const [h,d]=split(strip(txt));
+    const to=(/^([A-Z]{2,6})\s*[,，]/.exec(h)||[])[1];rows.push({id,name,rnd:+rnd,model:(a.model||'').toLowerCase(),h:to?h.replace(/^[A-Z]{2,6}\s*[,，]\s*/,''):h,d,to});};
   for(const c of cs){const b=c.body||'';
     const m=/^\*\*([A-Za-z\-]+)\*\*\s*\((\d)라운드\):\s*([\s\S]*)/.exec(b);
-    if(m){const id=byName[m[1].toUpperCase()]||m[1].toLowerCase();const a=S.team.agents[id]||{};rows.push({id,name:m[1],model:(a.model||'').toLowerCase(),text:strip(m[3])});continue;}
-    if(/^## 회의록/.test(b)){for(const mm of b.matchAll(/\*\*([A-Za-z\-]+)\*\*\s*\((\d)라운드\):\s*([\s\S]*?)(?=\n\n\*\*|\n\n## |$)/g)){const id=byName[mm[1].toUpperCase()]||mm[1].toLowerCase();const a=S.team.agents[id]||{};rows.push({id,name:mm[1],model:(a.model||'').toLowerCase(),text:strip(mm[3])});}}
-    const k=/## 결론\s*\n+([\s\S]*?)(?=\n## |\n남은 이견|$)/.exec(b);
-    if(k){const lead=(S.team.roles||{}).lead||'tom';rows.push({id:lead,name:'결론',model:'',text:strip(k[1])});}
-    else if(c.user&&c.user.login===OWNER&&!m){rows.push({id:null,name:'OWEN',model:'',text:strip(b)});}
+    if(m){add(m[1],m[2],m[3]);continue;}
+    const k=/## 결론\s*\n+([\s\S]*?)(?=\n## |$)/.exec(b);
+    if(k){const [h,d]=split(strip(k[1]));const why=/정한 이유\s*[:：]\s*(.+)/.exec(b);const go=/(M-\d+) 미션/.exec(b);
+      concl={h,d:(d+(why?'\n\n정한 이유: '+strip(why[1]):'')).trim(),go:go?go[1]:''};continue;}
+    if(c.user&&c.user.login===OWNER){rows.push({id:null,name:'OWEN',rnd:0,model:'',h:strip(b),d:''});}
   }
-  $('#talk').innerHTML=rows.length?rows.map(r=>`<div class="tk">${r.id?`<img src="${spriteOf(r.id)}" alt="" onerror="this.src='assets/s-ben.png'">`:'<span></span>'}<div><b>${esc(r.name)}</b> <span class="mono" style="color:${MC[r.model]||'#8E7861'}">${r.model.toUpperCase()}</span><p>${esc(r.text)}</p></div></div>`).join(''):`<div class="empty">${isLive?'발언을 기다리는 중…':'회의 없음'}</div>`;
+  const lead=(S.team.roles||{}).lead||'tom';
+  const row=(r,cls='')=>`<div class="tk ${cls}"${r.d?' data-x':''}>${r.id?`<img src="${spriteOf(r.id)}" alt="" onerror="this.src='assets/s-ben.png'">`:'<span></span>'}<div><b>${esc(r.name)}</b>${r.to?`<span class="to">→ ${esc(r.to)}</span>`:''} <span class="mono" style="color:${MC[r.model]||'#8E7861'}">${(r.model||'').toUpperCase()}</span>${r.d?'<span class="mr">자세히</span>':''}<p>${esc(r.h)}</p>${r.d?`<div class="dt">${esc(r.d)}</div>`:''}</div></div>`;
+  let html='';
+  if(concl)html+=row({id:lead,name:'결론',model:'',h:concl.h+(concl.go?` → ${concl.go} 진행 중`:''),d:concl.d},'cc');
+  let last=-1;for(const r of rows){if(r.rnd&&r.rnd!==last){html+=`<div class="rnd">${r.rnd===1?'1라운드 · 각자 제안':'2라운드 · 반박·보완'}</div>`;last=r.rnd;}html+=row(r);}
+  $('#talk').innerHTML=html||`<div class="empty">${isLive?'발언을 기다리는 중…':'회의 없음'}</div>`;
+  $('#talk').onclick=e=>{const t=e.target.closest('.tk[data-x]');if(t){t.classList.toggle('open');const m=t.querySelector('.mr');if(m)m.textContent=t.classList.contains('open')?'접기':'자세히';}};
 }
 function renderLog(){
   const im={};S.issues.forEach(i=>im[i.url]=i);
@@ -1005,8 +1022,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240413"></script>
-<script src="views.js?v=11240413"></script>
-<script src="chat.js?v=11240413"></script>
+<script src="portfolio.js?v=11240517"></script>
+<script src="views.js?v=11240517"></script>
+<script src="chat.js?v=11240517"></script>
 </body>
 </html>
