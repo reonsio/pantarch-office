@@ -51,11 +51,11 @@ window.renderPortfolio=async function(soft){
   const tabs=(KINDS[b.kind]||KINDS.SERVICE).tabs;if(!PF.tab[b.id]||!tabs.some(t=>t[0]===PF.tab[b.id]))PF.tab[b.id]=tabs[0][0];const cur=PF.tab[b.id];
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column">
     <div class="ph"><span class="cap">PORTFOLIO</span><span class="mono mu" style="font-size:10px">${BL.length} BUSINESS</span></div>
-    <div class="scroll">${side}</div>
+    <div class="scroll bzlist">${side}</div>
     <div style="padding:6px 8px;border-top:1px solid #3A2A1F"><button class="btn" style="width:100%" id="pAddBiz">＋ 사업 추가</button></div>
   </section>
   <section class="pnl" data-nofold style="display:flex;flex-direction:column;min-height:0">
-    <div class="ph" style="height:40px"><span style="display:flex;align-items:baseline;gap:10px"><span class="mono" style="font-size:11px;letter-spacing:1.4px;color:${b.col}">${b.kind}</span><span style="font-size:16px;font-weight:600;color:#F4E6CF">${esc(b.name)}</span><span class="mu" style="font-size:12px">${esc(b.desc)}</span></span>
+    <div class="ph" style="height:40px"><span style="display:flex;align-items:baseline;gap:10px"><span class="mono" style="font-size:11px;letter-spacing:1.4px;color:${b.col}">${b.kind}</span><span style="font-size:16px;font-weight:600;color:#F4E6CF">${esc(b.name)}</span><span class="mu bdesc" style="font-size:12px">${esc(b.desc)}</span></span>
     <span class="tabs" style="grid-template-columns:repeat(${tabs.length},120px)">${tabs.map(([k,l])=>`<button class="btn${k===cur?' on':''}" data-tab="${k}">${l}</button>`).join('')}</span></div>
     <div id="pfBody" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
   </section>`;
@@ -99,15 +99,17 @@ async function pLibrary(body,b){
   const cnt={all:all.length,image:all.filter(x=>x.kind==='image').length,video:all.filter(x=>x.kind==='video').length,todo:all.filter(x=>!x.analyzed).length};
   const f=PF.folder in cnt?PF.folder:'all';
   const shown=all.filter(x=>f==='all'||(f==='todo'?!x.analyzed:x.kind===f)).sort((a,c)=>PF.asc?(a.date||'').localeCompare(c.date||''):(c.date||'').localeCompare(a.date||''));
-  const lab={all:'전체',image:'사진',video:'영상',todo:'미분석'};
-  body.innerHTML=`<div class="ph"><span class="chips">${Object.keys(lab).map(k=>`<button class="btn sbtn${k===f?' on':''}" data-f="${k}" style="width:80px">${lab[k]} ${cnt[k]}</button>`).join('')}<button class="btn sbtn" id="pSort" style="width:80px">${PF.asc?'오래된순':'최신순'}</button></span>
-  <span style="display:flex;gap:6px;align-items:center"><button class="btn sbtn" id="pAna" style="width:120px"${cnt.todo?'':' disabled'}>미분석 ${cnt.todo}개 분석</button><label class="btn sbtn pri" style="width:96px">사진·영상 올리기<input type="file" id="pUp" multiple accept="image/*,video/*" style="display:none"></label></span></div>
-  <div class="libnote">${esc(b.name)} 폴더에 보관합니다. 올리면 엔진이 사진은 한 장씩, 영상은 장면 3컷을 Claude가 직접 보고 시기·장면·표정·스토리 포인트를 기록하고, 찍은 날짜(사진 정보·파일 날짜)순으로 정렬합니다. 40MB 넘는 영상은 나눠 올린 뒤 자동으로 합치고 1080p로 줄입니다. 미션에 이 사업을 지정하면 모든 직원이 이 목록을 보고 일하고, 그림도 직접 봅니다.<span id="upStat" class="upstat">${esc(PF.upStat||'')}</span></div>
-  <div class="scroll"><div class="grid">${shown.map(x=>{const th=(x.thumbs||[])[0];const d=x.desc||{};const cap=(x.date||'').slice(0,10)+(d.period?' · '+d.period:x.pending?' · '+(x.parts?'합치는 중':'분석 대기'):'');
-    return `<div class="tile${x.analyzed?'':' todo'}" data-p="${esc(x.path)}" title="${esc([d.scene,d.expression,d.story].filter(Boolean).join(' / '))}">${th?`<img data-path="${esc(th)}" alt="">`:(x.kind==='image'?`<img data-path="${esc(x.path)}" alt="">`:'<div class="vph mono">VIDEO</div>')}${x.kind==='video'?`<span class="vb">${x.duration?Math.round(x.duration)+'s':'VIDEO'}</span>`:''}<span class="cap2">${esc(cap)}</span></div>`;}).join('')||'<div class="empty">아직 자료가 없습니다. 사진·영상 올리기로 넣어 주세요.</div>'}</div></div>`;
+  const lab={all:'전체',image:'사진',video:'영상'};if(cnt.todo)lab.todo='미분석';
+  const md=x=>{const m=/\d{4}-(\d{2})-(\d{2})/.exec(x||'');return m?`${+m[1]}/${+m[2]}`:'';};
+  const per=d=>(d.period||'').replace(/\s*\(.*?\)\s*/g,'').trim();
+  body.innerHTML=`<div class="ph libbar"><span class="chips">${Object.keys(lab).map(k=>`<button class="btn sbtn${k===f?' on':''}" data-f="${k}">${lab[k]} ${cnt[k]}</button>`).join('')}</span>
+  <span class="chips"><button class="btn sbtn" id="pSort" title="정렬">${PF.asc?'↑ 오래된':'↓ 최신'}</button>${cnt.todo?`<button class="btn sbtn" id="pAna">분석 ${cnt.todo}</button>`:''}<label class="btn sbtn pri" id="pUpL" title="사진은 한 장씩, 영상은 장면 3컷을 Claude가 보고 시기·장면·스토리를 적습니다. 40MB 넘는 영상은 나눠 올려 자동으로 합칩니다.">＋ 올리기<input type="file" id="pUp" multiple accept="image/*,video/*" style="display:none"></label></span></div>
+  ${PF.upStat?`<div class="libnote" id="upStat">${esc(PF.upStat)}</div>`:''}
+  <div class="scroll"><div class="grid">${shown.map(x=>{const th=(x.thumbs||[])[0];const d=x.desc||{};const cap=x.pending?(x.parts?'합치는 중':'분석 대기'):(per(d)||md(x.date));
+    return `<div class="tile${x.analyzed?'':' todo'}" data-p="${esc(x.path)}" title="${esc([md(x.date),d.scene,d.story].filter(Boolean).join(' / '))}">${th?`<img data-path="${esc(th)}" alt="">`:(x.kind==='image'?`<img data-path="${esc(x.path)}" alt="">`:'<div class="vph mono">VIDEO</div>')}${x.kind==='video'?`<span class="vb">${x.duration?Math.round(x.duration)+'s':'REEL'}</span>`:''}${cap?`<span class="cap2">${esc(cap)}</span>`:''}</div>`;}).join('')||'<div class="empty">아직 자료가 없습니다. ＋ 올리기로 넣어 주세요.</div>'}</div></div>`;
   body.querySelectorAll('[data-f]').forEach(el=>el.onclick=()=>{PF.folder=el.dataset.f;renderPortfolio(true);});
   $('#pSort').onclick=()=>{PF.asc=!PF.asc;renderPortfolio(true);};
-  $('#pAna').onclick=async()=>{try{await gh('/actions/workflows/media.yml/dispatches',{method:'POST',body:{ref:'main'}});PF.upStat='분석을 시작했습니다. 몇 분 뒤 설명이 붙습니다.';$('#upStat').textContent=PF.upStat;}catch{toast('실패: 접근키 Actions 권한을 확인해 주세요');}};
+  if($('#pAna'))$('#pAna').onclick=async()=>{try{await gh('/actions/workflows/media.yml/dispatches',{method:'POST',body:{ref:'main'}});PF.upStat='분석을 시작했습니다. 몇 분 뒤 설명이 붙습니다.';renderPortfolio(true);}catch{toast('실패: 접근키 Actions 권한을 확인해 주세요');}};
   body.querySelectorAll('[data-p]').forEach(el=>el.onclick=()=>preview(b,el.dataset.p));
   $('#pUp').onchange=e=>upload(b,[...e.target.files]);
   lazy(body);
@@ -200,7 +202,7 @@ async function shrink(file){
     const c=document.createElement('canvas');c.width=Math.round(bmp.width*k);c.height=Math.round(bmp.height*k);c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);
     return await new Promise(r=>c.toBlob(r,'image/jpeg',.9));}catch{return file;}
 }
-function setUp(t){PF.upStat=t;const e=$('#upStat');if(e)e.textContent=t;}
+function setUp(t){PF.upStat=t;const e=$('#upStat');if(e)e.textContent=t;else if(t&&$('#pfBody'))renderPortfolio(true);}
 async function putFile(path,blob,msg){return gh('/contents/'+path.split('/').map(encodeURIComponent).join('/'),{method:'PUT',body:{message:msg,content:await toB64(blob),branch:'main'}});}
 async function upload(b,files){
   if(!files.length)return;const ym=new Date().toISOString().slice(0,7);let ok=0;const fails=[];const PART=20*1048576;
@@ -227,16 +229,24 @@ function openComposer(b,path){
     m.innerHTML=`<div class="fm" style="width:560px"><div class="ph"><span class="cap" id="cpTitle">NEW POST</span></div><div class="bd">
     <div style="display:grid;grid-template-columns:140px minmax(0,1fr);gap:10px"><div class="tile" id="cpMedia" style="cursor:default"></div>
     <div style="display:grid;gap:8px"><label>형식<select id="cpKind"><option>사진</option><option>영상</option><option>캐러셀</option></select></label><label>게시 시각<input type="datetime-local" id="cpWhen"></label></div></div>
-    <label>캡션 (한 줄 드립)<textarea id="cpCap" rows="3"></textarea></label>
+    <label>캡션 (한 줄 드립)<textarea id="cpCap" rows="2" placeholder="비워 두고 LILY에게 맡기면 써서 결재로 올립니다"></textarea></label>
     <label>해시태그 (첫 댓글)<input id="cpTags" value="#꾸미일기 #강아지 #반려견 #댕스타그램"></label>
     <div class="err" id="cpErr"></div>
-    <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="cpSave">승인하고 예약</button></div></div></div>`;
+    <div class="row" style="grid-template-columns:1fr 1.4fr 1.4fr"><button class="btn" data-close>취소</button><button class="btn" id="cpLily">LILY에게 맡기기</button><button class="btn pri" id="cpSave">승인하고 예약</button></div></div></div>`;
     $('#stage').append(m);m.querySelector('[data-close]').onclick=()=>m.classList.remove('show');}
   $('#cpTitle').textContent='NEW POST · '+b.name;PF.sel=path;const mt=$('#cpMedia');const it0=path&&libItems(b).find(x=>x.path===path);const th0=it0&&(it0.thumbs||[])[0];
   mt.innerHTML=path?(th0||isImg(path)?`<img data-path="${esc(th0||path)}" alt="">`:'<span class="vb">VIDEO</span>')+`<span class="cap2">${esc(path.split('/').pop())}</span>`:'<div class="empty">LIBRARY에서 자료를 고르면 여기에 붙습니다</div>';lazy(mt);
-  $('#cpKind').value=path&&isVid(path)?'영상':'사진';
+  $('#cpKind').value=!path||isVid(path)?'영상':'사진';
   const d=new Date();d.setDate(d.getDate()+1);d.setHours(18,0,0,0);$('#cpWhen').value=new Date(d-d.getTimezoneOffset()*6e4).toISOString().slice(0,16);
   $('#cpCap').value='';$('#cpErr').textContent='';m.classList.add('show');
+  $('#cpLily').onclick=async()=>{if(!PF.sel){$('#cpErr').textContent='LIBRARY에서 자료를 먼저 골라 주세요.';return;}
+    const when=$('#cpWhen').value.replace('T',' ');const kind=$('#cpKind').value;const hint=$('#cpCap').value.trim();const tags=$('#cpTags').value.trim();
+    const body=`꾸미 인스타 ${kind} 게시물 1건의 캡션을 써 주세요.\n\n- 자료: ${PF.sel} (첨부 그림을 직접 보고 쓰세요)\n- 게시 시각: ${when}\n- 캡션: 꾸미 시점 한 줄 드립. 설명조·감성 문구·이모지 남발 금지. 자료실의 시기·장면·스토리 포인트를 살릴 것.\n${hint?`- 대표님 메모: ${hint}\n`:''}- 해시태그: ${tags} 를 기본으로 6~10개 (첫 댓글로 달림)\n\n후보 3개를 짧게 보여 준 뒤, 가장 좋은 것 하나로 [[POST]] 블록을 정확히 1개 만드세요. 파일 경로와 추천 시각은 위 값을 그대로 씁니다.`;
+    const mm={focus:PF.sel,needs_approval:false};
+    $('#cpLily').disabled=true;
+    try{const r=await gh('/issues',{method:'POST',body:{title:'캡션 · '+PF.sel.split('/').pop().slice(0,28),body:body+'\n\n```json meta\n'+JSON.stringify(mm)+'\n```',labels:['task','agent:lily','status:queued','biz:'+b.id]}});
+      m.classList.remove('show');toast(`T-${String(r.number).padStart(3,'0')} LILY가 캡션을 씁니다. 몇 분 뒤 결재함에 올라옵니다`);setTimeout(sync,1200);}
+    catch(e){$('#cpErr').textContent='실패: '+e.message.slice(0,80);}finally{$('#cpLily').disabled=false;}};
   $('#cpSave').onclick=async()=>{const cap=$('#cpCap').value.trim();if(!cap){$('#cpErr').textContent='캡션을 적어 주세요.';return;}
     const when=$('#cpWhen').value.replace('T',' ');const tags=$('#cpTags').value.trim();const kind=$('#cpKind').value;
     const blk=`[[POST]]\n형식: ${kind}\n파일: ${PF.sel||''}\n캡션:\n${cap}\n해시태그: ${tags}\n추천 시각: ${when}\n[[/POST]]`;
