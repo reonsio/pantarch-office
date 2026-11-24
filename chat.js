@@ -113,7 +113,8 @@ function attOf(t){const m=/\n첨부\([^)]*\):\n([\s\S]*)$/.exec(t||'');return m?
 function attRender(){const box=$('#chatAtt');if(!box)return;box.classList.toggle('on',CH.att.length>0);
   box.innerHTML=CH.att.map((a,k)=>`<span class="at${a.path?'':' up'}">${a.url?`<img src="${a.url}" alt="">`:a.vid?'▶ 영상':''}${a.path?'':'<i class="upl">올리는 중</i>'}<em>${k+1}</em>${a.path?`<b data-rm="${k}">×</b>`:''}</span>`).join('');
   box.querySelectorAll('[data-rm]').forEach(x=>x.onclick=()=>{CH.att.splice(+x.dataset.rm,1);attRender();});if(typeof lazy==='function')lazy(box);}
-async function attAdd(files){const b=bizList()[0];if(!b){toast('사업이 없습니다');return;}if(!TOKEN){toast('접근키를 먼저 넣어 주세요');return;}
+async function attAdd(files){if(!TOKEN){toast('접근키를 먼저 넣어 주세요');return;}
+  const b={media:'workspace/',name:'채팅'};/* 채팅 첨부는 어느 사업 라이브러리에도 넣지 않고 workspace/_inbox 에 둔다(라이브러리에 이미 있는 자료면 그걸 씀) */
   if(!PF.tree){try{await loadTree();}catch{}}
   const ym=new Date().toISOString().slice(0,7);
   for(const f of files){if(CH.att.length>=10){toast('한 번에 10개까지');break;}
@@ -128,7 +129,7 @@ async function attAdd(files){const b=bizList()[0];if(!b){toast('사업이 없습
       let sha='',sha0='';try{sha0=await blobSha(f);sha=blob===f?sha0:await blobSha(blob);}catch{}
       const tw=(sha0&&twinOf(b,sha0))||(sha&&twinOf(b,sha));
       if(tw)a.path=tw.path;
-      else{const p=`${b.media}uploads/${ym}/${when}-${base}.${ext}`;await putFile(p,blob,`${b.name} 자료(채팅 첨부): ${f.name}`);a.path=p;(PF.tree||[]).push({path:p,type:'blob',sha});}
+      else{const p=`workspace/_inbox/${ym}/${when}-${base}.${ext}`;await putFile(p,blob,`채팅 첨부: ${f.name}`);a.path=p;(PF.tree||[]).push({path:p,type:'blob',sha});}
     }catch(e){CH.att.splice(CH.att.indexOf(a),1);toast(`${f.name} 첨부 실패: ${e.status===403?'접근키 Contents 권한':String(e.message).slice(0,40)}`);}
     finally{CH.busy--;attRender();}}
 }
