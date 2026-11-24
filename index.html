@@ -355,6 +355,10 @@ html.m #mtab .nb{position:absolute;margin:-18px 0 0 34px;font:600 9px 'IBM Plex 
 #mtTitle:empty{display:none}
 html.m #boardSum{display:none}
 .apc,.doc2,.sum,.ana span,.ap .t,.cn .mu,.mb{text-align:justify;word-break:break-all}
+.ap .why{font-size:11px;line-height:1.5;color:#BFA98C;text-align:justify;word-break:break-all}
+.ap .aps{font-size:11.5px;line-height:1.55;color:#E6D6BC;background:#1B1410;border-left:2px solid #5A4130;padding:5px 8px 0;border-bottom:5px solid #1B1410;white-space:pre-line;text-align:justify;word-break:break-all;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;max-height:calc(1.55em * 4 + 10px);box-sizing:border-box}
+.ap [data-full]{justify-self:start;width:auto;padding:0 10px}
+.apv{line-height:1.35!important}
 </style>
 </head>
 <body>
@@ -405,7 +409,7 @@ html.m #boardSum{display:none}
 </div>
 
 <aside>
-<section class="pnl" data-m="approve" style="display:flex;flex-direction:column;max-height:330px">
+<section class="pnl" data-m="approve" style="display:flex;flex-direction:column;max-height:540px">
 <div class="ph"><span class="cap">APPROVALS</span><span class="mono" style="font-size:10px;color:#E2704F" id="apCap"></span></div>
 <div class="scroll" id="approvals"></div>
 </section>
@@ -759,23 +763,41 @@ function renderApprovals(){
   const rv=S.issues.filter(i=>i.state==='open'&&(has(i,'task')||has(i,'post'))&&(statusOf(i)==='REVIEW'||statusOf(i)==='BLOCKED'));
   const hires=S.issues.filter(i=>i.state==='open'&&has(i,'hire'));
   $('#apCap').textContent=`${rv.length+hires.length} PENDING`;const nb=$('#mtabN');if(nb)nb.textContent=rv.length+hires.length?` ${rv.length+hires.length}`:'';
-  const card=(i,kind)=>{const m=meta(i);let head,who,b;
-    if(kind==='hire'){const a=m.agent||{};head=`<span style="color:${MC[(a.model||'').toLowerCase()]||'#A3ACDB'}">HIRE · ${esc((a.model||'').toUpperCase())}</span>`;who=esc(a.team||'');b=[['승인','채용'],['','의견'],['거절','보류']];}
-    else if(statusOf(i)==='BLOCKED'){const aid=lab(i,'agent:');const a=S.team.agents[aid]||{};head=`<span style="color:#E2704F">BLOCKED · 멈춤</span>`;who=esc(a.name||aid||'');b=[['다시','다시 시도'],['','의견'],['기각','중단']];}
-    else if(has(i,'post')){head=`<span style="color:#E08A5A">POST · ${esc(BIZ[bizOf(i)]?BIZ[bizOf(i)].name:'')}</span>`;who=esc(m.when||'');b=[['승인','게시 승인'],['','의견'],['기각','기각']];}
-    else{const aid=lab(i,'agent:');const a=S.team.agents[aid]||{};head=`<span style="color:#E2704F">TASK · QA ${m.score??'—'}</span>`;who=esc(a.name||aid||'');b=[['승인','승인'],['','의견'],['기각','기각']];}
-    const pm=kind==='post'&&m.media?`<div class="apm" data-pv="${esc(m.media)}" data-bz="${esc(bizOf(i)||'')}">${/\.(mp4|mov|m4v|webm)$/i.test(m.media)?'<span class="apv">▶ 릴스 보기</span>':`<img data-path="${esc(m.media)}" alt="">`}<span class="apc">${esc(m.caption||'')}</span></div>`:'';
-    return `<div class="ap" data-n="${i.number}"><div class="h">${head}<span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${who}</span></div>${pm||`<div class="t ell" data-url="${i.html_url}" title="GitHub에서 열기">${esc(i.title)}</div>`}
+  const bizName=i=>BIZ[bizOf(i)]?BIZ[bizOf(i)].name:'';
+  const card=(i,kind)=>{const m=meta(i);let head,who,b,body='';
+    if(kind==='hire'){const a=m.agent||{};head=`<span style="color:#A3ACDB">채용 결재</span>`;who=esc(a.name||'');b=[['승인','채용'],['','의견'],['거절','보류']];
+      body=`<div class="t">${esc(a.name||'')} · ${esc(a.title||'')} <span class="mu">(${esc((a.model||'').toUpperCase())})</span></div><div class="why">${esc(strip(i.body).split('\n')[0]||'')}</div>`;}
+    else if(statusOf(i)==='BLOCKED'){const aid=lab(i,'agent:');const a=S.team.agents[aid]||{};head=`<span style="color:#E2704F">업무 멈춤 · ${esc(bizName(i))}</span>`;who=esc(a.name||aid||'');b=[['다시','다시 시도'],['','의견'],['기각','중단']];
+      body=`<div class="t">${esc(i.title)}</div><div class="why">작업 중 오류로 멈췄습니다. 다시 시도하거나 중단해 주세요.</div>`;}
+    else if(kind==='post'){const md=m.media||'';const vid=/\.(mp4|mov|m4v|webm)$/i.test(md);const edited=/\/reels\//.test(md);
+      const it=vid&&typeof CAT!=='undefined'&&CAT[bizOf(i)]?(CAT[bizOf(i)].items||[]).find(x=>x.path===md):null;const dur=it&&it.duration?` ${Math.round(it.duration)}초`:'';
+      const label=!md?'파일 없음':vid?(edited?`편집한 릴스${dur}`:`원본 영상${dur}`):'사진';
+      head=`<span style="color:#E08A5A">게시 결재 · ${esc(bizName(i))}</span>`;who=esc(m.when||'');b=[['승인','게시 승인'],['','의견'],['기각','기각']];
+      body=`<div class="apm" data-pv="${esc(md)}" data-bz="${esc(bizOf(i)||'')}">${vid?`<span class="apv">▶<br>${esc(label)}</span>`:md?`<img data-path="${esc(md)}" alt="">`:'<span class="apv">없음</span>'}<span class="apc">${esc(m.caption||'')}</span></div>
+      <div class="why">${vid&&!edited?'<b style="color:#E2704F">편집 전 원본 영상입니다.</b> ':''}눌러서 올라갈 ${vid?'영상':'사진'}을 확인하세요. 승인하면 ${esc(m.when||'추천 시각')}에 인스타 예약, 해시태그는 첫 댓글.</div>`;}
+    else{const aid=lab(i,'agent:');const a=S.team.agents[aid]||{};head=`<span style="color:#D9A441">업무 확인 · ${esc(bizName(i))}</span>`;who=`${esc(a.name||aid||'')} <span class="mu">${esc(a.title||'')}</span>`;b=[['승인','승인'],['','의견'],['기각','기각']];
+      const why=m.replaces?'의견을 반영한 수정본입니다.':m.needs_approval?'최종 결과물입니다. 확인하고 승인해 주세요.':'검수를 여러 번 넘지 못했습니다. 이대로 쓸지 판단해 주세요.';
+      body=`<div class="t">${esc(i.title)}</div><div class="why">${why}</div><div class="aps" data-sum="${i.number}"><span class="mu">결과물 불러오는 중…</span></div><button class="btn sbtn" data-full="${i.number}" type="button">결과물 전체 보기</button>`;}
+    return `<div class="ap" data-n="${i.number}"><div class="h">${head}<span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${who}</span></div>${body}
     <div class="b3">${b.map(([v,l],k)=>`<button class="btn${k===0?' pri':''}" data-act="${v}">${l}</button>`).join('')}</div>
-    <div class="fb"><textarea rows="3" placeholder="의견을 적으면 해당 직원이 반영해 다시 합니다"></textarea><div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn" data-act="x">취소</button><button class="btn pri" data-act="send">보내기</button></div></div></div>`;};
+    <div class="fb"><textarea rows="3" placeholder="의견을 적으면 담당 직원이 반영해 다시 합니다"></textarea><div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn" data-act="x">취소</button><button class="btn pri" data-act="send">보내기</button></div></div></div>`;};
   const sched=S.issues.filter(i=>i.state==='open'&&has(i,'post')&&(has(i,'status:approved')||has(i,'status:scheduled')));
   const schedCard=i=>{const m=meta(i);const sc=has(i,'status:scheduled');return `<div class="ap" data-n="${i.number}"><div class="h"><span style="color:${m.pub_error?'#E2704F':sc?'#7DB79A':'#E2B04A'}">POST · ${m.pub_error?'게시 실패':sc?'게시 예약됨':'예약 접수 중'}</span><span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${esc(m.when||'')}</span></div><div class="t ell" data-url="${i.html_url}">${esc(m.caption||i.title)}</div>${m.pub_error?`<div style="font-size:11px;color:#E2704F">${esc(m.pub_error)}</div>`:''}<div class="b3"><button class="btn pri" data-act="지금 올리기">지금 올리기</button><button class="btn" data-act="${m.pub_error?'다시':'취소'}">${m.pub_error?'다시 시도':'예약 취소'}</button><button class="btn" data-act="open">열기</button></div></div>`;};
   $('#approvals').innerHTML=[...rv.map(i=>card(i,has(i,'post')?'post':'task')),...sched.map(schedCard),...hires.map(i=>card(i,'hire'))].join('')||'<div class="empty">결재할 일 없음</div>';
   if(typeof lazy==='function')lazy($('#approvals'));
+  fillSummaries();
+  if(rv.some(i=>has(i,'post')&&/\/media\/.*\.(mp4|mov)$/i.test(meta(i).media||''))&&typeof CAT!=='undefined'&&!CAT[bizOf(rv[0])]&&!S.catTry){S.catTry=1;(async()=>{try{if(!PF.tree)await loadTree();for(const b of bizList())await loadCatalog(b);renderApprovals();}catch{}})();}
+}
+async function fillSummaries(){
+  for(const el of document.querySelectorAll('#approvals [data-sum]')){const n=+el.dataset.sum;
+    let txt=VW.out[n];if(txt===undefined){try{const cs=await commentsOf(n);const c=[...cs].reverse().find(x=>/검수 \d+점/.test(x.body))||cs[cs.length-1];txt=c?c.body:'';}catch{txt='';}VW.out[n]=txt;}
+    const plain=strip((txt||'').replace(/\[\[HANDOFF\]\][\s\S]*?\[\[\/HANDOFF\]\]/g,'').replace(/<details>[\s\S]*?<\/details>/g,'')).replace(/^#+\s*/gm,'').replace(/workspace\/[\w\-\/.]+\/([\w\-.]+)/g,'$1').replace(/\n{2,}/g,'\n').trim();
+    el.textContent=plain?plain.slice(0,220)+(plain.length>220?'…':''):'제출된 내용 없음';}
 }
 $('#approvals').addEventListener('click',async e=>{
   const pv=e.target.closest('[data-pv]');if(pv&&typeof preview==='function'){const b=bizList().find(x=>x.id===pv.dataset.bz)||bizList()[0];if(!PF.tree){try{await loadTree();}catch{}}preview(b,pv.dataset.pv);return;}
   const t=e.target.closest('[data-url]');if(t){open(t.dataset.url,'_blank','noopener');return;}
+  const fl=e.target.closest('[data-full]');if(fl){VW.sel=+fl.dataset.full;if(MOB)mpane('outputs');else setView('outputs');return;}
   const b=e.target.closest('[data-act]');if(!b)return;const ap=b.closest('.ap');const n=+ap.dataset.n;const act=b.dataset.act;
   if(act==='open'){open(ap.querySelector('[data-url]').dataset.url,'_blank','noopener');return;}
   if(act===''){ap.classList.add('op');ap.querySelector('textarea').focus();return;}

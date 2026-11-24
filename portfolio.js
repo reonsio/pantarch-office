@@ -179,7 +179,7 @@ function ensureModal(){
 }
 async function preview(b,path){
   ensureModal();const m=$('#mPv');const it=libItems(b).find(x=>x.path===path)||{path,kind:isVid(path)?'video':'image'};const d=it.desc||{};
-  $('#pvCap').textContent=(it.date||'').slice(0,16)+' · '+path.split('/').pop();m.classList.add('show');
+  $('#pvCap').textContent=(/\/reels\//.test(path)?'편집한 릴스':isVid(path)?'원본 영상':'사진')+(it.duration?` · ${Math.round(it.duration)}초`:'')+' · '+path.split('/').pop();m.classList.add('show');
   $('#pvMedia').innerHTML='<div class="empty">불러오는 중…</div>';
   try{const u=await blobUrl(path);$('#pvMedia').innerHTML=it.kind==='image'?`<img src="${u}" alt="">`:`<video src="${u}" controls playsinline></video>`;}catch{$('#pvMedia').innerHTML='<div class="empty">불러오기 실패</div>';}
   $('#pvBody').innerHTML=!path.startsWith(b.media)?`<div class="mu" style="font-size:12px">직원이 만든 결과물입니다(${esc(path.split('/').slice(-2,-1)[0]||'')}). 재생해 보고 결재함에서 승인하거나 의견을 남기세요.</div><div class="row"><a class="btn" href="https://github.com/${REPO}/blob/main/${encodeURI(path)}" target="_blank" rel="noopener">GitHub에서 보기</a><button class="btn" data-close2>닫기</button></div>`:`${it.analyzed?`<div class="ana"><b>시기</b><span>${esc(d.period)}</span><b>장면</b><span>${esc(d.scene)}</span><b>표정</b><span>${esc(d.expression)}</span><b>스토리</b><span>${esc(d.story)}</span>${(it.tags||[]).length?`<b>태그</b><span>${it.tags.map(esc).join(' · ')}</span>`:''}</div>`:'<div class="mu" style="font-size:12px">분석 대기</div>'}
