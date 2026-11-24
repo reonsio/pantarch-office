@@ -438,6 +438,7 @@ html.m #boardSum{display:none}
 .ap .aps{font-size:12px;line-height:1.5;color:#F4E6CF;background:#1B1410;border-left:2px solid #D9A441;padding:5px 8px;text-align:justify;word-break:break-all}
 .ap [data-full]{justify-self:start;width:auto;padding:0 10px}
 .apv{line-height:1.35!important}
+.oopen{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0}.oopen .btn{width:auto;padding:0 10px}
 .oshots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:6px 0;align-items:start}.oshots figure{margin:0;border:1px solid #3A2A1F;background:#17110D;min-width:0}.oshots figure.top{grid-column:1/-1}.oshots figure.mo{max-width:300px}.oshots figcaption{font-size:10px;color:#A38C72;padding:4px 6px;border-bottom:1px solid #2C2018;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.oshots img{width:100%;display:block}
 html.m .oshots{grid-template-columns:1fr}
 .apcar{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:3px;margin:4px 0}
@@ -1027,7 +1028,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241507';
+const APPVER='11241513';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1184,8 +1185,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241507"></script>
-<script src="views.js?v=11241507"></script>
-<script src="chat.js?v=11241507"></script>
+<script src="portfolio.js?v=11241513"></script>
+<script src="views.js?v=11241513"></script>
+<script src="chat.js?v=11241513"></script>
 </body>
 </html>

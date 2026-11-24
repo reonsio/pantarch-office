@@ -85,7 +85,8 @@ async function renderOutputs(){
       +o.posts.map((p,k)=>`<div class="opost">${o.posts.length>1?`<div class="mono mu" style="font-size:10px;margin-bottom:4px">게시물 ${k+1}</div>`:''}${p.files.length?`<div class="apcar${p.files.length===1?' one':''}">${p.files.map((f,j)=>/\.(mp4|mov|m4v|webm)$/i.test(f)?`<span data-vid="${esc(f)}" class="ovv">▶ 영상</span>`:`<span><img data-path="${esc(f)}" alt=""><em>${j+1}</em></span>`).join('')}</div>`:''}
         <div class="ocap">${esc(p.cap||'(캡션 없음)')}</div><div class="mono mu ometa">${esc(p.kind||'')}${p.when?' · '+esc(p.when):''}${p.tags?`<br>첫 댓글 ${esc(p.tags)}`:''}</div></div>`).join('')
       +(()=>{const sh=o.imgs.filter(f=>f.includes('/shots/')),rest=o.imgs.filter(f=>!f.includes('/shots/'));const lab=f=>(f.includes('/ref/')?'기준 사이트 · ':'')+(/-pc-top\.jpg$/.test(f)?'노트북 첫 화면':/-pc\.jpg$/.test(f)?'노트북 전체':/-m\.jpg$/.test(f)?'폰':'');
-        return (sh.length?`<div class="oshots">${sh.map(f=>`<figure class="${/-m\.jpg$/.test(f)?'mo':/-pc-top/.test(f)?'top':''}"><figcaption class="mono">${lab(f)} · ${esc(f.split('/').pop().replace(/-[0-9a-f]{5}-(pc-top|pc|m)\.jpg$/,''))}</figcaption><img data-path="${esc(f)}" alt=""></figure>`).join('')}</div>`:'')
+        const pg=[...new Set(sh.filter(f=>!f.includes('/ref/')).map(f=>{const m=/^(workspace\/[^\/]+)\/shots\/(.+)-[0-9a-f]{5}-(?:pc-top|pc|m)\.jpg$/.exec(f);return m?m[1]+'/site/view/'+m[2]+'.html':'';}).filter(Boolean))];
+        return (pg.length?`<div class="oopen">${pg.map(x=>`<button type="button" class="btn sbtn" data-openpage="${esc(x)}">${esc(x.split('/').pop().replace(/\.html$/,''))} 열어 보기</button>`).join('')}</div>`:'')+(sh.length?`<div class="oshots">${sh.map(f=>`<figure class="${/-m\.jpg$/.test(f)?'mo':/-pc-top/.test(f)?'top':''}"><figcaption class="mono">${lab(f)} · ${esc(f.split('/').pop().replace(/-[0-9a-f]{5}-(pc-top|pc|m)\.jpg$/,''))}</figcaption><img data-path="${esc(f)}" alt=""></figure>`).join('')}</div>`:'')
           +(rest.length?`<div class="apcar">${rest.map((f,j)=>`<span><img data-path="${esc(f)}" alt=""><em>${j+1}</em></span>`).join('')}</div>`:'');})()
       +`<p class="osum">${esc(o.one||'제출된 내용 없음')}</p>`
       +(o.qa&&!/^\s*$/.test(o.qa)&&statusOf(sel)==='REVIEW'?`<div class="oqa"><b>검수 의견</b> ${esc(o.qa)}</div>`:'')
@@ -229,3 +230,13 @@ async function renderRefs(){
       setTimeout(()=>poll(1),20000);renderRefs();
     }catch(err){toast('실패: '+(err.status===403?'접근키 권한(Contents·Issues 쓰기)':err.message.slice(0,60)));go.disabled=false;}};
 }
+
+/* 시안 열어 보기: 엔진이 만든 단독 html(사진 포함)을 새 창으로 */
+document.addEventListener('click',async e=>{const b=e.target.closest('[data-openpage]');if(!b)return;
+  const w=window.open('about:blank','_blank');const t=b.textContent;b.textContent='여는 중…';
+  try{const r=await fetch(API+'/contents/'+b.dataset.openpage.split('/').map(encodeURIComponent).join('/')+'?ref=main',{headers:{Accept:'application/vnd.github.raw',Authorization:'Bearer '+TOKEN,'X-GitHub-Api-Version':'2022-11-28'}});
+    if(!r.ok)throw new Error(r.status);
+    const u=URL.createObjectURL(new Blob([await r.arrayBuffer()],{type:'text/html;charset=utf-8'}));
+    if(w)w.location.href=u;else location.href=u;
+  }catch(x){if(w)w.close();if(typeof toast==='function')toast('열지 못했습니다. 잠시 뒤 다시 눌러 주세요.');}
+  b.textContent=t;});
