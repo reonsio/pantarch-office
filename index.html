@@ -594,7 +594,7 @@ const REPO='reonsio/pantarch-hq', OWNER='reonsio', API='https://api.github.com/r
 const LEGACY={archon:'tom',krites:'kate',praxis:'jake',eikon:'emma',kairos:'max'};
 const MC={claude:'#E08A5A',gpt:'#7DB79A',grok:'#A3ACDB'};
 /* 팀 색: 채팅·회의실·활동 기록에서 누가 어느 팀인지 한눈에 */
-const TC={COMMAND:'#D9A441',CHECK:'#D9776A',BUILD:'#7FAFD6',MUSE:'#D69AC0',SCOUT:'#79C0B4',CHANNEL:'#9CC07A',GAME:'#B29CDB'};
+const TC={COMMAND:'#D9A441',CHECK:'#D9776A',BUILD:'#7FAFD6',MUSE:'#D69AC0',SCOUT:'#79C0B4',CHANNEL:'#9CC07A',GAME:'#B29CDB',TECH:'#E0A070'};
 function teamOf(id){const a=(S.team&&S.team.agents||{})[id];return a?a.team:'';}
 function teamCol(id){return TC[teamOf(id)]||'#B9A68A';}
 function teamName(id){const k=teamOf(id);return ((S.team||{}).teams||{})[k]||'';}
@@ -624,6 +624,7 @@ const ROOMS={
  PANTRY:{door:[330,420],label:[95,72],ko:'탕비실'},
  LOUNGE:{door:[300,600],label:[95,952],ko:'라운지'},
  CEO:{door:[1600,600],corr:[1560,CORR],label:[1575,478],ko:'대표실'},
+ TECH:{door:[1600,860],corr:[1560,CORR],label:[1575,952],ko:'기술팀 · 서버실'},
 };
 const OFF=[[-105,-45],[110,-45],[-105,40],[110,40]];
 const MEET_SEATS=[[1730,165],[1652,215],[1810,215],[1652,320],[1810,320],[1652,268],[1810,268],[1730,410]];
@@ -691,6 +692,7 @@ function homes(){ // id -> {room,pos}
   const lead=(S.team.roles||{}).lead||'tom',sec=(S.team.roles||{}).secretary;
   const extra=[];
   if(sec&&byTeam[(S.team.agents[sec]||{}).team]){byTeam[S.team.agents[sec].team]=byTeam[S.team.agents[sec].team].filter(i=>i!==sec);out[sec]={room:'CEO',pos:[1800,650]};}
+  (byTeam.TECH||[]).forEach((id,k)=>out[id]={room:'TECH',pos:[[1668,850],[1772,850],[1720,800],[1720,890]][k%4]});delete byTeam.TECH;
   for(const [team,ids] of Object.entries(byTeam)){
     if(!ROOMS[team]||!ROOMS[team].pod){ids.forEach(i=>i===lead?out[i]={room:'MEETING',pos:MEET_SEATS[0]}:extra.push(i));continue;}
     ids.forEach((id,k)=>{if(k<4){const [cx,cy]=ROOMS[team].pod;out[id]={room:team,pos:[cx+OFF[k][0],cy+OFF[k][1]]};}else extra.push(id);});
@@ -806,6 +808,7 @@ function renderPlan(){
     const [l,t]=P(...r.label);const d=document.createElement('div');d.className='rl';d.style.left=l+'%';d.style.top=t+'%';
     let extra='';
 
+    if(room==='TECH'){const run=S.runs&&S.runs[0];extra=run?' · RUN #'+run.run_number:'';}
     if(room==='MEETING') extra=lm&&has(lm,'live')?' · <span style="color:#79B8C9">LIVE</span>':'';
     d.innerHTML=`<b>${room}</b>${r.ko}${extra}`;plan.append(d);
     if(r.pod){const used=new Set(list.filter(a=>HOMES[a.id].room===room).map(a=>HOMES[a.id].pos.join()));
@@ -814,8 +817,7 @@ function renderPlan(){
         else{const who=list.find(a=>HOMES[a.id].pos.join()===pos.join());const g=AG[who.id];if(g&&g.room===room&&!g.path.length&&Math.hypot(g.x-pos[0],g.y-pos[1])<2)return;s.className='seat';s.title=who.name+' 자리';}
         s.style.left=sl+'%';s.style.top=stp+'%';plan.append(s);});}
   }
-  const [el,et]=P(1575,952);const e=document.createElement('div');e.className='rl';e.style.left=el+'%';e.style.top=et+'%';
-  const run=S.runs&&S.runs[0];e.innerHTML=`<b>ENGINE</b>서버실${run?' · RUN #'+run.run_number:''}`;plan.append(e);
+
 }
 function showCard(id){
   const a=S.team.agents[id];if(!a)return;const {st,task}=agentState(id);const g=AG[id];
@@ -1018,7 +1020,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241233';
+const APPVER='11241237';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1154,8 +1156,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241233"></script>
-<script src="views.js?v=11241233"></script>
-<script src="chat.js?v=11241233"></script>
+<script src="portfolio.js?v=11241237"></script>
+<script src="views.js?v=11241237"></script>
+<script src="chat.js?v=11241237"></script>
 </body>
 </html>
