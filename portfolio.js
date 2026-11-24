@@ -279,19 +279,20 @@ function openAddBiz(){
     m.innerHTML=`<div class="fm"><div class="ph"><span class="cap">NEW BUSINESS</span></div><div class="bd">
     <div class="row"><label>사업 이름<input id="bzName" maxlength="30" placeholder="예: 동네 카페"></label><label>영문 코드<input id="bzId" maxlength="20" placeholder="예: cafe"></label></div>
     <label>유형<select id="bzKind"><option value="BRAND">BRAND · 콘텐츠·SNS 브랜드 (캘린더·자료실·게시)</option><option value="PRODUCT">PRODUCT · 만드는 제품 (마일스톤·문서·빌드)</option><option value="SERVICE">SERVICE · 운영·서비스 (마일스톤·문서)</option></select></label>
-    <label>한 줄 설명<input id="bzDesc" maxlength="60"></label>
-    <label>첫 미션 (선택)<textarea id="bzMission" rows="4" placeholder="적으면 등록과 동시에 TOM이 업무로 나눕니다"></textarea></label>
+    <label>한 줄 설명<input id="bzDesc" maxlength="60" placeholder="누구에게 무엇을"></label>
+    <label>인스타 계정 (BRAND · 선택)<input id="bzHandle" maxlength="40" placeholder="@계정 · 성과 수집과 게시 채널로 씀"></label>
+    <label>첫 미션 (선택)<textarea id="bzMission" rows="4" placeholder="비워 두면 TOM이 사업 착수 계획(방향·기둥·운영 리듬·첫 2주 할 일)부터 만들어 결재로 올립니다"></textarea></label>
     <div class="err" id="bzErr"></div>
     <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="bzSave">사업 등록</button></div></div></div>`;
     $('#stage').append(m);m.querySelector('[data-close]').onclick=()=>m.classList.remove('show');}
-  ['bzName','bzId','bzDesc','bzMission'].forEach(k=>$('#'+k).value='');$('#bzErr').textContent='';m.classList.add('show');
+  ['bzName','bzId','bzDesc','bzHandle','bzMission'].forEach(k=>$('#'+k).value='');$('#bzErr').textContent='';m.classList.add('show');
   $('#bzSave').onclick=async()=>{const name=$('#bzName').value.trim(),id=$('#bzId').value.trim().toLowerCase();
     if(!name){$('#bzErr').textContent='사업 이름을 적어 주세요.';return;}
     if(!/^[a-z][a-z0-9-]{1,19}$/.test(id)){$('#bzErr').textContent='영문 코드는 영문 소문자로 시작하고 영문·숫자·하이픈만 씁니다.';return;}
     if((S.bus||[]).some(b=>b.id===id)){$('#bzErr').textContent='이미 있는 코드입니다.';return;}
-    const meta={id,name,kind:$('#bzKind').value,desc:$('#bzDesc').value.trim(),mission:$('#bzMission').value.trim()};
+    const meta={id,name,kind:$('#bzKind').value,desc:$('#bzDesc').value.trim(),handle:$('#bzHandle').value.trim().replace(/^@/,''),mission:$('#bzMission').value.trim()};
     $('#bzSave').disabled=true;
     try{await gh('/issues',{method:'POST',body:{title:'사업 등록: '+name,body:`${meta.kind} · ${name}\n${meta.desc}\n\n\`\`\`json meta\n${JSON.stringify(meta)}\n\`\`\``,labels:['business']}});
-      m.classList.remove('show');toast(`${name} 등록 요청 · 엔진이 1~2분 안에 사업 목록에 넣습니다`);setTimeout(sync,1500);}
+      m.classList.remove('show');toast(`${name} 등록 요청 · 1~2분 안에 등록되고 TOM이 첫 미션을 시작합니다`);setTimeout(sync,1500);}
     catch(e){$('#bzErr').textContent='실패: '+e.message.slice(0,80);}finally{$('#bzSave').disabled=false;}};
 }
