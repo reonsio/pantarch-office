@@ -126,11 +126,12 @@ function pQueue(body,b){
   body.innerHTML=`<div class="ph"><span class="cap">POST QUEUE · ${ps.filter(i=>i.state==='open').length} OPEN</span><button class="btn sbtn pri" id="pNew" style="width:84px">＋ 게시물</button></div>
   <div class="pqh"><span>MEDIA</span><span>CAPTION</span><span>WHEN</span><span>STATUS</span><span>DECISION</span></div>
   <div class="scroll">${ps.map(i=>{const m=meta(i);const st=pStatus(i);const [l,c]=PST[st]||[st,'#A08A72'];const d=postDate(i);
-    return `<div class="pq" data-n="${i.number}">${m.media&&isImg(m.media)&&m.media.startsWith('workspace/')?`<img data-path="${esc(m.media)}" alt="">`:`<div class="mono mu" style="font-size:9px;text-align:center">${esc(m.kind||'—')}</div>`}
+    return `<div class="pq" data-n="${i.number}">${m.media&&isImg(m.media)&&m.media.startsWith('workspace/')?`<img data-path="${esc(m.media)}" data-pv2="${esc(m.media)}" alt="" style="cursor:pointer">`:m.media&&isVid(m.media)?`<div class="mono" data-pv2="${esc(m.media)}" style="font-size:9px;text-align:center;color:#D9A441;cursor:pointer">▶ 릴스</div>`:`<div class="mono mu" style="font-size:9px;text-align:center">${esc(m.kind||'—')}</div>`}
     <div><div class="cp">${esc(m.caption||i.title)}</div><div class="mono mu" style="font-size:10px;margin-top:2px"><b style="color:#D9A441">${code(i)}</b> · ${esc((m.hashtags||'').slice(0,60))}</div></div>
     <span class="mono" style="font-size:11px">${d?`${d.getMonth()+1}/${d.getDate()} ${WD[d.getDay()]} ${d.toTimeString().slice(0,5)}`:esc(m.when||'—')}</span>
     <span class="mono" style="font-size:11px;color:${c}"><i class="d" style="background:${c}"></i>${l}</span>
     <div>${st==='REVIEW'?`<div class="b3"><button class="btn pri" data-act="승인">게시 승인</button><button class="btn" data-act="">의견</button><button class="btn" data-act="기각">기각</button></div>`:(st==='APPROVED'||st==='SCHEDULED')?`<div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn pri" data-act="지금 올리기">지금 올리기</button>${m.pub_error?'<button class="btn" data-act="다시">다시 시도</button>':'<button class="btn" data-act="기각">취소</button>'}</div>${m.pub_error?`<div style="font-size:11px;color:#E2704F;margin-top:3px">${esc(m.pub_error)}</div>`:''}`:'<span class="mu" style="font-size:11px">—</span>'}</div></div>`;}).join('')||'<div class="empty">게시물이 없습니다. 직원 결과물의 [[POST]] 블록이나 ＋ 게시물로 생깁니다.</div>'}</div>`;
+  body.querySelectorAll('[data-pv2]').forEach(el=>el.onclick=()=>preview(b,el.dataset.pv2));
   body.querySelectorAll('[data-act]').forEach(btn=>btn.onclick=async()=>{const n=+btn.closest('[data-n]').dataset.n;let txt=btn.dataset.act;
     if(!txt){txt=prompt('의견을 적어 주세요. LILY가 반영해서 다시 만듭니다.');if(!txt)return;}
     btn.disabled=true;try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body:txt}});toast(`${codeN(n)} 처리했습니다`);setTimeout(sync,1500);}catch(e){toast('실패: '+e.message.slice(0,60));btn.disabled=false;}});
@@ -183,9 +184,10 @@ async function preview(b,path){
   $('#pvCap').textContent=(it.date||'').slice(0,16)+' · '+path.split('/').pop();m.classList.add('show');
   $('#pvMedia').innerHTML='<div class="empty">불러오는 중…</div>';
   try{const u=await blobUrl(path);$('#pvMedia').innerHTML=it.kind==='image'?`<img src="${u}" alt="">`:`<video src="${u}" controls playsinline></video>`;}catch{$('#pvMedia').innerHTML='<div class="empty">불러오기 실패</div>';}
-  $('#pvBody').innerHTML=`${it.analyzed?`<div class="ana"><b>시기</b><span>${esc(d.period)}</span><b>장면</b><span>${esc(d.scene)}</span><b>표정</b><span>${esc(d.expression)}</span><b>스토리</b><span>${esc(d.story)}</span>${(it.tags||[]).length?`<b>태그</b><span>${it.tags.map(esc).join(' · ')}</span>`:''}</div>`:'<div class="mu" style="font-size:12px">아직 분석 전입니다. 엔진이 곧 설명을 붙입니다.</div>'}
+  $('#pvBody').innerHTML=!path.startsWith(b.media)?`<div class="mu" style="font-size:12px">직원이 만든 결과물입니다(${esc(path.split('/').slice(-2,-1)[0]||'')}). 재생해 보고 결재함에서 승인하거나 의견을 남기세요.</div><div class="row"><a class="btn" href="https://github.com/${REPO}/blob/main/${encodeURI(path)}" target="_blank" rel="noopener">GitHub에서 보기</a><button class="btn" data-close2>닫기</button></div>`:`${it.analyzed?`<div class="ana"><b>시기</b><span>${esc(d.period)}</span><b>장면</b><span>${esc(d.scene)}</span><b>표정</b><span>${esc(d.expression)}</span><b>스토리</b><span>${esc(d.story)}</span>${(it.tags||[]).length?`<b>태그</b><span>${it.tags.map(esc).join(' · ')}</span>`:''}</div>`:'<div class="mu" style="font-size:12px">아직 분석 전입니다. 엔진이 곧 설명을 붙입니다.</div>'}
   <div class="row"><a class="btn" href="https://github.com/${REPO}/blob/main/${encodeURI(path)}" target="_blank" rel="noopener">GitHub에서 보기</a><button class="btn pri" id="pvUse">이 자료로 게시물 만들기</button></div>`;
-  $('#pvUse').onclick=()=>{m.classList.remove('show');openComposer(b,path);};
+  if($('#pvUse'))$('#pvUse').onclick=()=>{m.classList.remove('show');openComposer(b,path);};
+  const c2=m.querySelector('[data-close2]');if(c2)c2.onclick=()=>m.classList.remove('show');
 }
 async function exifDate(file){
   try{if(!/jpe?g/i.test(file.type))return null;const buf=new DataView(await file.slice(0,262144).arrayBuffer());
