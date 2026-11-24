@@ -876,7 +876,7 @@ async function sync(){
     renderPlan();events();renderRoster();renderBoard();renderKpis();renderApprovals();renderLog();renderFooter();await renderMeeting();
     const sig=S.issues.map(i=>i.number+':'+i.updated_at).join()+'|'+(S.bus||[]).length;
     renderWork();renderLegend();if(window.chatSync)chatSync();
-    if(sig!==S.sig){S.sig=sig;if(!document.querySelector('.mask.show')&&!(typeof PB!=='undefined'&&PB.edit)){if(VIEW==='portfolio')renderPortfolio(true);else if(VIEWS[VIEW]&&VIEW!=='playbook'&&VIEW!=='connections')VIEWS[VIEW][1]();}}
+    if(sig!==S.sig){S.sig=sig;if(!document.querySelector('.mask.show')&&!(typeof PB!=='undefined'&&PB.edit)){if(VIEW==='portfolio')renderPortfolio(true);else if(VIEWS[VIEW]&&VIEW!=='playbook'&&VIEW!=='connections'&&VIEW!=='refs')VIEWS[VIEW][1]();}}
   }catch(e){
     if(e.status===401){showKey('키가 만료됐거나 지워졌습니다. 새 키를 넣어 주세요.');}
     else if(e.status===403||e.status===404){toast(/rate limit/i.test(e.message)?'GitHub 요청 한도 · 잠시 후 다시 시도합니다':'접근 거부('+e.status+') · 키 권한을 확인해 주세요');}
@@ -961,7 +961,8 @@ const VIEWS={portfolio:['#portfolio',()=>window.renderPortfolio&&renderPortfolio
 let VIEW='office';
 function setView(v){VIEW=v;document.querySelectorAll('header nav a').forEach(x=>x.classList.toggle('on',x.dataset.go===v));$('main').style.display=v==='office'?'':'none';
   for(const [k,[sel]] of Object.entries(VIEWS)) $(sel).style.display=k===v?'grid':'none';
-  if(VIEWS[v]&&S.team) VIEWS[v][1]();}
+  if(VIEWS[v]&&S.team){try{const r=VIEWS[v][1]();if(r&&r.catch)r.catch(viewErr(v));}catch(e){viewErr(v)(e);}}}
+function viewErr(v){return e=>{console.error(e);const el=$(VIEWS[v][0]);if(el)el.innerHTML=`<section class="pnl"><div class="empty">화면을 불러오지 못했습니다. 새로고침해 주세요. (${esc(String(e&&e.message||e).slice(0,80))})</div></section>`;};}
 document.querySelectorAll('nav a').forEach(a=>a.onclick=()=>{const go=a.dataset.go;
   setView(go);});
 addEventListener('keydown',e=>{if(e.key==='Escape')document.querySelectorAll('.mask.show').forEach(m=>{if(m.id!=='mKey'||TOKEN)m.classList.remove('show');});});
@@ -986,8 +987,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js"></script>
-<script src="views.js"></script>
-<script src="chat.js"></script>
+<script src="portfolio.js?v=11240210"></script>
+<script src="views.js?v=11240210"></script>
+<script src="chat.js?v=11240210"></script>
 </body>
 </html>
