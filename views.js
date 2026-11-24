@@ -83,7 +83,7 @@ async function renderConnections(){
   const ig=cx.instagram||null,mods=cx.models||{};
   const igState=!ig?'점검 전':ig.ok?'연결됨':'문제 있음';
   const igDesc=!ig?'아직 연결 점검을 돌리지 않았습니다. 아래 연결 점검을 누르세요.':ig.ok?`Upload-Post 프로필 ${esc(ig.profile)} · ${esc(ig.instagram)}. 게시 승인하면 추천 시각에 예약되고 해시태그는 첫 댓글로 답니다.${ig.plan?' · 플랜 '+esc(String(ig.plan)):''} · ${hhmm(ig.checked)} 점검`:`${esc(ig.problem||'')} · ${hhmm(ig.checked)} 점검`;
-  const mState=k=>mods[k]===false?'키 없음':'연결됨';
+  const mState=k=>mods[k]===false?'키 없음':'연결됨';const em=cx.engine_models||{};const gm=em.grok||{};
   const list=agents();const cnt={claude:0,gpt:0,grok:0};list.forEach(a=>cnt[a.model]=(cnt[a.model]||0)+1);
   const runRow=r=>{const run=r.status!=='completed';const col=run?'#E2B04A':(r.conclusion==='success'?'#7DB79A':'#E2704F');const dur=r.run_started_at?Math.round((new Date(r.updated_at)-new Date(r.run_started_at))/1000):0;
     return `<div class="tr" style="grid-template-columns:60px 90px minmax(0,1fr) 70px" onclick="open('${r.html_url}','_blank','noopener')"><span class="mono" style="color:#D9A441">#${r.run_number}</span><span class="mono" style="color:${col}"><i class="d" style="background:${col}"></i>${run?'RUNNING':(r.conclusion||'').toUpperCase()}</span><span class="mono mu">${esc(r.event)} · ${hhmm(r.run_started_at||r.created_at)}</span><span class="mono r mu">${Math.floor(dur/60)}m ${String(dur%60).padStart(2,'0')}s</span></div>`;};
@@ -91,8 +91,8 @@ async function renderConnections(){
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0;overflow:auto"><div class="ph"><span class="cap">CONNECTIONS</span><span class="mono mu" style="font-size:10px">키는 GitHub Secrets에만 있습니다</span></div>
    <div class="cgrid">
     ${card('MODEL','Claude',MC.claude,mState('claude'),mods.claude!==false,`Pro 구독 · 직원 ${cnt.claude}명 · 자료 분석 담당`)}
-    ${card('MODEL','GPT',MC.gpt,mState('gpt'),mods.gpt!==false,`OpenAI 크레딧 · 직원 ${cnt.gpt}명 · 그림을 같이 봄`)}
-    ${card('MODEL','Grok',MC.grok,mState('grok'),mods.grok!==false,`xAI 선불 · 직원 ${cnt.grok}명 · 그림을 같이 봄`)}
+    ${card('MODEL','GPT',MC.gpt,mState('gpt'),mods.gpt!==false,`${esc((em.gpt||{}).model||'OpenAI')} · 직원 ${cnt.gpt}명 · 그림을 같이 봄`)}
+    ${card('MODEL','Grok',MC.grok,mState('grok'),mods.grok!==false,`${esc(gm.model||'xAI')} · 직원 ${cnt.grok}명 · ${gm.search?'웹·X 실시간 검색 확인됨':gm.search===false?'실시간 검색 실패':'검색 점검 전'}`)}
     ${card('ENGINE','GitHub Actions','#D9A441',runs[0]?(runs[0].status!=='completed'?'실행 중':runs[0].conclusion==='success'?'정상':'오류'):'—',!runs[0]||runs[0].conclusion!=='failure','미션·회의·결재·업무 처리. 새 일이 생기면 바로, 남은 일이 있으면 스스로 이어서 돕니다.')}
     ${card('CHANNEL','Instagram · 꾸미','#E08A5A',igState,!!(ig&&ig.ok),igDesc)}
     ${card('DEVICE','이 기기 접근키','#A3ACDB',TOKEN?'연결됨':'없음',!!TOKEN,'이 브라우저에만 저장. 다른 기기는 따로 키를 넣습니다.')}
