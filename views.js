@@ -178,9 +178,9 @@ async function renderRefs(){
     <textarea id="rfT" rows="3" placeholder="@계정 · 링크 · 문구 · 캡처"></textarea>
     <div class="rfb"><label class="btn sbtn">사진·영상<input type="file" id="rfI" multiple accept="image/*,video/*" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
     ${REF.stat?`<div class="libnote">${esc(REF.stat)}</div>`:''}</section>
-  <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span></div><div class="rfc">${[{id:'all',name:'전체'}].concat(sc).map(x=>`<button class="btn sbtn${REF.f===x.id?' on':''}" data-rf="${x.id}">${esc(x.id==='_common'?'공통':x.name)}<em>${x.id==='all'?sc.reduce((n,y)=>n+cnt(y),0):cnt(x)}</em></button>`).join('')}</div>
+  <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span></div><div class="rfc rfr"><label>보기<select id="rfV">${[{id:'all',name:'전체'}].concat(sc).map(x=>`<option value="${x.id}"${REF.f===x.id?' selected':''}>${esc(x.id==='all'?'전체':x.id==='_common'?'회사 공통':`${x.kind} · ${x.name}`)} (${x.id==='all'?sc.reduce((n,y)=>n+cnt(y),0):cnt(x)})</option>`).join('')}</select></label><label>항목<span class="rfn">${sc.reduce((n,y)=>n+cnt(y),0)}개 · 사업 ${sc.length-1}곳</span></label></div>
     <div class="scroll">${list}</div></section>`;
-  root.querySelectorAll('[data-rf]').forEach(el=>el.onclick=()=>{REF.f=el.dataset.rf;renderRefs();});
+  const rv=root.querySelector('#rfV');if(rv)rv.onchange=()=>{REF.f=rv.value;renderRefs();};
   let files=[];
   $('#rfI').onchange=e=>{files=[...e.target.files];$('#rfN').textContent=files.length?`${files.length}장`:'';};
   $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const scope=$('#rfS').value,kind=$('#rfK').value;const go=$('#rfGo');go.disabled=true;
