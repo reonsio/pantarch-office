@@ -6,7 +6,7 @@ const KINDS={
   SERVICE:{tabs:[['milestones','MILESTONES'],['docs','DOCS']]},
 };
 function bizList(){return (S.bus||[]).map(b=>({...b,col:b.color||KCOL[b.kind],media:`workspace/${b.id}/media/`,dir:`workspace/${b.id}/`}));}
-const PF={biz:null,tab:{},tree:null,folder:'all',sel:null,doc:null};
+const PF={biz:null,tab:{},tree:null,folder:'all',sel:null,doc:null,asc:true};
 const BLOB={};
 
 async function loadTree(){
@@ -93,20 +93,27 @@ function pCalendar(body,b){
   body.querySelectorAll('[data-url]').forEach(el=>el.onclick=()=>open(el.dataset.url,'_blank','noopener'));
   $('#pNew').onclick=()=>openComposer(b,null);lazy(body);
 }
+function chron(xs,W){const out=[];let key=null;
+  for(const x of xs){const w=W(x);const k=w?w.slice(0,7):'미정';
+    if(k!==key){key=k;const ages=[...new Set(xs.filter(y=>(W(y)||'').slice(0,7)===k&&'age_m' in y).map(y=>y.age_m))];
+      out.push([[k==='미정'?'시기 미정':`${k.slice(0,4)}.${k.slice(5,7)}`,k==='미정'?'분석이 끝나면 자리를 찾아갑니다':ages.length?`생후 ${Math.min(...ages)}${ages.length>1?'~'+Math.max(...ages):''}개월`:''],[]]);}
+    out[out.length-1][1].push(x);}
+  return out;}
 async function pLibrary(body,b){
   await loadCatalog(b);
   const all=libItems(b);
   const cnt={all:all.length,image:all.filter(x=>x.kind==='image').length,video:all.filter(x=>x.kind==='video').length,todo:all.filter(x=>!x.analyzed).length};
   const f=PF.folder in cnt?PF.folder:'all';
-  const shown=all.filter(x=>f==='all'||(f==='todo'?!x.analyzed:x.kind===f)).sort((a,c)=>PF.asc?(a.date||'').localeCompare(c.date||''):(c.date||'').localeCompare(a.date||''));
+  const W=x=>x.when||(x.date_src==='추정'?'':x.date)||'';
+  const shown=all.filter(x=>f==='all'||(f==='todo'?!x.analyzed:x.kind===f)).sort((a,c)=>{const A=W(a),C=W(c);if(!A||!C)return (!A)-(!C);return PF.asc?A.localeCompare(C):C.localeCompare(A);});
   const lab={all:'전체',image:'사진',video:'영상'};if(cnt.todo)lab.todo='미분석';
   const md=x=>{const m=/\d{4}-(\d{2})-(\d{2})/.exec(x||'');return m?`${+m[1]}/${+m[2]}`:'';};
   const per=d=>(d.period||'').replace(/\s*\(.*?\)\s*/g,'').trim();
   body.innerHTML=`<div class="ph libbar"><span class="chips">${Object.keys(lab).map(k=>`<button class="btn sbtn${k===f?' on':''}" data-f="${k}">${lab[k]} ${cnt[k]}</button>`).join('')}</span>
-  <span class="chips"><button class="btn sbtn" id="pSort" title="정렬">${PF.asc?'↑ 오래된':'↓ 최신'}</button>${cnt.todo?`<button class="btn sbtn" id="pAna">분석 ${cnt.todo}</button>`:''}<label class="btn sbtn pri" id="pUpL" title="사진은 한 장씩, 영상은 장면 3컷을 Claude가 보고 시기·장면·스토리를 적습니다. 40MB 넘는 영상은 나눠 올려 자동으로 합칩니다.">＋ 올리기<input type="file" id="pUp" multiple accept="image/*,video/*" style="display:none"></label></span></div>
+  <span class="chips"><button class="btn sbtn" id="pSort" title="정렬">${PF.asc?'↑ 어릴 때부터':'↓ 지금부터'}</button>${cnt.todo?`<button class="btn sbtn" id="pAna">분석 ${cnt.todo}</button>`:''}<label class="btn sbtn pri" id="pUpL" title="사진은 한 장씩, 영상은 장면 3컷을 Claude가 보고 시기·장면·스토리를 적습니다. 40MB 넘는 영상은 나눠 올려 자동으로 합칩니다.">＋ 올리기<input type="file" id="pUp" multiple accept="image/*,video/*" style="display:none"></label></span></div>
   ${PF.upStat?`<div class="libnote" id="upStat">${esc(PF.upStat)}</div>`:''}
-  <div class="scroll"><div class="grid">${shown.map(x=>{const th=(x.thumbs||[])[0];const d=x.desc||{};const cap=x.pending?(x.parts?'합치는 중':'분석 대기'):(per(d)||md(x.date));
-    return `<div class="tile${x.analyzed?'':' todo'}" data-p="${esc(x.path)}" title="${esc([md(x.date),d.scene,d.story].filter(Boolean).join(' / '))}">${th?`<img data-path="${esc(th)}" alt="">`:(x.kind==='image'?`<img data-path="${esc(x.path)}" alt="">`:'<div class="vph mono">VIDEO</div>')}${x.kind==='video'?`<span class="vb">${x.duration?Math.round(x.duration)+'s':'REEL'}</span>`:''}${cap?`<span class="cap2">${esc(cap)}</span>`:''}</div>`;}).join('')||'<div class="empty">아직 자료가 없습니다. ＋ 올리기로 넣어 주세요.</div>'}</div></div>`;
+  <div class="scroll">${chron(shown,W).map(([h,xs])=>`<div class="chh2"><b>${esc(h[0])}</b><span>${esc(h[1])}</span><em>${xs.length}</em></div><div class="grid">${xs.map(x=>{const th=(x.thumbs||[])[0];const d=x.desc||{};const cap=x.pending?(x.parts?'합치는 중':'분석 대기'):('age_m' in x?`${x.age_m}개월${x.age_est?' 추정':''}`:'')+(d.scene?` · ${d.scene}`:'');
+    return `<div class="tile${x.analyzed?'':' todo'}" data-p="${esc(x.path)}" title="${esc([md(x.date),d.scene,d.story].filter(Boolean).join(' / '))}">${th?`<img data-path="${esc(th)}" alt="">`:(x.kind==='image'?`<img data-path="${esc(x.path)}" alt="">`:'<div class="vph mono">VIDEO</div>')}${x.kind==='video'?`<span class="vb">${x.duration?Math.round(x.duration)+'s':'REEL'}</span>`:''}${cap?`<span class="cap2">${esc(cap)}</span>`:''}</div>`;}).join('')}</div>`).join('')||'<div class="empty">아직 자료가 없습니다. ＋ 올리기로 넣어 주세요.</div>'}</div>`;
   body.querySelectorAll('[data-f]').forEach(el=>el.onclick=()=>{PF.folder=el.dataset.f;renderPortfolio(true);});
   $('#pSort').onclick=()=>{PF.asc=!PF.asc;renderPortfolio(true);};
   if($('#pAna'))$('#pAna').onclick=async()=>{try{await gh('/actions/workflows/media.yml/dispatches',{method:'POST',body:{ref:'main'}});PF.upStat='분석을 시작했습니다. 몇 분 뒤 설명이 붙습니다.';renderPortfolio(true);}catch{toast('실패: 접근키 Actions 권한을 확인해 주세요');}};
@@ -207,10 +214,10 @@ async function putFile(path,blob,msg){return gh('/contents/'+path.split('/').map
 async function upload(b,files){
   if(!files.length)return;const ym=new Date().toISOString().slice(0,7);let ok=0;const fails=[];const PART=20*1048576;
   for(const [k,f] of files.entries()){
-    const when=(await exifDate(f))||stamp(new Date(f.lastModified||Date.now()));
+    const shot=await exifDate(f);const when=shot||('u'+Math.random().toString(36).replace(/[^a-z]/g,'').slice(0,6));
     const base=f.name.replace(/\.[^.]+$/,'').replace(/[^\w가-힣\-]+/g,'-').slice(0,40)||'file';
     try{
-      if(/^image/.test(f.type)){setUp(`올리는 중 ${k+1}/${files.length} · ${f.name}`);const blob=await shrink(f);const ext=blob===f?(f.name.split('.').pop()||'jpg').toLowerCase():'jpg';
+      if(/^image/.test(f.type)){setUp(`올리는 중 ${k+1}/${files.length} · ${f.name}`);const blob=(!shot&&!/jpe?g/i.test(f.type)&&f.size<25*1048576)?f:await shrink(f);/* 촬영 정보를 못 읽은 HEIC 등은 원본 그대로: 엔진이 직접 읽는다 */const ext=blob===f?(f.name.split('.').pop()||'jpg').toLowerCase():'jpg';
         await putFile(`${b.media}uploads/${ym}/${when}-${base}.${ext}`,blob,`${b.name} 자료: ${f.name}`);}
       else{const ext=(f.name.split('.').pop()||'mp4').toLowerCase();const path=`${b.media}uploads/${ym}/${when}-${base}.${ext}`;
         if(f.size<=40*1048576){setUp(`영상 올리는 중 ${k+1}/${files.length} · ${f.name}`);await putFile(path,f,`${b.name} 자료: ${f.name}`);}
