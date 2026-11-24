@@ -88,8 +88,8 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .bg .bs{flex:none;display:flex;gap:6px;font:10px 'IBM Plex Mono',monospace}.bg .bs b{font-weight:500}
 .bg .bp{flex:none;width:32px;text-align:right;font:10px 'IBM Plex Mono',monospace;color:#8E7861}
 .bg .bb{flex:none;width:40px;height:4px;background:#33251B}.bg .bb i{display:block;height:100%;background:#7DB79A}
-.bd{height:24px;display:flex;align-items:center;padding:0 10px 0 28px;font:10px 'IBM Plex Mono',monospace;color:#8E7861;border-bottom:1px solid #2C2018;cursor:pointer;user-select:none}
-.bd:hover{color:#BFA98C}
+.bdn{height:24px;display:flex;align-items:center;padding:0 10px 0 28px;font:10px 'IBM Plex Mono',monospace;color:#8E7861;border-bottom:1px solid #2C2018;cursor:pointer;user-select:none}
+.bdn:hover{color:#BFA98C}
 #board .tr,.bth{grid-template-columns:60px minmax(0,1fr) 54px 56px 80px 34px 96px 38px}
 .bg .bz{flex:none;display:flex;align-items:center}
 html.m #board .tr{grid-template-columns:56px minmax(0,1fr) 46px 78px}
@@ -99,8 +99,8 @@ html.m #board .tr>.ell:nth-child(2){white-space:normal}
 html.m .bg .bz{display:none}
 
 .bgrp .tr>:first-child{padding-left:18px}
-.bgrp.folded>.tr,.bgrp.folded>.bd{display:none}
-.bgrp:not(.showdone)>.bd~.tr.cl{display:none}
+.bgrp.folded>.tr,.bgrp.folded>.bdn{display:none}
+.bgrp:not(.showdone)>.bdn~.tr.cl{display:none}
 html.m .bg{height:36px;padding:0 10px}html.m .bg .bb{display:none}html.m .bg .bt{font-size:12px}
 html.m .bgrp .tr>:first-child{padding-left:14px}
 
@@ -239,7 +239,9 @@ html.m .tr>.ell:nth-child(3){white-space:normal}
 html.m .btn{height:32px;font-size:11px}
 html.m .sbtn{height:26px}
 html.m .ap .t{white-space:normal}
-html.m .mask .fm{width:94vw!important;max-height:90dvh;overflow:auto}
+html.m .mask{position:fixed;inset:0;z-index:60;align-items:flex-start;padding-top:max(14px,env(safe-area-inset-top));overflow:auto}
+html.m .mask .fm{width:94vw!important;max-height:calc(100dvh - 28px);overflow:auto;flex:none}
+html.m .fm input,html.m .fm select,html.m .fm textarea{font-size:16px;padding:8px}html.m .fm label{font-size:12px}html.m .fm .row .btn{height:40px}
 html.m footer{display:none}
 html.m #mtab{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #3A2A1F;background:#1E1611}
 #mtab button{background:none;border:0;border-top:2px solid transparent;color:#A08A72;font:600 11px 'IBM Plex Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
@@ -835,7 +837,7 @@ function renderBoard(){
     return `<div class="bgrp${folded?' folded':''}${showDone?' showdone':''}" data-g="${key}">
       <div class="bg" data-fg="${key}"><span class="cv">${folded?'▸':'▾'}</span><span class="bc">${g.k?mc:'—'}</span>${g.ms?`<span class="bz">${bizTag(bizOf(g.ms))}</span>`:''}<span class="bt">${esc(title)}</span><span class="bs">${sum||(g.open.length?'':'<b style="color:#7DB79A">완료</b>')}</span><span class="bp">${g.done.length}/${g.n}</span><span class="bb"><i style="width:${pct}%"></i></span></div>
       ${g.open.map(row).join('')}
-      ${g.done.length?(g.open.length?`<div class="bd" data-dg="${key}">${showDone?'▾':'▸'} 끝난 업무 ${g.done.length}개</div>`:'')+g.done.map(row).join(''):''}
+      ${g.done.length?(g.open.length?`<div class="bdn" data-dg="${key}">${showDone?'▾':'▸'} 끝난 업무 ${g.done.length}개</div>`:'')+g.done.map(row).join(''):''}
     </div>`;}).join('');
   $('#board').innerHTML=html||'<div class="empty">진행 중인 업무 없음</div>';
   const openAll=tasks.filter(i=>i.state==='open');const c={};openAll.forEach(i=>{const s=statusOf(i);c[s]=(c[s]||0)+1;});
@@ -979,7 +981,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11240952';
+const APPVER='11240956';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 async function sync(){checkVer();
@@ -1108,8 +1110,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240952"></script>
-<script src="views.js?v=11240952"></script>
-<script src="chat.js?v=11240952"></script>
+<script src="portfolio.js?v=11240956"></script>
+<script src="views.js?v=11240956"></script>
+<script src="chat.js?v=11240956"></script>
 </body>
 </html>
