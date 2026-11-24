@@ -2,6 +2,13 @@
 <html lang="ko">
 <head>
 <meta charset="utf-8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="assets/icon-180.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="PANTARCH">
+<meta name="theme-color" content="#1E150F">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <script>if(matchMedia("(max-width: 760px)").matches)document.documentElement.classList.add("m");</script>
 <title>PANTARCH HQ</title>
@@ -832,7 +839,8 @@ async function sync(){
     renderWork();renderLegend();if(window.chatSync)chatSync();
     if(sig!==S.sig){S.sig=sig;if(!document.querySelector('.mask.show')&&!(typeof PB!=='undefined'&&PB.edit)){if(VIEW==='portfolio')renderPortfolio(true);else if(VIEWS[VIEW]&&VIEW!=='playbook'&&VIEW!=='connections')VIEWS[VIEW][1]();}}
   }catch(e){
-    if(e.status===401||e.status===403||e.status===404){toast('GitHub 키를 확인해 주세요');showKey('연결이 거부됐습니다('+e.status+'). 키 권한과 저장소 선택을 확인해 주세요.');}
+    if(e.status===401){showKey('키가 만료됐거나 지워졌습니다. 새 키를 넣어 주세요.');}
+    else if(e.status===403||e.status===404){toast(/rate limit/i.test(e.message)?'GitHub 요청 한도 · 잠시 후 다시 시도합니다':'접근 거부('+e.status+') · 키 권한을 확인해 주세요');}
     else toast('동기화 실패 · 잠시 후 다시 시도합니다');
   }finally{syncing=false;}
 }
@@ -936,6 +944,7 @@ function foldable(root){
 foldable($('main'));
 document.querySelectorAll('#mtab button').forEach(b=>b.onclick=()=>mpane(b.dataset.m));
 fit();
+try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
 <script src="portfolio.js"></script>
