@@ -378,6 +378,8 @@ html.m .pp{height:40px}
 .cm em{flex:none;font:normal 9px 'IBM Plex Mono',monospace;color:#7A6654}
 .cm.me{align-items:flex-end}
 .cm.me .row{flex-direction:row-reverse}
+.cm .bub{position:relative;touch-action:manipulation;user-select:text}
+.cm .bub .hrt{position:absolute;right:-6px;bottom:-8px;font-size:12px;line-height:1;color:#E2704F;background:#1B1410;border:1px solid #3A2A1F;border-radius:9px;padding:2px 3px}
 .cm.me .bub{background:#D9A441;border-color:#D9A441;border-left-color:#D9A441;color:#1E150F}
 .cm.sys{align-self:center;color:#8E7861;font-size:10.5px}
 #chatF{display:grid;grid-template-columns:minmax(0,1fr) 52px;gap:4px;padding:6px 8px;border-top:1px solid #3A2A1F}
@@ -957,7 +959,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11240641';
+const APPVER='11240710';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 async function sync(){checkVer();
@@ -1085,8 +1087,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240641"></script>
-<script src="views.js?v=11240641"></script>
-<script src="chat.js?v=11240641"></script>
+<script src="portfolio.js?v=11240710"></script>
+<script src="views.js?v=11240710"></script>
+<script src="chat.js?v=11240710"></script>
 </body>
 </html>
