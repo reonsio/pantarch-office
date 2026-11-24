@@ -26,6 +26,7 @@ async function chatLoad(){
     const fresh=msgs.filter(m=>m.aid&&!CH.seen.has(m.id));
     if(!CH.first)fresh.forEach(m=>{if(typeof trip==='function')trip(m.aid,[{go:['CEO',CEO_SPOT]},{wait:2500}],'대표님께 답변');});
     if(!CH.first&&fresh.length&&!chatVisible())CH.unread+=fresh.length;
+    if(fresh.some(m=>/^\[[^\]]+\]/.test(m.t))&&typeof REF!=='undefined'){REF.cache={};REF.stat='';if(VIEW==='refs'&&!($('#rfT')&&$('#rfT').value.trim()))renderRefs();}
     msgs.forEach(m=>CH.seen.add(m.id));CH.first=false;
     const lastMine=msgs.filter(m=>m.mine).pop(),lastReply=msgs.filter(m=>m.aid).pop();
     const tomAfter=lastMine&&msgs.some(m=>m.aid==='tom'&&m.id>lastMine.id);
@@ -38,14 +39,17 @@ function chatRender(){
   const l=$('#chatLog');if(!l)return;const stick=l.scrollHeight-l.scrollTop-l.clientHeight<40;
   const A=(S.team&&S.team.agents)||{};
   l.innerHTML=CH.msgs.slice(-60).map(m=>{const a=A[m.aid]||{};const col=MC[(a.model||'claude').toLowerCase()]||'#D9A441';
-    const to=m.mine&&((/^@(\S+)/.exec(m.t)||[])[1]||'TOM');
+    const to=m.mine&&(refLabel(m.t)?'레퍼런스':((/^@(\S+)/.exec(m.t)||[])[1]||'TOM'));
     return m.mine?`<div class="cm me">${to?`<span class="who" style="color:#A08A72">→ ${esc(to==='팀'?'팀 토론':to)}</span>`:''}<div class="row"><span class="bub">${mdChat(m.t)}</span><em>${hhmm(m.at)}</em></div></div>`
       :`<div class="cm"><span class="who" style="color:${col}">${esc(a.name||m.aid)}</span><div class="row"><span class="bub">${mdChat(m.t)}</span><em>${hhmm(m.at)}</em></div></div>`;}).join('')
     +(CH.pending?`<div class="cm sys">${/^@팀/.test((CH.msgs.filter(m=>m.mine).pop()||{}).t||'')?'의논 중…':'답변 준비 중…'}</div>`:'');
   if(stick||CH.pending)l.scrollTop=l.scrollHeight;
   const nb=$('#mtabC');if(nb){if(chatVisible())CH.unread=0;nb.textContent=CH.unread?String(CH.unread):'';}
 }
-function mdChat(t){return esc(t).replace(/^@\S+\s*/,'').replace(/M-(\d{3})/g,'<b>M-$1</b>').replace(/\n{2,}/g,'\n').replace(/\n/g,'<br>');}
+function refLabel(t){const m=/^(?:@\S+\s+)?레퍼런스\s+(?:#(\S+)\s*)?(?:!(\S+)\s*)?([\s\S]*)$/.exec(t);if(!m)return null;
+  const sc=m[1]==='_common'?'회사 공통':((S.bus||[]).find(b=>b.id===m[1])||{}).name||'회사 공통';const files=(m[3].match(/workspace\/\S+/g)||[]).length;
+  return `레퍼런스 · ${sc} · ${m[2]||'말투'}\n${m[3].replace(/workspace\/\S+/g,'').trim()}${files?`${m[3].replace(/workspace\/\S+/g,'').trim()?'\n':''}자료 ${files}개`:''}`.trim();}
+function mdChat(t){const r=refLabel(t);if(r)t=r;return esc(t).replace(/^@\S+\s*/,'').replace(/M-(\d{3})/g,'<b>M-$1</b>').replace(/\n{2,}/g,'\n').replace(/\n/g,'<br>');}
 
 async function chatSend(){
   const inp=$('#chatIn');const t=inp.value.trim();if(!t)return;

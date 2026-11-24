@@ -126,7 +126,7 @@ function parseVoice(txt){const sec={};let cur=null;(txt||'').split('\n').forEach
 async function renderRefs(){
   const root=$('#vRefs');const sc=refScopes();
   await Promise.all(sc.map(async x=>{if(REF.cache[x.id]===undefined){try{REF.cache[x.id]=await gh(`/contents/workspace/${x.id}/voice.md`,{raw:true})||'';}catch{REF.cache[x.id]='';}}}));
-  const ORDER=[['레퍼런스 계정','계정'],['레퍼런스 예시','예시'],['레퍼런스 캡션(대표님이 준 예)','예시'],['레퍼런스 링크','링크'],['레퍼런스 스크린샷','스크린샷'],['대표님이 통과시킨 캡션','통과시킨 것'],['대표님이 싫어한 캡션','싫어한 것'],['대표님 의견','대표님 의견'],['기본','기본 원칙']];
+  const ORDER=[['레퍼런스 계정','계정'],['레퍼런스 예시','예시'],['레퍼런스 캡션(대표님이 준 예)','예시'],['레퍼런스 링크','링크'],['레퍼런스 스크린샷','스크린샷'],['레퍼런스 영상','영상'],['대표님이 통과시킨 캡션','통과시킨 것'],['대표님이 싫어한 캡션','싫어한 것'],['대표님 의견','대표님 의견'],['기본','기본 원칙']];
   const cnt=x=>Object.values(parseVoice(REF.cache[x.id])).reduce((n,a)=>n+a.length,0);
   const shown=sc.filter(x=>REF.f==='all'||REF.f===x.id);
   const list=shown.map(x=>{const sec=parseVoice(REF.cache[x.id]);
@@ -135,8 +135,8 @@ async function renderRefs(){
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">ADD REFERENCE</span></div>
     <form class="rf" id="rfF"><div class="rfr"><label>어디에<select id="rfS">${sc.map(x=>`<option value="${x.id}"${x.id===(REF.f==='all'?'_common':REF.f)?' selected':''}>${x.id==='_common'?'회사 공통':`${x.kind} · ${esc(x.name)}`}</option>`).join('')}</select></label>
     <label>종류<select id="rfK">${REF_KINDS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label></div>
-    <textarea id="rfT" rows="3" placeholder="@계정아이디, 링크, 마음에 드는 문구"></textarea>
-    <div class="rfb"><label class="btn sbtn">스크린샷<input type="file" id="rfI" multiple accept="image/*" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
+    <textarea id="rfT" rows="3" placeholder="@계정, 링크, 문구 · 인스타는 화면 녹화·캡처가 가장 정확"></textarea>
+    <div class="rfb"><label class="btn sbtn">사진·영상<input type="file" id="rfI" multiple accept="image/*,video/*" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
     ${REF.stat?`<div class="libnote">${esc(REF.stat)}</div>`:''}</section>
   <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span><span class="chips">${[{id:'all',name:'전체'}].concat(sc).map(x=>`<button class="btn sbtn${REF.f===x.id?' on':''}" data-rf="${x.id}" style="width:auto;padding:0 10px">${esc(x.id==='_common'?'공통':x.name)} ${x.id==='all'?sc.reduce((n,y)=>n+cnt(y),0):cnt(x)}</button>`).join('')}</span></div>
     <div class="scroll">${list}</div></section>`;
@@ -145,7 +145,8 @@ async function renderRefs(){
   $('#rfI').onchange=e=>{files=[...e.target.files];$('#rfN').textContent=files.length?`${files.length}장`:'';};
   $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const scope=$('#rfS').value,kind=$('#rfK').value;const go=$('#rfGo');go.disabled=true;
     try{const paths=[];
-      for(const [k,f] of files.entries()){const blob=await shrink(f);const pth=`workspace/${scope}/refs/${stamp(new Date())}-${k}.jpg`;await putFile(pth,blob,'레퍼런스 스크린샷');paths.push(pth);}
+      for(const [k,f] of files.entries()){const vid=/^video/.test(f.type);if(vid&&f.size>40*1048576){toast(`${f.name}: 40MB 넘는 영상은 짧게 잘라 주세요`);continue;}
+        const blob=vid?f:await shrink(f);const ext=vid?((f.name.split('.').pop()||'mp4').toLowerCase()):'jpg';const pth=`workspace/${scope}/refs/${stamp(new Date())}-${k}.${ext}`;$('#rfN').textContent=`올리는 중 ${k+1}/${files.length}`;await putFile(pth,blob,'레퍼런스 자료');paths.push(pth);}
       let num=(typeof CH!=='undefined'&&CH.num)||(S.issues.find(i=>i.state==='open'&&has(i,'chat'))||{}).number;
       if(!num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});num=it.number;}
       await gh(`/issues/${num}/comments`,{method:'POST',body:{body:`레퍼런스 #${scope} !${kind} ${t}${paths.length?'\n'+paths.join('\n'):''}`}});
