@@ -49,7 +49,7 @@ async function renderMissions(){
   <div class="scroll">${ms.map(row).join('')||'<div class="empty">미션 없음</div>'}</div></section>`;
   root.querySelectorAll('.mh2').forEach(h=>h.onclick=async()=>{const n=+h.parentElement.dataset.mn;VW.open[n]=!VW.open[n];renderMissions();
     if(VW.open[n]&&VW.plan[n]===undefined){try{const cs=await commentsOf(n);const c=cs.map(x=>x.body).find(b=>/## (계획|결론)/.test(b))||'';const m=/## (?:계획|결론)\s*\n+([\s\S]*?)(?=\n## |$)/.exec(c);VW.plan[n]=m?strip(m[1]):strip(c).slice(0,600);}catch{VW.plan[n]='';}renderMissions();}});
-  root.querySelectorAll('[data-url]').forEach(el=>el.onclick=()=>open(el.dataset.url,'_blank','noopener'));
+  root.querySelectorAll('[data-url]').forEach(el=>el.onclick=()=>{const n=+((/\/issues\/(\d+)/.exec(el.dataset.url)||[])[1]||0);const it=n&&S.issues.find(i=>i.number===n);if(it&&has(it,'task')&&typeof openTask==='function')openTask(n);else open(el.dataset.url,'_blank','noopener');});
   root.querySelectorAll('[data-ma]').forEach(b=>b.onclick=async e=>{e.stopPropagation();const n=+b.closest('[data-mn]').dataset.mn;const a=b.dataset.ma;b.disabled=true;
     try{if(a==='del'){
         const ts=tasks.filter(t=>meta(t).mission===n&&t.state==='open');const tn=new Set(tasks.filter(t=>meta(t).mission===n).map(t=>t.number));
