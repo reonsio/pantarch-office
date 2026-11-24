@@ -1,6 +1,6 @@
 'use strict';
 /* CHAT: 대표님 ↔ 직원 메신저. 'chat' 이슈 하나에 댓글로 주고받는다. 기본은 팀 토론, 직원을 고르면 그 직원이 답한다. */
-const CH={num:null,msgs:[],to:'',pending:0,seen:new Set(),timer:null,first:true,lastCount:null,unread:0,hearts:new Set(),unheart:new Set(),att:[],busy:0};
+const CH={num:null,msgs:[],to:'',pending:0,seen:new Set(),timer:null,first:true,lastCount:null,unread:0,hearts:new Set(),unheart:new Set(),open:new Set(),att:[],busy:0};
 
 function chatIssue(){return S.issues.find(i=>i.state==='open'&&has(i,'chat'));}
 function chatAgent(body){const m=/<!-- chat:(\w+) -->/.exec(body||'');return m?m[1]:null;}
@@ -47,7 +47,7 @@ function chatRender(){
     const to=m.mine&&(refLabel(m.t)?'레퍼런스':((/^@(\S+)/.exec(m.t)||[])[1]||(((S.team.agents||{})[(S.team.roles||{}).secretary]||{}).name)||'TOM'));
     const ap=m.mine?attOf(m.t):[];const tx=ap.length?m.t.split(/\n첨부\(/)[0]:m.t;
     return m.mine?`<div class="cm me">${to?`<span class="who" style="color:#A08A72">→ ${esc(to==='팀'?'팀 토론':to)}</span>`:''}<div class="row"><span class="bub">${mdChat(tx)}${ap.length?`<span class="ath">${ap.map(p=>/\.(mp4|mov|m4v|webm)$/i.test(p)?'<span>▶ 영상</span>':`<img data-path="${esc(p)}" alt="">`).join('')}</span>`:''}</span><em>${hhmm(m.at)}</em></div></div>`
-      :`<div class="cm" style="--c:${col}"><span class="who" style="color:${col}">${esc(a.name||m.aid)}<i>${esc(teamName(m.aid))}</i></span><div class="row"><span class="bub" data-cid="${m.id}" title="두 번 눌러 ❤">${mdChat(m.t)}${m.heart&&!CH.unheart.has(m.id)?'<b class="hrt">❤</b>':''}</span><em>${hhmm(m.at)}</em></div></div>`;}).join('')
+      :`<div class="cm" style="--c:${col}"><span class="who" style="color:${col}">${esc(a.name||m.aid)}<i>${esc(teamName(m.aid))}</i></span><div class="row"><span class="bub${m.t.length>420?' lng':''}${CH.open.has(m.id)?' open':''}" data-cid="${m.id}" title="두 번 눌러 ❤">${m.t.length>420?`<span class="bc">${mdChat(m.t)}</span><button type="button" class="more">${CH.open.has(m.id)?'접기':'더 보기'}</button>`:mdChat(m.t)}${m.heart&&!CH.unheart.has(m.id)?'<b class="hrt">❤</b>':''}</span><em>${hhmm(m.at)}</em></div></div>`;}).join('')
     +(CH.pending?`<div class="cm sys">${/^@팀/.test((CH.msgs.filter(m=>m.mine).pop()||{}).t||'')?'의논 중…':'답변 준비 중…'}</div>`:'');
   if(typeof lazy==='function')lazy(l);
   if(stick||CH.pending)l.scrollTop=l.scrollHeight;
@@ -56,7 +56,20 @@ function chatRender(){
 function refLabel(t){const m=/^(?:@\S+\s+)?레퍼런스\s+(?:#(\S+)\s*)?(?:!(\S+)\s*)?([\s\S]*)$/.exec(t);if(!m)return null;
   const sc=m[1]==='_common'?'회사 공통':((S.bus||[]).find(b=>b.id===m[1])||{}).name||'회사 공통';const files=(m[3].match(/workspace\/\S+/g)||[]).length;
   return `레퍼런스 · ${sc} · ${m[2]||'말투'}\n${m[3].replace(/workspace\/\S+/g,'').trim()}${files?`${m[3].replace(/workspace\/\S+/g,'').trim()?'\n':''}자료 ${files}개`:''}`.trim();}
-function mdChat(t){const r=refLabel(t);if(r)t=r;t=t.replace(/`([^`]+)`/g,'$1').replace(/workspace\/\S+?\/([^\/\s]+\.(mp4|mov|jpe?g|png))/gi,'$1');return esc(t).replace(/^@\S+\s*/,'').replace(/M-(\d{3})/g,'<b>M-$1</b>').replace(/\n{2,}/g,'\n').replace(/\n/g,'<br>');}
+function mdChat(t){const r=refLabel(t);if(r)t=r;
+  t=t.replace(/`([^`]+)`/g,'$1').replace(/workspace\/\S+?\/([^\/\s]+\.(mp4|mov|jpe?g|png))/gi,'$1')
+    .replace(/\[\[\d+\]\]\([^)]*\)/g,'').replace(/^\s*출처\s*[:：]?\s*$[\s\S]*$/m,'');   /* 검색 직원이 붙이는 [[1]](url) 중복·출처 목록 정리 */
+  const host=u=>{try{return new URL(u).hostname.replace(/^www\./,'');}catch{return '링크';}};
+  const inl=x=>esc(x).replace(/\[([^\]]+)\]\((https?:\/\/[^)\s]+)\)/g,(m,a,u)=>`<a href="${u}" target="_blank" rel="noopener">${a}</a>`)
+    .replace(/(^|[\s(])(https?:\/\/[^\s)<]+)/g,(m,p,u)=>`${p}<a href="${u}" target="_blank" rel="noopener">${host(u)}</a>`)
+    .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/M-(\d{3})/g,'<b>M-$1</b>');
+  const lines=t.replace(/^@\S+\s*/,'').split('\n');let out='',tb=null;
+  const flush=()=>{if(tb){const h=tb[0]||[];/* 폰에서 읽히게 표는 줄마다 카드로: 첫 칸이 제목, 나머지는 '머리: 값' */
+      out+=`<div class="ctb">${tb.slice(1).map(r=>`<div class="cr"><b>${inl(r[0]||'')}</b>${r.slice(1).map((c,j)=>c&&c!=='-'?`<div><i>${inl(h[j+1]||'')}</i>${inl(c)}</div>`:'').join('')}</div>`).join('')}</div>`;tb=null;}};
+  for(const l of lines){const m=/^\s*\|(.+)\|\s*$/.exec(l);
+    if(m){if(/^\s*[-:| ]+$/.test(m[1]))continue;(tb=tb||[]).push(m[1].split('|').map(c=>c.trim()));continue;}
+    flush();if(!l.trim())continue;out+=(out&&!out.endsWith('</div>')?'<br>':'')+inl(l.replace(/^#+\s*/,''));}
+  flush();return out;}
 
 async function chatSend(){
   const inp=$('#chatIn');let t=inp.value.trim();
@@ -121,3 +134,5 @@ async function attAdd(files){const b=bizList()[0];if(!b){toast('사업이 없습
 }
 $('#chatClip').onclick=()=>$('#chatFile').click();
 $('#chatFile').onchange=e=>{const fs=[...e.target.files];e.target.value='';attAdd(fs);};
+
+$('#chatLog').addEventListener('click',e=>{const b=e.target.closest('.bub .more');if(!b)return;const u=b.parentElement;const id=+u.dataset.cid;u.classList.toggle('open');if(u.classList.contains('open'))CH.open.add(id);else CH.open.delete(id);b.textContent=u.classList.contains('open')?'접기':'더 보기';});
