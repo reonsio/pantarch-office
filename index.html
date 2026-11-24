@@ -81,6 +81,9 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .tr,.th{display:grid;grid-template-columns:48px 100px minmax(0,1fr) 110px 46px 52px 72px 26px 56px 38px;gap:8px;align-items:center;padding:0 10px;height:27px;font-size:12px;border-bottom:1px solid #2C2018}
 .tr{cursor:pointer}.tr:hover{background:#2A1F17}
 ::placeholder{font-size:11px!important;color:#6E5C4A!important;opacity:1}
+.sxl{position:fixed;z-index:200;background:#1B1410;border:1px solid #6B5233;box-shadow:0 6px 0 rgba(0,0,0,.35);max-height:280px;overflow:auto;padding:2px 0}
+.sxl div{height:26px;display:flex;align-items:center;padding:0 10px 0 8px;font:12px 'IBM Plex Sans KR',sans-serif;color:#E6D6BC;cursor:pointer;white-space:nowrap;border-left:2px solid transparent}
+.sxl div:hover,.sxl div.hv{background:#2A1F17}.sxl div.on{color:#D9A441;border-left-color:#D9A441;font-weight:600}
 select{-webkit-appearance:none;appearance:none;border-radius:0!important;background-image:linear-gradient(45deg,transparent 50%,#8E7861 50%),linear-gradient(135deg,#8E7861 50%,transparent 50%)!important;background-position:calc(100% - 12px) 50%,calc(100% - 8px) 50%!important;background-size:4px 4px!important;background-repeat:no-repeat!important;padding-right:22px!important}
 .vsub{display:flex;justify-content:space-between;align-items:center;padding:10px 10px 4px;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#A38C72;border-top:1px solid #2C2018}.vsub em{font-style:normal;font-weight:400;color:#7A6654}
 .lba{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:4px;padding:4px 10px 8px;white-space:normal}
@@ -1020,7 +1023,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241237';
+const APPVER='11241238';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1057,6 +1060,26 @@ function ask(o){return new Promise(res=>{const m=$('#mAsk'),t=$('#askT');$('#ask
   const done=v=>{m.classList.remove('show');res(v);};$('#askNo').onclick=()=>done(null);
   $('#askOk').onclick=()=>{if(o.input){const v=t.value.trim();if(!v){t.focus();return;}done(v);}else done(true);};
   m.classList.add('show');if(o.input)setTimeout(()=>t.focus(),50);});}
+/* 선택칸 목록을 운영체제 기본 모양 대신 회사 모양으로(노트북). 폰은 기기 기본 선택기를 그대로 쓴다 */
+(function(){let box=null,cur=null,hv=-1;
+  const close=()=>{if(box){box.remove();box=null;cur=null;}};
+  const pick=i=>{if(!cur)return;const s=cur;close();if(s.selectedIndex!==i){s.selectedIndex=i;s.dispatchEvent(new Event('input',{bubbles:true}));s.dispatchEvent(new Event('change',{bubbles:true}));}s.focus();};
+  const mark=()=>{[...box.children].forEach((d,i)=>d.classList.toggle('hv',i===hv));const d=box.children[hv];if(d)d.scrollIntoView({block:'nearest'});};
+  const open=s=>{close();cur=s;hv=s.selectedIndex;box=document.createElement('div');box.className='sxl';
+    [...s.options].forEach((o,i)=>{const d=document.createElement('div');d.textContent=o.textContent;if(i===s.selectedIndex)d.className='on';d.onmousedown=e=>{e.preventDefault();pick(i);};box.append(d);});
+    document.body.append(box);const r=s.getBoundingClientRect();box.style.minWidth=r.width+'px';box.style.left=Math.max(4,Math.min(r.left,innerWidth-box.offsetWidth-4))+'px';
+    const below=innerHeight-r.bottom-6,h=box.offsetHeight;if(h<=below||below>=r.top)box.style.top=(r.bottom+2)+'px',box.style.maxHeight=Math.max(120,below)+'px';else box.style.top=Math.max(4,r.top-2-Math.min(h,r.top-6))+'px',box.style.maxHeight=(r.top-6)+'px';mark();};
+  const desk=()=>!document.documentElement.classList.contains('m');
+  document.addEventListener('mousedown',e=>{const s=e.target.closest&&e.target.closest('select');
+    if(s&&desk()&&!s.multiple&&!s.disabled){e.preventDefault();s.focus();cur===s?close():open(s);return;}
+    if(box&&!box.contains(e.target))close();},true);
+  document.addEventListener('keydown',e=>{const s=e.target;
+    if(!box){if(s&&s.tagName==='SELECT'&&desk()&&[' ','Enter','ArrowDown','ArrowUp'].includes(e.key)){e.preventDefault();open(s);}return;}
+    if(e.key==='Escape'){e.preventDefault();e.stopPropagation();close();}
+    else if(e.key==='ArrowDown'||e.key==='ArrowUp'){e.preventDefault();hv=Math.max(0,Math.min(box.children.length-1,hv+(e.key==='ArrowDown'?1:-1)));mark();}
+    else if(e.key==='Enter'||e.key===' '){e.preventDefault();pick(hv);}
+    else if(e.key==='Tab')close();},true);
+  addEventListener('resize',close);document.addEventListener('scroll',e=>{if(box&&!box.contains(e.target))close();},true);})();
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2600);}
 function showKey(msg){$('#eKey').textContent=msg||'';$('#mKey').classList.add('show');setTimeout(()=>$('#iKey').focus(),50);}
 $('#bKey').onclick=()=>showKey('');
@@ -1156,8 +1179,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241237"></script>
-<script src="views.js?v=11241237"></script>
-<script src="chat.js?v=11241237"></script>
+<script src="portfolio.js?v=11241238"></script>
+<script src="views.js?v=11241238"></script>
+<script src="chat.js?v=11241238"></script>
 </body>
 </html>
