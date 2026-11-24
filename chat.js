@@ -1,6 +1,6 @@
 'use strict';
 /* CHAT: 대표님 ↔ 직원 메신저. 'chat' 이슈 하나에 댓글로 주고받는다. 기본은 팀 토론, 직원을 고르면 그 직원이 답한다. */
-const CH={num:null,msgs:[],to:'team',pending:0,seen:new Set(),timer:null,first:true,lastCount:null,unread:0,hearts:new Set(),unheart:new Set()};
+const CH={num:null,msgs:[],to:'team',pending:0,seen:new Set(),timer:null,first:true,lastCount:null,unread:0,hearts:new Set(),unheart:new Set(),att:[],busy:0};
 
 function chatIssue(){return S.issues.find(i=>i.state==='open'&&has(i,'chat'));}
 function chatAgent(body){const m=/<!-- chat:(\w+) -->/.exec(body||'');return m?m[1]:null;}
@@ -44,9 +44,11 @@ function chatRender(){
   const A=(S.team&&S.team.agents)||{};
   l.innerHTML=CH.msgs.slice(-60).map(m=>{const a=A[m.aid]||{};const col=teamCol(m.aid);
     const to=m.mine&&(refLabel(m.t)?'레퍼런스':((/^@(\S+)/.exec(m.t)||[])[1]||'TOM'));
-    return m.mine?`<div class="cm me">${to?`<span class="who" style="color:#A08A72">→ ${esc(to==='팀'?'팀 토론':to)}</span>`:''}<div class="row"><span class="bub">${mdChat(m.t)}</span><em>${hhmm(m.at)}</em></div></div>`
+    const ap=m.mine?attOf(m.t):[];const tx=ap.length?m.t.split(/\n첨부\(/)[0]:m.t;
+    return m.mine?`<div class="cm me">${to?`<span class="who" style="color:#A08A72">→ ${esc(to==='팀'?'팀 토론':to)}</span>`:''}<div class="row"><span class="bub">${mdChat(tx)}${ap.length?`<span class="ath">${ap.map(p=>/\.(mp4|mov|m4v|webm)$/i.test(p)?'<span>▶ 영상</span>':`<img data-path="${esc(p)}" alt="">`).join('')}</span>`:''}</span><em>${hhmm(m.at)}</em></div></div>`
       :`<div class="cm" style="--c:${col}"><span class="who" style="color:${col}">${esc(a.name||m.aid)}<i>${esc(teamName(m.aid))}</i></span><div class="row"><span class="bub" data-cid="${m.id}" title="두 번 눌러 ❤">${mdChat(m.t)}${m.heart&&!CH.unheart.has(m.id)?'<b class="hrt">❤</b>':''}</span><em>${hhmm(m.at)}</em></div></div>`;}).join('')
     +(CH.pending?`<div class="cm sys">${/^@팀/.test((CH.msgs.filter(m=>m.mine).pop()||{}).t||'')?'의논 중…':'답변 준비 중…'}</div>`:'');
+  if(typeof lazy==='function')lazy(l);
   if(stick||CH.pending)l.scrollTop=l.scrollHeight;
   const nb=$('#mtabC');if(nb){if(chatVisible())CH.unread=0;nb.textContent=CH.unread?String(CH.unread):'';}
 }
@@ -56,14 +58,18 @@ function refLabel(t){const m=/^(?:@\S+\s+)?레퍼런스\s+(?:#(\S+)\s*)?(?:!(\S+
 function mdChat(t){const r=refLabel(t);if(r)t=r;t=t.replace(/`([^`]+)`/g,'$1').replace(/workspace\/\S+?\/([^\/\s]+\.(mp4|mov|jpe?g|png))/gi,'$1');return esc(t).replace(/^@\S+\s*/,'').replace(/M-(\d{3})/g,'<b>M-$1</b>').replace(/\n{2,}/g,'\n').replace(/\n/g,'<br>');}
 
 async function chatSend(){
-  const inp=$('#chatIn');const t=inp.value.trim();if(!t)return;
+  const inp=$('#chatIn');let t=inp.value.trim();
+  if(CH.busy){toast('첨부 올리는 중입니다. 끝나면 보내세요');return;}
+  const att=CH.att.filter(a=>a.path).map(a=>a.path);
+  if(!t&&!att.length)return;
+  if(att.length)t=(t||'첨부한 자료 봐 줘')+'\n첨부(대표님이 고른 자료, 순서대로):\n'+att.join('\n');
   if(!TOKEN){toast('접근키를 먼저 넣어 주세요');return;}
   const a=S.team.agents[CH.to];const body=(CH.to==='team'?'@팀 ':CH.to==='tom'?'':'@'+a.name+' ')+t;
   inp.value='';$('#chatGo').disabled=true;
   try{
     if(!CH.num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});CH.num=it.number;S.issues.unshift(it);}
     const c=await gh(`/issues/${CH.num}/comments`,{method:'POST',body:{body}});
-    CH.msgs.push({id:c.id,mine:true,t:body,at:c.created_at});CH.seen.add(c.id);CH.pending=1;chatRender();
+    CH.msgs.push({id:c.id,mine:true,t:body,at:c.created_at});CH.seen.add(c.id);CH.pending=1;CH.att=[];attRender();chatRender();
     clearTimeout(CH.timer);CH.timer=setTimeout(chatLoad,8000);
   }catch(e){inp.value=t;toast('보내기 실패: '+(e.status===403?'접근키 Issues 권한':e.message.slice(0,40)));}
   finally{$('#chatGo').disabled=false;}
@@ -87,3 +93,30 @@ async function chatHeart(id){const m=CH.msgs.find(x=>x.id===id);if(!m||m.mine)re
   l.addEventListener('dblclick',e=>{const b=e.target.closest('.bub[data-cid]');if(b){e.preventDefault();chatHeart(+b.dataset.cid);}});
   l.addEventListener('touchend',e=>{const b=e.target.closest('.bub[data-cid]');if(!b)return;const now=Date.now(),id=+b.dataset.cid;
     if(id===lastId&&now-lastT<320){e.preventDefault();lastT=0;lastId=null;chatHeart(id);}else{lastT=now;lastId=id;}},{passive:false});})();
+
+/* 첨부: 대표님이 고른 사진·영상을 라이브러리에 올리고(같은 파일이면 기존 것 사용) 메시지에 경로를 붙인다 */
+function attOf(t){const m=/\n첨부\([^)]*\):\n([\s\S]*)$/.exec(t||'');return m?(m[1].match(/workspace\/\S+/g)||[]):[];}
+function attRender(){const box=$('#chatAtt');if(!box)return;box.classList.toggle('on',CH.att.length>0);
+  box.innerHTML=CH.att.map((a,k)=>`<span class="at${a.path?'':' up'}">${a.url?`<img src="${a.url}" alt="">`:a.vid?'▶ 영상':''}${a.path?'':'<i class="upl">올리는 중</i>'}<em>${k+1}</em>${a.path?`<b data-rm="${k}">×</b>`:''}</span>`).join('');
+  box.querySelectorAll('[data-rm]').forEach(x=>x.onclick=()=>{CH.att.splice(+x.dataset.rm,1);attRender();});if(typeof lazy==='function')lazy(box);}
+async function attAdd(files){const b=bizList()[0];if(!b){toast('사업이 없습니다');return;}if(!TOKEN){toast('접근키를 먼저 넣어 주세요');return;}
+  if(!PF.tree){try{await loadTree();}catch{}}
+  const ym=new Date().toISOString().slice(0,7);
+  for(const f of files){if(CH.att.length>=10){toast('한 번에 10개까지');break;}
+    const a={name:f.name,path:'',vid:!/^image/.test(f.type),url:/^image/.test(f.type)?URL.createObjectURL(f):''};CH.att.push(a);attRender();CH.busy++;
+    try{
+      if(!a.vid&&f.size>40*1048576)throw new Error('너무 큼');
+      if(a.vid&&f.size>40*1048576)throw new Error('40MB 넘는 영상은 라이브러리에서 올려 주세요');
+      const shot=await exifDate(f);const when=shot||('u'+Math.random().toString(36).replace(/[^a-z]/g,'').slice(0,6));
+      const base=f.name.replace(/\.[^.]+$/,'').replace(/[^\w가-힣\-]+/g,'-').slice(0,40)||'file';
+      const blob=a.vid?f:((!shot&&!/jpe?g/i.test(f.type)&&f.size<25*1048576)?f:await shrink(f));
+      const ext=a.vid||blob===f?(f.name.split('.').pop()||'jpg').toLowerCase():'jpg';
+      let sha='',sha0='';try{sha0=await blobSha(f);sha=blob===f?sha0:await blobSha(blob);}catch{}
+      const tw=(sha0&&twinOf(b,sha0))||(sha&&twinOf(b,sha));
+      if(tw)a.path=tw.path;
+      else{const p=`${b.media}uploads/${ym}/${when}-${base}.${ext}`;await putFile(p,blob,`${b.name} 자료(채팅 첨부): ${f.name}`);a.path=p;(PF.tree||[]).push({path:p,type:'blob',sha});}
+    }catch(e){CH.att.splice(CH.att.indexOf(a),1);toast(`${f.name} 첨부 실패: ${e.status===403?'접근키 Contents 권한':String(e.message).slice(0,40)}`);}
+    finally{CH.busy--;attRender();}}
+}
+$('#chatClip').onclick=()=>$('#chatFile').click();
+$('#chatFile').onchange=e=>{const fs=[...e.target.files];e.target.value='';attAdd(fs);};
