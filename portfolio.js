@@ -1,7 +1,7 @@
 'use strict';
 /* PORTFOLIO: 사업마다 성격에 맞는 기능 묶음 */
 const KINDS={
-  BRAND:{tabs:[['calendar','CALENDAR'],['library','LIBRARY'],['queue','POST QUEUE'],['insights','INSIGHTS']]},
+  BRAND:{tabs:[['calendar','CALENDAR'],['library','LIBRARY'],['queue','POSTS'],['refs','REFERENCE'],['insights','INSIGHTS']]},
   PRODUCT:{tabs:[['milestones','MILESTONES'],['docs','DOCS'],['builds','BUILDS']]},
   SERVICE:{tabs:[['milestones','MILESTONES'],['docs','DOCS']]},
 };
@@ -56,14 +56,14 @@ window.renderPortfolio=async function(soft){
   </section>
   <section class="pnl" data-nofold style="display:flex;flex-direction:column;min-height:0">
     <div class="ph" style="height:40px"><span style="display:flex;align-items:baseline;gap:10px"><span class="mono" style="font-size:11px;letter-spacing:1.4px;color:${b.col}">${b.kind}</span><span style="font-size:16px;font-weight:600;color:#F4E6CF">${esc(b.name)}</span><span class="mu bdesc" style="font-size:12px">${esc(b.desc)}</span></span>
-    <span class="tabs" style="grid-template-columns:repeat(${tabs.length},120px)">${tabs.map(([k,l])=>`<button class="btn${k===cur?' on':''}" data-tab="${k}">${l}</button>`).join('')}</span></div>
+    <span class="tabs" style="grid-template-columns:repeat(${tabs.length},104px);--nt:${tabs.length}">${tabs.map(([k,l])=>`<button class="btn${k===cur?' on':''}" data-tab="${k}">${l}</button>`).join('')}</span></div>
     <div id="pfBody" style="flex:1;min-height:0;display:flex;flex-direction:column"></div>
   </section>`;
   root.querySelectorAll('[data-bz]').forEach(el=>el.onclick=()=>{PF.biz=el.dataset.bz;PF.folder='all';PF.doc=null;renderPortfolio(true);});
   $('#pAddBiz').onclick=openAddBiz;
   root.querySelectorAll('[data-tab]').forEach(el=>el.onclick=()=>{PF.tab[b.id]=el.dataset.tab;renderPortfolio(true);});
   const body=$('#pfBody');
-  ({calendar:pCalendar,library:pLibrary,queue:pQueue,insights:pInsights,milestones:pMilestones,docs:pDocs,builds:pBuilds})[cur](body,b);
+  ({calendar:pCalendar,library:pLibrary,queue:pQueue,refs:pRefs,insights:pInsights,milestones:pMilestones,docs:pDocs,builds:pBuilds})[cur](body,b);
   foldable(root);
 };
 
@@ -136,6 +136,32 @@ function pQueue(body,b){
     if(!txt){txt=prompt('의견을 적어 주세요. LILY가 반영해서 다시 만듭니다.');if(!txt)return;}
     btn.disabled=true;try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body:txt}});toast(`${codeN(n)} 처리했습니다`);setTimeout(sync,1500);}catch(e){toast('실패: '+e.message.slice(0,60));btn.disabled=false;}});
   $('#pNew').onclick=()=>openComposer(b,null);lazy(body);
+}
+/* 레퍼런스: 계정·링크·캡션·스크린샷을 던지면 말투 기준(voice.md)에 쌓인다. 직원·검수가 매번 읽는다 */
+const VOICE={};
+async function pRefs(body,b){
+  const vp=`${b.dir}voice.md`;
+  if(VOICE[b.id]===undefined){try{VOICE[b.id]=await textOf(vp);}catch{VOICE[b.id]='';}}
+  const sec={};let cur=null;
+  (VOICE[b.id]||'').split('\n').forEach(l=>{const h=/^##\s+(.+)/.exec(l);if(h){cur=h[1].trim();sec[cur]=[];return;}if(cur&&/^- /.test(l))sec[cur].push(l.slice(2));});
+  const order=[['레퍼런스 계정','계정'],['레퍼런스 캡션(대표님이 준 예)','캡션'],['레퍼런스 스크린샷','스크린샷'],['대표님이 통과시킨 캡션','통과'],['대표님이 싫어한 캡션','싫어함'],['대표님 의견','의견'],['기본','기본']];
+  const rows=order.filter(([k])=>sec[k]&&sec[k].length).map(([k,l])=>`<div class="vg"><div class="vh"><b>${l}</b><em>${sec[k].length}</em></div>${(k==='기본'?sec[k]:sec[k].slice().reverse()).map(x=>`<div class="vi">${esc(x)}</div>`).join('')}</div>`).join('');
+  body.innerHTML=`<div class="ph"><span class="cap">REFERENCE · 말투 기준</span></div>
+  <form class="rf" id="rfF"><textarea id="rfT" rows="2" placeholder="@계정아이디, 인스타 링크, 마음에 드는 캡션"></textarea>
+  <div class="rfb"><label class="btn sbtn">스크린샷<input type="file" id="rfI" multiple accept="image/*" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
+  ${PF.refStat?`<div class="libnote">${esc(PF.refStat)}</div>`:''}
+  <div class="scroll">${rows||'<div class="empty">레퍼런스 없음</div>'}</div>`;
+  let files=[];
+  $('#rfI').onchange=e=>{files=[...e.target.files];$('#rfN').textContent=files.length?`${files.length}장`:'';};
+  $('#rfF').onsubmit=async e=>{e.preventDefault();const t=$('#rfT').value.trim();if(!t&&!files.length)return;const go=$('#rfGo');go.disabled=true;
+    try{const paths=[];
+      for(const [k,f] of files.entries()){const blob=await shrink(f);const pth=`${b.dir}refs/${stamp(new Date())}-${k}.jpg`;await putFile(pth,blob,`${b.name} 레퍼런스 스크린샷`);paths.push(pth);}
+      let num=(typeof CH!=='undefined'&&CH.num)||(S.issues.find(i=>i.state==='open'&&has(i,'chat'))||{}).number;
+      if(!num){const it=await gh('/issues',{method:'POST',body:{title:'대표님 채팅',body:'대표님과 직원의 채팅방입니다. 닫지 마세요.',labels:['chat']}});num=it.number;}
+      await gh(`/issues/${num}/comments`,{method:'POST',body:{body:`레퍼런스 #${b.id} ${t}${paths.length?'\n'+paths.join('\n'):''}`}});
+      PF.refStat=`넣었습니다. ${/@|instagram\.com/.test(t)?'계정은 MAX가 찾아 정리하고, ':''}${paths.length?'스크린샷은 LILY가 읽어서 ':''}1~2분 뒤 아래에 반영됩니다.`;
+      VOICE[b.id]=undefined;setTimeout(()=>{VOICE[b.id]=undefined;if(PF.tab[b.id]==='refs')renderPortfolio(true);},90000);renderPortfolio(true);
+    }catch(err){toast('실패: '+(err.status===403?'접근키 권한(Contents·Issues 쓰기)':err.message.slice(0,60)));go.disabled=false;}};
 }
 function pInsights(body){
   body.innerHTML=`<div class="ph"><span class="cap">INSIGHTS</span><span class="mono mu" style="font-size:10px">첫 게시 후 연결</span></div><div class="empty">반응 지표 없음</div>`;

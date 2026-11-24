@@ -218,7 +218,7 @@ html.m #portfolio>section:first-child{max-height:none;height:auto!important;min-
 html.m #portfolio>section:first-child .scroll{flex:none!important}
 html.m #portfolio .bz{height:52px}
 html.m #portfolio .ph{height:auto!important;min-height:34px;flex-wrap:wrap;gap:6px;padding:6px 8px}
-html.m #portfolio .tabs{grid-template-columns:repeat(4,1fr)!important;width:100%}
+html.m #portfolio .tabs{grid-template-columns:repeat(var(--nt,4),minmax(0,1fr))!important;width:100%}html.m #portfolio .tabs .btn{letter-spacing:.5px;font-size:10px;padding:0}
 html.m .cal{grid-template-columns:repeat(7,minmax(0,1fr));grid-template-rows:18px repeat(2,minmax(56px,auto));gap:2px;padding:6px}
 html.m .day{min-height:84px;padding:3px}
 html.m .day .dn{font-size:9px}
@@ -359,6 +359,12 @@ html.m #boardSum{display:none}
 .ap .aps{font-size:11.5px;line-height:1.55;color:#E6D6BC;background:#1B1410;border-left:2px solid #5A4130;padding:5px 8px 0;border-bottom:5px solid #1B1410;white-space:pre-line;text-align:justify;word-break:break-all;display:-webkit-box;-webkit-line-clamp:4;-webkit-box-orient:vertical;overflow:hidden;max-height:calc(1.55em * 4 + 10px);box-sizing:border-box}
 .ap [data-full]{justify-self:start;width:auto;padding:0 10px}
 .apv{line-height:1.35!important}
+.rf{display:grid;gap:5px;padding:8px 10px;border-bottom:1px solid #2C2018}
+.rf textarea{width:100%;background:#17110D;border:1px solid #4A3626;color:#EFE2CC;font:12px 'IBM Plex Sans KR',sans-serif;padding:6px 8px;resize:vertical;box-sizing:border-box}
+.rfb{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:6px;align-items:center}.rfb .btn{width:auto;padding:0 12px}.rfb .mu{font:10px 'IBM Plex Mono',monospace}
+.vg{padding:6px 10px;border-bottom:1px solid #2C2018}
+.vh{display:flex;justify-content:space-between;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#D9A441;margin-bottom:3px}.vh em{font-style:normal;color:#7A6654}
+.vi{font-size:12px;line-height:1.55;color:#E6D6BC;padding:2px 0;text-align:justify;word-break:break-all}
 </style>
 </head>
 <body>
