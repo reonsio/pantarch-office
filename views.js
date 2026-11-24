@@ -87,7 +87,7 @@ async function renderConnections(){
   try{last=await gh('/contents/workspace/engine-last-run.md',{raw:true});}catch{}
   try{mlast=await gh('/contents/workspace/media-last-run.md',{raw:true});}catch{}
   let cx={};try{cx=JSON.parse(await gh('/contents/workspace/connections.json',{raw:true})||'{}');}catch{}
-  const ig=cx.instagram||null,mods=cx.models||{};
+  const ig=cx.instagram||null,mods=cx.models||{};const ia=cx.ig_api||{};await loadKeys();const dk=KEYS.list.find(k=>k.id==='dev');
   const igState=!ig?'점검 전':ig.ok?'연결됨':'문제 있음';
   let qn=0;try{const q=JSON.parse(await gh('/contents/workspace/upload-count.json',{raw:true})||'{}');const k=new Date(Date.now()+9*36e5).toISOString().slice(0,7);qn=q[k]||0;}catch{}
   const igDesc=!ig?'점검 전':ig.ok?`@${esc(ig.instagram)} · 이번 달 게시 ${qn}/10`:esc(ig.problem||'');
@@ -103,7 +103,8 @@ async function renderConnections(){
     ${card('MODEL','Grok',MC.grok,mState('grok'),mods.grok!==false,`${esc(gm.model||'')} · 직원 ${cnt.grok}명 · ${gm.search?'웹·X 검색 됨':gm.search===false?'검색 실패':'검색 점검 전'}`)}
     ${card('ENGINE','GitHub Actions','#D9A441',runs[0]?(runs[0].status!=='completed'?'실행 중':runs[0].conclusion==='success'?'정상':'오류'):'—',!runs[0]||runs[0].conclusion!=='failure',runs[0]?`마지막 실행 ${hhmm(runs[0].updated_at)}`:'')}
     ${card('CHANNEL','Instagram · 꾸미','#E08A5A',igState,!!(ig&&ig.ok),igDesc)}
-    ${card('DEVICE','이 기기 접근키','#A3ACDB',TOKEN?'연결됨':'없음',!!TOKEN,'')}
+    ${card('REFERENCE','인스타 공식 API','#E08A5A',ia.ok?'연결됨':ia.problem?'문제 있음':'점검 전',!!ia.ok,ia.ok?`@${esc(ia.account||'')} 조회 됨${ia.expires?` · 만료 ${ia.expires} (D-${Math.max(0,Math.ceil((new Date(ia.expires)-Date.now())/864e5))})`:''}`:esc(ia.problem||''))}
+    ${card('DEVICE','이 기기 접근키','#A3ACDB',TOKEN?'연결됨':'없음',!!TOKEN,dk?`만료 ${dk.due} 무렵 (D-${keyDays(dk)})`:'')}
    </div>
    <div class="ph" style="border-top:1px solid #3A2A1F"><span class="cap">ENGINE RUNS</span><span class="cnb"><button class="btn sbtn pri" id="cnWake">엔진 깨우기</button><button class="btn sbtn" id="cnMedia">자료 분석</button><button class="btn sbtn" id="cnCheck">연결 점검</button></span></div>
    ${runs.map(runRow).join('')||'<div class="empty">기록 없음</div>'}

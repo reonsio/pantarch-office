@@ -776,11 +776,19 @@ function decided(){let d={};try{d=JSON.parse(localStorage.getItem('pantarch_dec'
   for(const k in d){const it=S.issues.find(i=>i.number===+k);if(now-d[k].t>36e5||!it||it.state==='closed'||new Date(it.updated_at)>d[k].t+15e3&&!/review|blocked/.test(statusOf(it).toLowerCase()))delete d[k];}
   try{localStorage.setItem('pantarch_dec',JSON.stringify(d));}catch{}return d;}
 function markDecided(n,a){let d={};try{d=JSON.parse(localStorage.getItem('pantarch_dec')||'{}');}catch{}d[n]={t:Date.now(),a:a||''};try{localStorage.setItem('pantarch_dec',JSON.stringify(d));}catch{}}
+/* 키 만료 알림: 만료 14일 전부터 결재함 맨 위에 갱신 카드 */
+const KEYS={list:[]};
+async function loadKeys(){const out=[];let cx={};try{cx=JSON.parse(await gh('/contents/workspace/connections.json',{raw:true})||'{}');}catch{}
+  const ig=cx.ig_api||{};if(ig.expires)out.push({id:'ig',name:'인스타 공식 API 키',due:ig.expires,how:'developers.facebook.com/tools/explorer 에서 앱 pantarch-scout → Generate Access Token → GitHub 비밀값 IG_GRAPH_TOKEN 교체'});
+  let at=null;try{at=localStorage.getItem('pantarch_token_at');if(!at&&TOKEN){at=new Date().toISOString().slice(0,10);localStorage.setItem('pantarch_token_at',at);}}catch{}
+  if(at){const d=new Date(at);d.setDate(d.getDate()+90);out.push({id:'dev',name:'이 기기 접근키(GitHub)',due:d.toISOString().slice(0,10),approx:true,how:'github.com/settings/personal-access-tokens 에서 pantarch-office 키 Regenerate → 오피스 접근키에 새로 넣기'});}
+  KEYS.list=out;return out;}
+function keyDays(k){return Math.ceil((new Date(k.due+'T00:00:00+09:00')-Date.now())/864e5);}
 function renderApprovals(){
   const typing=[...document.querySelectorAll('#approvals .ap.op textarea')].some(t=>t.value.trim()); if(typing)return; // 의견을 쓰는 중이면 새로고침으로 지우지 않는다
   const DEC=decided();const rv=S.issues.filter(i=>i.state==='open'&&!DEC[i.number]&&(has(i,'task')||has(i,'post'))&&(statusOf(i)==='REVIEW'||statusOf(i)==='BLOCKED'));
   const hires=S.issues.filter(i=>i.state==='open'&&!DEC[i.number]&&has(i,'hire'));
-  $('#apCap').textContent=`${rv.length+hires.length} PENDING`;const nb=$('#mtabN');if(nb)nb.textContent=rv.length+hires.length?String(rv.length+hires.length):'';
+  const nd=KEYS.list.filter(k=>keyDays(k)<=14).length;$('#apCap').textContent=`${rv.length+hires.length+nd} PENDING`;const nb=$('#mtabN');if(nb)nb.textContent=rv.length+hires.length+nd?String(rv.length+hires.length+nd):'';
   const bizName=i=>BIZ[bizOf(i)]?BIZ[bizOf(i)].name:'';
   const card=(i,kind)=>{const m=meta(i);let head,who,b,body='';
     if(kind==='hire'){const a=m.agent||{};head=`<span style="color:#A3ACDB">채용 결재</span>`;who=esc(a.name||'');b=[['승인','채용'],['','의견'],['거절','보류']];
@@ -801,7 +809,9 @@ function renderApprovals(){
     <div class="fb"><textarea rows="3" placeholder="의견을 적으면 담당 직원이 반영해 다시 합니다"></textarea><div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn" data-act="x">취소</button><button class="btn pri" data-act="send">보내기</button></div></div></div>`;};
   const sched=S.issues.filter(i=>i.state==='open'&&!(DEC[i.number]&&/기각|취소/.test(DEC[i.number].a))&&has(i,'post')&&(has(i,'status:approved')||has(i,'status:scheduled')));
   const schedCard=i=>{const m=meta(i);const sc=has(i,'status:scheduled');return `<div class="ap" data-n="${i.number}"><div class="h"><span style="color:${m.pub_error?'#E2704F':sc?'#7DB79A':'#E2B04A'}">POST · ${m.pub_error?'게시 실패':sc?'게시 예약됨':'예약 접수 중'}</span><span class="mu"><b style="color:#D9A441">${code(i)}</b> · ${esc(m.when||'')}</span></div><div class="t ell" data-url="${i.html_url}">${esc(m.caption||i.title)}</div>${m.pub_error?`<div style="font-size:11px;color:#E2704F">${esc(m.pub_error)}</div>`:''}<div class="b3"><button class="btn pri" data-act="지금 올리기">지금 올리기</button><button class="btn" data-act="${m.pub_error?'다시':'취소'}">${m.pub_error?'다시 시도':'예약 취소'}</button><button class="btn" data-act="open">열기</button></div></div>`;};
-  $('#approvals').innerHTML=[...rv.map(i=>card(i,has(i,'post')?'post':'task')),...sched.map(schedCard),...hires.map(i=>card(i,'hire'))].join('')||'<div class="empty">결재할 일 없음</div>';
+  const due=KEYS.list.filter(k=>keyDays(k)<=14);
+  const keyCard=k=>{const d=keyDays(k);return `<div class="ap"><div class="h"><span style="color:#E2704F">키 갱신 · ${d<0?'만료됨':'D-'+d}</span><span class="mu">${k.due}${k.approx?' 무렵':''}</span></div><div class="t">${esc(k.name)}</div><div class="why">${esc(k.how)}</div></div>`;};
+  $('#approvals').innerHTML=[...due.map(keyCard),...rv.map(i=>card(i,has(i,'post')?'post':'task')),...sched.map(schedCard),...hires.map(i=>card(i,'hire'))].join('')||'<div class="empty">결재할 일 없음</div>';
   if(typeof lazy==='function')lazy($('#approvals'));
   fillSummaries();
   if(rv.some(i=>has(i,'post')&&/\/media\/.*\.(mp4|mov)$/i.test(meta(i).media||''))&&typeof CAT!=='undefined'&&!CAT[bizOf(rv[0])]&&!S.catTry){S.catTry=1;(async()=>{try{if(!PF.tree)await loadTree();for(const b of bizList())await loadCatalog(b);renderApprovals();}catch{}})();}
@@ -883,6 +893,7 @@ async function sync(){
     renderPlan();events();renderRoster();renderBoard();renderKpis();renderApprovals();renderLog();renderFooter();await renderMeeting();
     const sig=S.issues.map(i=>i.number+':'+i.updated_at).join()+'|'+(S.bus||[]).length;
     renderWork();renderLegend();if(window.chatSync)chatSync();
+    if(!S.keysAt||Date.now()-S.keysAt>36e5){S.keysAt=Date.now();loadKeys().then(()=>renderApprovals()).catch(()=>{});}
     if(sig!==S.sig){S.sig=sig;if(!document.querySelector('.mask.show')&&!(typeof PB!=='undefined'&&PB.edit)){if(VIEW==='portfolio')renderPortfolio(true);else if(VIEWS[VIEW]&&VIEW!=='playbook'&&VIEW!=='connections'&&VIEW!=='refs')VIEWS[VIEW][1]();}}
   }catch(e){
     if(e.status===401){showKey('키가 만료됐거나 지워졌습니다. 새 키를 넣어 주세요.');}
@@ -902,7 +913,7 @@ $('#bKeyCancel').onclick=()=>{if(TOKEN)$('#mKey').classList.remove('show');};
 $('#bKeySave').onclick=async()=>{
   const v=$('#iKey').value.trim();if(!v){$('#eKey').textContent='키를 붙여넣어 주세요.';return;}
   const old=TOKEN;TOKEN=v;$('#eKey').textContent='확인 중…';
-  try{await gh('');localStorage.setItem('pantarch_token',v);$('#iKey').value='';$('#mKey').classList.remove('show');toast('연결했습니다');sync();}
+  try{await gh('');localStorage.setItem('pantarch_token',v);localStorage.setItem('pantarch_token_at',new Date().toISOString().slice(0,10));$('#iKey').value='';$('#mKey').classList.remove('show');toast('연결했습니다');sync();}
   catch(e){TOKEN=old;$('#eKey').textContent=`연결 실패(${e.status||'네트워크'}). pantarch-hq를 선택했는지, 권한이 맞는지 확인해 주세요.`;}
 };
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.mask').classList.remove('show'));
@@ -994,8 +1005,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11240325"></script>
-<script src="views.js?v=11240325"></script>
-<script src="chat.js?v=11240325"></script>
+<script src="portfolio.js?v=11240413"></script>
+<script src="views.js?v=11240413"></script>
+<script src="chat.js?v=11240413"></script>
 </body>
 </html>
