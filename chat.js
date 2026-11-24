@@ -113,12 +113,12 @@ function attOf(t){const m=/\n첨부\([^)]*\):\n([\s\S]*)$/.exec(t||'');return m?
 function attRender(){const box=$('#chatAtt');if(!box)return;box.classList.toggle('on',CH.att.length>0);
   box.innerHTML=CH.att.map((a,k)=>`<span class="at${a.path?'':' up'}">${a.url?`<img src="${a.url}" alt="">`:a.doc?`<i class="dc">${esc(a.name.split('.').pop().toUpperCase())}</i>`:a.vid?'▶ 영상':''}${a.path?'':'<i class="upl">올리는 중</i>'}<em>${k+1}</em>${a.path?`<b data-rm="${k}">×</b>`:''}</span>`).join('');
   box.querySelectorAll('[data-rm]').forEach(x=>x.onclick=()=>{CH.att.splice(+x.dataset.rm,1);attRender();});if(typeof lazy==='function')lazy(box);}
-async function attAdd(files){if(!TOKEN){toast('접근키를 먼저 넣어 주세요');return;}
+async function attAdd(files,st){st=st||CH;const draw=st.render||attRender;if(!TOKEN){toast('접근키를 먼저 넣어 주세요');return;}
   const b={media:'workspace/',name:'채팅'};/* 채팅 첨부는 어느 사업 라이브러리에도 넣지 않고 workspace/_inbox 에 둔다(라이브러리에 이미 있는 자료면 그걸 씀) */
   if(!PF.tree){try{await loadTree();}catch{}}
   const ym=new Date().toISOString().slice(0,7);
-  for(const f of files){if(CH.att.length>=10){toast('한 번에 10개까지');break;}
-    const doc=/\.(pdf|pptx|docx|zip|html?|js|mjs|ts|css|json|txt|md|csv|svg|xml)$/i.test(f.name);const a={name:f.name,path:'',doc,vid:!doc&&!/^image/.test(f.type),url:/^image/.test(f.type)?URL.createObjectURL(f):''};CH.att.push(a);attRender();CH.busy++;
+  for(const f of files){if(st.att.length>=10){toast('한 번에 10개까지');break;}
+    const doc=/\.(pdf|pptx|docx|zip|html?|js|mjs|ts|css|json|txt|md|csv|svg|xml)$/i.test(f.name);const a={name:f.name,path:'',doc,vid:!doc&&!/^image/.test(f.type),url:/^image/.test(f.type)?URL.createObjectURL(f):''};st.att.push(a);draw();st.busy++;
     try{
       if(!a.vid&&f.size>40*1048576)throw new Error('너무 큼');
       if((a.vid||a.doc)&&f.size>40*1048576)throw new Error(a.doc?'40MB 넘는 문서는 PDF로 줄여 주세요':'40MB 넘는 영상은 라이브러리에서 올려 주세요');
@@ -130,10 +130,26 @@ async function attAdd(files){if(!TOKEN){toast('접근키를 먼저 넣어 주세
       const tw=(sha0&&twinOf(b,sha0))||(sha&&twinOf(b,sha));
       if(tw)a.path=tw.path;
       else{const p=`workspace/_inbox/${ym}/${when}-${base}.${ext}`;await putFile(p,blob,`채팅 첨부: ${f.name}`);a.path=p;(PF.tree||[]).push({path:p,type:'blob',sha});}
-    }catch(e){CH.att.splice(CH.att.indexOf(a),1);toast(`${f.name} 첨부 실패: ${e.status===403?'접근키 Contents 권한':String(e.message).slice(0,40)}`);}
-    finally{CH.busy--;attRender();}}
+    }catch(e){st.att.splice(st.att.indexOf(a),1);toast(`${f.name} 첨부 실패: ${e.status===403?'접근키 Contents 권한':String(e.message).slice(0,40)}`);}
+    finally{st.busy--;draw();}}
 }
 $('#chatClip').onclick=()=>$('#chatFile').click();
 $('#chatFile').onchange=e=>{const fs=[...e.target.files];e.target.value='';attAdd(fs);};
 
 $('#chatLog').addEventListener('click',e=>{const b=e.target.closest('.bub .more');if(!b)return;const u=b.parentElement;const id=+u.dataset.cid;u.classList.toggle('open');if(u.classList.contains('open'))CH.open.add(id);else CH.open.delete(id);b.textContent=u.classList.contains('open')?'접기':'더 보기';});
+
+/* 미션·회의 창 첨부: 채팅과 같은 방식으로 올리고, 지시 글 끝에 경로를 붙인다 */
+const FA={};
+function faInit(key,box){const st=FA[key]={att:[],busy:0,render(){
+    box.innerHTML=`<label class="btn sbtn">＋ 첨부파일<input type="file" multiple hidden accept="image/*,video/*,.pdf,.pptx,.docx,.zip,.html,.htm,.js,.css,.json,.txt,.md"></label><span class="mu">${st.att.length?'':'사진·영상·문서·zip·코드'}</span>`
+      +st.att.map((a,k)=>`<span class="fac${a.path?'':' up'}">${esc(a.name.length>22?a.name.slice(0,20)+'…':a.name)}${a.path?`<b data-rm="${k}">×</b>`:'<i>올리는 중</i>'}</span>`).join('');
+    box.querySelector('input').onchange=e=>{const fs=[...e.target.files];e.target.value='';attAdd(fs,st);};
+    box.querySelectorAll('[data-rm]').forEach(x=>x.onclick=()=>{st.att.splice(+x.dataset.rm,1);st.render();});}};
+  st.render();return st;}
+function faReset(key){if(FA[key]){FA[key].att=[];FA[key].render();}}
+function faBusy(key){return !!(FA[key]&&FA[key].busy);}
+function faText(key){const ps=((FA[key]||{}).att||[]).map(a=>a.path).filter(Boolean);if(!ps.length)return '';
+  const proj=ps.filter(p=>/\.(zip|html?|js|mjs|ts|css|json|txt|md|csv|svg|xml)$/i.test(p)),rest=ps.filter(p=>!proj.includes(p));
+  return (rest.length?`\n\n[대표님이 직접 고른 자료 — 이것만, 이 순서대로 씁니다. 다른 자료로 바꾸거나 빼지 않습니다]\n${rest.map((p,i)=>`${i+1}. ${p}`).join('\n')}`:'')
+    +(proj.length?`\n\n[들여올 프로젝트 파일]\n${proj.join('\n')}`:'');}
+faInit('mission',$('#msAtt'));faInit('meet',$('#mtAtt'));

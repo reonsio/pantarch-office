@@ -438,6 +438,7 @@ html.m #boardSum{display:none}
 .ap .aps{font-size:12px;line-height:1.5;color:#F4E6CF;background:#1B1410;border-left:2px solid #D9A441;padding:5px 8px;text-align:justify;word-break:break-all}
 .ap [data-full]{justify-self:start;width:auto;padding:0 10px}
 .apv{line-height:1.35!important}
+.fatt{display:flex;flex-wrap:wrap;align-items:center;gap:4px;font-size:10px;min-height:24px}.fatt .btn{width:auto;padding:0 10px;cursor:pointer}.fac{display:inline-flex;align-items:center;gap:6px;height:22px;padding:0 6px 0 8px;border:1px solid #6B5233;color:#E6D6BC;font:10px 'IBM Plex Mono',monospace;white-space:nowrap}.fac b{cursor:pointer;color:#BFA98C;font-weight:500}.fac i{font-style:normal;color:#D9A441}.fac.up{border-color:#3A2A1F;color:#8E7861}
 .oopen{display:flex;flex-wrap:wrap;gap:4px;margin:6px 0 0}.oopen .btn{width:auto;padding:0 10px}
 .oshots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:6px 0;align-items:start}.oshots figure{margin:0;border:1px solid #3A2A1F;background:#17110D;min-width:0}.oshots figure.top{grid-column:1/-1}.oshots figure.mo{max-width:300px}.oshots figcaption{font-size:10px;color:#A38C72;padding:4px 6px;border-bottom:1px solid #2C2018;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.oshots img{width:100%;display:block}
 html.m .oshots{grid-template-columns:1fr}
@@ -570,6 +571,7 @@ html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 <label>사업<select id="iBiz"></select></label>
 <label>미션 제목<input id="iMTitle" maxlength="80"></label>
 <label>지시 내용<textarea id="iMBody" rows="6"></textarea></label>
+<div class="fatt" id="msAtt"></div>
 <div class="err" id="eMission"></div>
 <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="bMissionSave">TOM에게 맡기기</button></div>
 </div></div></div>
@@ -580,7 +582,8 @@ html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 <label>사업<select id="iTBiz"></select></label>
 <label>안건<input id="iTTitle" maxlength="80"></label>
 <label>배경·질문<textarea id="iTBody" rows="4"></textarea></label>
-<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#A38C72"><span>참석자 <span id="pplN" class="mono"></span></span><span style="display:flex;gap:4px"><button class="btn sbtn" data-pp="lead" type="button">리드만</button><button class="btn sbtn" data-pp="kkumi" type="button">꾸미 담당</button><button class="btn sbtn" data-pp="game" type="button">게임 담당</button><button class="btn sbtn" data-pp="none" type="button">비우기</button></span></div>
+<div class="fatt" id="mtAtt"></div>
+<div style="display:flex;justify-content:space-between;align-items:center;font-size:10px;color:#A38C72"><span>참석자 <span id="pplN" class="mono"></span></span><span style="display:flex;gap:4px"><button class="btn sbtn" data-pp="lead" type="button">리드만</button><button class="btn sbtn" data-pp="kkumi" type="button">꾸미 담당</button><button class="btn sbtn" data-pp="game" type="button">게임 담당</button><button class="btn sbtn" data-pp="all" type="button">전원</button><button class="btn sbtn" data-pp="none" type="button">비우기</button></span></div>
 <div class="ppl2" id="iPpl"></div>
 <div class="err" id="eMeet"></div>
 <div class="row"><button class="btn" data-close>취소</button><button class="btn pri" id="bMeetSave">회의 소집</button></div>
@@ -1028,7 +1031,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241527';
+const APPVER='11241536';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1099,7 +1102,7 @@ $('#bKeySave').onclick=async()=>{
 document.querySelectorAll('[data-close]').forEach(b=>b.onclick=()=>b.closest('.mask').classList.remove('show'));
 let missionFor=null;
 window.openMission=function(agentId,hire){
-  missionFor=agentId||null;$('#eMission').textContent='';
+  missionFor=agentId||null;$('#eMission').textContent='';if(typeof faReset==='function')faReset('mission');
   const a=agentId&&S.team.agents[agentId];
   $('#iBiz').innerHTML=bizOptions(a&&a.team==='TECH'?'':(S.bus&&S.bus[0]||{}).id);
   $('#msCap').textContent=hire?'HIRE REQUEST':(a?`ASSIGN · ${a.name}`:'NEW MISSION');
@@ -1111,10 +1114,11 @@ $('#bMission').onclick=()=>openMission();$('#bMission2').onclick=()=>openMission
 $('#bMissionSave').onclick=async()=>{
   const title=$('#iMTitle').value.trim(),body=$('#iMBody').value.trim(),biz=$('#iBiz').value;
   if(!title){$('#eMission').textContent='제목을 적어 주세요.';return;}
+  if(faBusy('mission')){$('#eMission').textContent='첨부파일을 올리는 중입니다. 잠시 뒤 다시 눌러 주세요.';return;}
   const tech=missionFor&&(S.team.agents[missionFor]||{}).team==='TECH';const lbl=['mission'];if(biz&&!tech)lbl.push('biz:'+biz);
   const extra=missionFor?`\n\n담당 지정: ${missionFor} (${S.team.agents[missionFor].name})`:'';
   $('#bMissionSave').disabled=true;
-  try{const r=await gh('/issues',{method:'POST',body:{title,body:`사업: ${BIZ[biz]&&!tech?BIZ[biz].kind+' · '+BIZ[biz].name:'회사 공통'}\n\n${body}${extra}`,labels:lbl}});$('#mMission').classList.remove('show');toast(`M-${String(r.number).padStart(3,'0')} 등록 · TOM이 곧 업무로 나눕니다`);setTimeout(sync,1500);}
+  try{const r=await gh('/issues',{method:'POST',body:{title,body:`사업: ${BIZ[biz]&&!tech?BIZ[biz].kind+' · '+BIZ[biz].name:'회사 공통'}\n\n${body}${faText('mission')}${extra}`,labels:lbl}});$('#mMission').classList.remove('show');toast(`M-${String(r.number).padStart(3,'0')} 등록 · TOM이 곧 업무로 나눕니다`);setTimeout(sync,1500);}
   catch(e){$('#eMission').textContent='등록 실패: '+e.message.slice(0,80);}
   finally{$('#bMissionSave').disabled=false;}
 };
@@ -1122,21 +1126,21 @@ const MEET_PRESET={lead:['tom','kate','jake','emma','max','noah','sam'],kkumi:['
 function pplHtml(sel){const teams=S.team.teams||{};const list=agents();const order=[...Object.keys(teams),...new Set(list.map(a=>a.team).filter(t=>!(t in teams)))];
   return order.filter(t=>list.some(a=>a.team===t)).map(t=>`<div class="pg"><div class="pgh">${esc(t)} <span>${esc(teams[t]||'')}</span></div>${list.filter(a=>a.team===t).map(a=>`<label class="pp${sel.includes(a.id)?' on':''}"><input type="checkbox" value="${a.id}" ${sel.includes(a.id)?'checked':''}><img src="${spriteOf(a.id)}" alt="" onerror="this.src='assets/s-ben.png'"><span class="pn" style="color:${MC[a.model]}">${esc(a.name)}</span><span class="pt">${esc(a.title||'')}</span><span class="pm" style="color:${MC[a.model]}">${a.model.toUpperCase()}</span></label>`).join('')}</div>`).join('');}
 function setPpl(sel){$('#iPpl').innerHTML=pplHtml(sel);$('#iPpl').querySelectorAll('input').forEach(x=>x.onchange=()=>{x.parentElement.classList.toggle('on',x.checked);pplCount();});pplCount();}
-function pplCount(){const n=document.querySelectorAll('#iPpl input:checked').length;$('#pplN').textContent=`${n}명 선택 · 2~6명`;$('#pplN').style.color=n>=2&&n<=6?'#A08A72':'#E2704F';}
+function pplCount(){const n=document.querySelectorAll('#iPpl input:checked').length;$('#pplN').textContent=`${n}명 선택 · 2명 이상`;$('#pplN').style.color=n>=2?'#A08A72':'#E2704F';}
 $('#bMeet').onclick=()=>{
-  $('#iTBiz').innerHTML=bizOptions('');$('#iTTitle').value='';$('#iTBody').value='';$('#eMeet').textContent='';
+  $('#iTBiz').innerHTML=bizOptions('');$('#iTTitle').value='';$('#iTBody').value='';$('#eMeet').textContent='';if(typeof faReset==='function')faReset('meet');
   setPpl(['tom','jake','emma','max']);
-  $('#iTBiz').onchange=()=>{const v=$('#iTBiz').value;if(MEET_PRESET[v])setPpl(MEET_PRESET[v].filter(x=>S.team.agents[x]).slice(0,6));};
+  $('#iTBiz').onchange=()=>{const v=$('#iTBiz').value;if(MEET_PRESET[v])setPpl(MEET_PRESET[v].filter(x=>S.team.agents[x]));};
   $('#mMeet').classList.add('show');setTimeout(()=>$('#iTTitle').focus(),50);
 };
-document.querySelectorAll('[data-pp]').forEach(b=>b.onclick=()=>{const k=b.dataset.pp;setPpl(k==='none'?[]:(MEET_PRESET[k]||[]).filter(x=>S.team.agents[x]).slice(0,6));});
+document.querySelectorAll('[data-pp]').forEach(b=>b.onclick=()=>{const k=b.dataset.pp;setPpl(k==='none'?[]:k==='all'?agents().map(x=>x.id).filter(x=>x!==((S.team.roles||{}).secretary)):(MEET_PRESET[k]||[]).filter(x=>S.team.agents[x]));});
 $('#bMeetSave').onclick=async()=>{
   const title=$('#iTTitle').value.trim();const ppl=[...document.querySelectorAll('#iPpl input:checked')].map(x=>x.value);
   if(!title){$('#eMeet').textContent='안건을 적어 주세요.';return;}
   if(ppl.length<2){$('#eMeet').textContent='참석자를 2명 이상 골라 주세요.';return;}
-  if(ppl.length>6){$('#eMeet').textContent='6명까지만 부를 수 있습니다(호출 비용).';return;}
+  if(faBusy('meet')){$('#eMeet').textContent='첨부파일을 올리는 중입니다. 잠시 뒤 다시 눌러 주세요.';return;}
   $('#bMeetSave').disabled=true;
-  try{const r=await gh('/issues',{method:'POST',body:{title,body:`참석: ${ppl.join(', ')}\n\n${$('#iTBody').value.trim()}`,labels:['meeting'].concat($('#iTBiz').value?['biz:'+$('#iTBiz').value]:[])}});$('#mMeet').classList.remove('show');toast(`MT-${String(r.number).padStart(3,'0')} 소집 · 엔진이 시작하면 회의실로 모입니다`);setTimeout(sync,1500);}
+  try{const r=await gh('/issues',{method:'POST',body:{title,body:`참석: ${ppl.join(', ')}\n\n${$('#iTBody').value.trim()}${faText('meet')}`,labels:['meeting'].concat($('#iTBiz').value?['biz:'+$('#iTBiz').value]:[])}});$('#mMeet').classList.remove('show');toast(`MT-${String(r.number).padStart(3,'0')} 소집 · 엔진이 시작하면 회의실로 모입니다`);setTimeout(sync,1500);}
   catch(e){$('#eMeet').textContent='소집 실패: '+e.message.slice(0,80);}
   finally{$('#bMeetSave').disabled=false;}
 };
@@ -1185,8 +1189,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241527"></script>
-<script src="views.js?v=11241527"></script>
-<script src="chat.js?v=11241527"></script>
+<script src="portfolio.js?v=11241536"></script>
+<script src="views.js?v=11241536"></script>
+<script src="chat.js?v=11241536"></script>
 </body>
 </html>
