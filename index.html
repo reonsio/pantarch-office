@@ -9,7 +9,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black">
 <meta name="apple-mobile-web-app-title" content="PANTARCH">
 <meta name="theme-color" content="#1E150F">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
 <script>if(matchMedia("(max-width: 760px)").matches)document.documentElement.classList.add("m");</script>
 <title>PANTARCH HQ</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -80,6 +80,10 @@ aside,.col{display:flex;flex-direction:column;gap:8px;min-height:0}
 .st i{width:5px;height:5px;display:inline-block;margin-right:4px}
 .tr,.th{display:grid;grid-template-columns:48px 100px minmax(0,1fr) 110px 46px 52px 72px 26px 56px 38px;gap:8px;align-items:center;padding:0 10px;height:27px;font-size:12px;border-bottom:1px solid #2C2018}
 .tr{cursor:pointer}.tr:hover{background:#2A1F17}
+::placeholder{font-size:11px!important;color:#6E5C4A!important;opacity:1}
+select{-webkit-appearance:none;appearance:none;border-radius:0!important;background-image:linear-gradient(45deg,transparent 50%,#8E7861 50%),linear-gradient(135deg,#8E7861 50%,transparent 50%)!important;background-position:calc(100% - 12px) 50%,calc(100% - 8px) 50%!important;background-size:4px 4px!important;background-repeat:no-repeat!important;padding-right:22px!important}
+.rfc{display:flex;gap:4px;padding:6px 8px;border-bottom:1px solid #2C2018;overflow-x:auto;scrollbar-width:none}.rfc::-webkit-scrollbar{display:none}
+.rfc .btn{flex:none;width:auto;padding:0 10px;display:flex;gap:6px;align-items:center}.rfc .btn em{font-style:normal;font-family:'IBM Plex Mono',monospace;font-size:10px;opacity:.75}
 .bg{display:flex;align-items:center;gap:8px;height:30px;padding:0 10px;background:#241A13;border-bottom:1px solid #2C2018;cursor:pointer;user-select:none}
 .bg:hover{background:#2A1F17}
 .bg .cv{width:10px;flex:none;font:10px 'IBM Plex Mono',monospace;color:#8E7861}
@@ -241,7 +245,7 @@ html.m .sbtn{height:26px}
 html.m .ap .t{white-space:normal}
 html.m .mask{position:fixed;inset:0;z-index:60;align-items:flex-start;padding-top:max(14px,env(safe-area-inset-top));overflow:auto}
 html.m .mask .fm{width:94vw!important;max-height:calc(100dvh - 28px);overflow:auto;flex:none}
-html.m .fm input,html.m .fm select,html.m .fm textarea{font-size:16px;padding:8px}html.m .fm label{font-size:12px}html.m .fm .row .btn{height:40px}
+html.m .fm input,html.m .fm select,html.m .fm textarea{padding:7px 8px}html.m .fm label{font-size:12px}html.m .fm .row .btn{height:40px}
 html.m footer{display:none}
 html.m #mtab{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid #3A2A1F;background:#1E1611}
 #mtab button{background:none;border:0;border-top:2px solid transparent;color:#A08A72;font:600 11px 'IBM Plex Sans KR',sans-serif;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer}
@@ -267,7 +271,7 @@ html.m .grid{grid-template-columns:repeat(3,1fr);gap:4px;padding:6px}
 html.m .doc{grid-template-columns:1fr}
 html.m .doc .ls{max-height:200px;border-right:0;border-bottom:1px solid #3A2A1F}
 /* 아이폰은 16px보다 작은 입력칸을 누르면 화면을 확대해 버린다 */
-html.m input,html.m textarea,html.m select{font-size:16px!important}
+html.m input,html.m textarea,html.m select{font-size:13px!important}/* 확대 방지는 viewport maximum-scale로 */
 
 /* library */
 .libnote{padding:8px 10px;font-size:11px;line-height:1.6;color:#B9A285;border-bottom:1px solid #2C2018}
@@ -296,7 +300,7 @@ html.m .tile .cap2{font-size:9px;padding:1px 4px}
 #vRefs{grid-template-columns:360px minmax(0,1fr)}#vRefs>section:first-child{align-self:start}
 .rfr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
 .rfr label{display:grid;gap:3px;font-size:10px;color:#A38C72}
-.rfr select{height:28px;background:#17110D;border:1px solid #4A3626;color:#EFE2CC;font:12px 'IBM Plex Sans KR',sans-serif;padding:0 6px}
+.rfr select{width:100%;box-sizing:border-box;min-width:0;height:28px;background-color:#17110D;border:1px solid #4A3626;color:#EFE2CC;font:12px 'IBM Plex Sans KR',sans-serif;padding:0 6px}
 .vs{padding:6px 10px;background:#2A1F17;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1.2px;display:flex;gap:8px;align-items:center}
 .msn{border-bottom:1px solid #2C2018;padding:8px 10px}
 .msn .mh2{display:grid;grid-template-columns:14px 58px minmax(0,1fr) auto 92px 44px;gap:8px;align-items:center;cursor:pointer}
@@ -985,7 +989,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241028';
+const APPVER='11241030';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 async function sync(){checkVer();
@@ -1114,8 +1118,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241028"></script>
-<script src="views.js?v=11241028"></script>
-<script src="chat.js?v=11241028"></script>
+<script src="portfolio.js?v=11241030"></script>
+<script src="views.js?v=11241030"></script>
+<script src="chat.js?v=11241030"></script>
 </body>
 </html>

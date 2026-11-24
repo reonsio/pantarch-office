@@ -175,10 +175,10 @@ async function renderRefs(){
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">ADD REFERENCE</span></div>
     <form class="rf" id="rfF"><div class="rfr"><label>어디에<select id="rfS">${sc.map(x=>`<option value="${x.id}"${x.id===(REF.f==='all'?'_common':REF.f)?' selected':''}>${x.id==='_common'?'회사 공통':`${x.kind} · ${esc(x.name)}`}</option>`).join('')}</select></label>
     <label>종류<select id="rfK">${REF_KINDS.map(([v,l])=>`<option value="${v}">${l}</option>`).join('')}</select></label></div>
-    <textarea id="rfT" rows="3" placeholder="@계정, 링크, 문구 · 인스타는 화면 녹화·캡처가 가장 정확"></textarea>
+    <textarea id="rfT" rows="3" placeholder="@계정 · 링크 · 문구 · 캡처"></textarea>
     <div class="rfb"><label class="btn sbtn">사진·영상<input type="file" id="rfI" multiple accept="image/*,video/*" style="display:none"></label><span class="mu" id="rfN"></span><button class="btn sbtn pri" id="rfGo">넣기</button></div></form>
     ${REF.stat?`<div class="libnote">${esc(REF.stat)}</div>`:''}</section>
-  <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span><span class="chips">${[{id:'all',name:'전체'}].concat(sc).map(x=>`<button class="btn sbtn${REF.f===x.id?' on':''}" data-rf="${x.id}" style="width:auto;padding:0 10px">${esc(x.id==='_common'?'공통':x.name)} ${x.id==='all'?sc.reduce((n,y)=>n+cnt(y),0):cnt(x)}</button>`).join('')}</span></div>
+  <section class="pnl" style="display:flex;flex-direction:column;min-height:0"><div class="ph"><span class="cap">REFERENCE</span></div><div class="rfc">${[{id:'all',name:'전체'}].concat(sc).map(x=>`<button class="btn sbtn${REF.f===x.id?' on':''}" data-rf="${x.id}">${esc(x.id==='_common'?'공통':x.name)}<em>${x.id==='all'?sc.reduce((n,y)=>n+cnt(y),0):cnt(x)}</em></button>`).join('')}</div>
     <div class="scroll">${list}</div></section>`;
   root.querySelectorAll('[data-rf]').forEach(el=>el.onclick=()=>{REF.f=el.dataset.rf;renderRefs();});
   let files=[];
