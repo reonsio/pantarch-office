@@ -381,7 +381,7 @@ html.m .pp{height:40px}
 
 /* roster: team rows */
 /* 직원 명단: 아래 COMPANY METRICS와 같은 4칸(같은 바깥 여백·칸 사이·안쪽 여백). 1칸 팀, 2~4칸 직원, 3명 넘으면 다음 줄 */
-.tm{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:4px;row-gap:0;align-items:center;padding:1px 8px;border-bottom:1px solid #2C2018}
+.tm{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));column-gap:4px;row-gap:0;align-items:center;padding:1px 8px;border-bottom:1px solid #2C2018;background:linear-gradient(#2C2018,#2C2018) no-repeat calc(8px + (100% - 28px)/4 - 1px) 0/1px 100%}
 .tn{grid-column:1;align-self:start;height:18px;display:flex;align-items:center;padding-left:7px;font:600 10px 'IBM Plex Mono',monospace;letter-spacing:1px;color:#D9A441;white-space:nowrap;overflow:hidden}
 .tc{display:contents}
 .ch{display:flex;align-items:center;gap:3px;height:18px;padding-left:2px;cursor:pointer;white-space:nowrap;overflow:hidden;min-width:0}
@@ -1027,7 +1027,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241501';
+const APPVER='11241506';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1184,8 +1184,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241501"></script>
-<script src="views.js?v=11241501"></script>
-<script src="chat.js?v=11241501"></script>
+<script src="portfolio.js?v=11241506"></script>
+<script src="views.js?v=11241506"></script>
+<script src="chat.js?v=11241506"></script>
 </body>
 </html>
