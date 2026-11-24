@@ -44,10 +44,13 @@ window.renderPortfolio=async function(soft){
   if(!PF.tree||!soft){try{await loadTree();}catch(e){toast('저장소 목록을 못 읽었습니다');}}
   const BL=bizList();if(!BL.length){root.innerHTML='<div class="empty">사업 목록을 불러오는 중…</div>';return;}
   const b=BL.find(x=>x.id===PF.biz)||BL[0];PF.biz=b.id;
-  const side=BL.map(x=>{let s='';
-    if(x.kind==='BRAND'){const ps=posts(x.id);s=`자료 ${mediaFiles(x).length} · 게시 결재 ${ps.filter(i=>i.state==='open'&&statusOf(i)==='REVIEW').length}`;}
-    else{const t=S.issues.filter(i=>has(i,'task')&&bizOf(i)===x.id);s=`업무 ${t.filter(i=>i.state==='open').length} 진행 · ${t.filter(i=>i.state==='closed').length} 완료`;}
-    return `<div class="bz${x.id===PF.biz?' on':''}" data-bz="${x.id}"><div class="bar" style="background:${x.col}"></div><div><div class="k" style="color:${x.col}">${x.kind}</div><div class="n">${esc(x.name)}</div><div class="s">${esc(s)}</div></div></div>`;}).join('');
+  const row=x=>{let s='';
+    if(x.kind==='BRAND'){const ps=posts(x.id);s=[['자료',mediaFiles(x).length],['결재',ps.filter(i=>i.state==='open'&&statusOf(i)==='REVIEW').length]];}
+    else{const t=S.issues.filter(i=>has(i,'task')&&bizOf(i)===x.id);s=[['진행',t.filter(i=>i.state==='open').length],['완료',t.filter(i=>i.state==='closed').length]];}
+    return `<div class="bz${x.id===PF.biz?' on':''}" data-bz="${x.id}"><i class="bar" style="background:${x.col}"></i><span class="n">${esc(x.name)}</span><span class="s">${s.map(([k,v])=>`<b><i>${k}</i><span>${v}</span></b>`).join('')}</span></div>`;};
+  /* 유형별로 묶음: BRAND · PRODUCT · SERVICE */
+  const side=['BRAND','PRODUCT','SERVICE'].map(k=>{const g=BL.filter(x=>x.kind===k);if(!g.length)return '';const c=(g[0]||{}).col;
+    return `<div class="bzg"><span style="color:${c}">${k}</span><em>${g.length}</em></div>${g.map(row).join('')}`;}).join('')+BL.filter(x=>!['BRAND','PRODUCT','SERVICE'].includes(x.kind)).map(row).join('');
   const tabs=(KINDS[b.kind]||KINDS.SERVICE).tabs;if(!PF.tab[b.id]||!tabs.some(t=>t[0]===PF.tab[b.id]))PF.tab[b.id]=tabs[0][0];const cur=PF.tab[b.id];
   root.innerHTML=`<section class="pnl" style="display:flex;flex-direction:column">
     <div class="ph"><span class="cap">BUSINESS</span></div>
