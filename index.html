@@ -490,7 +490,7 @@ html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 <section class="pnl" id="chatPanel" data-m="chat" style="display:flex;flex-direction:column;flex:1;min-height:0">
 <div class="ph"><span class="cap">CHAT</span><span class="mono mu" style="font-size:10px" id="chatWho"></span></div>
 <div class="chb"><div class="chto" id="chatTo"></div><div class="scroll" id="chatLog"></div></div>
-<div id="chatAtt"></div><form id="chatF"><button type="button" class="btn" id="chatClip" title="사진·영상·문서(PDF·PPT·워드) 첨부">＋</button><input id="chatIn" autocomplete="off" enterkeyhint="send"><button class="btn pri" id="chatGo">보내기</button><input type="file" id="chatFile" accept="image/*,video/*,.pdf,.pptx,.docx" multiple hidden></form>
+<div id="chatAtt"></div><form id="chatF"><button type="button" class="btn" id="chatClip" title="사진·영상·문서·프로젝트 파일(zip·코드) 첨부">＋</button><input id="chatIn" autocomplete="off" enterkeyhint="send"><button class="btn pri" id="chatGo">보내기</button><input type="file" id="chatFile" accept="image/*,video/*,.pdf,.pptx,.docx,.zip,.html,.htm,.js,.css,.json,.txt,.md" multiple hidden></form>
 </section>
 </aside>
 
@@ -1028,7 +1028,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241513';
+const APPVER='11241527';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1185,8 +1185,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241513"></script>
-<script src="views.js?v=11241513"></script>
-<script src="chat.js?v=11241513"></script>
+<script src="portfolio.js?v=11241527"></script>
+<script src="views.js?v=11241527"></script>
+<script src="chat.js?v=11241527"></script>
 </body>
 </html>
