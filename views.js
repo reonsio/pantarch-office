@@ -38,13 +38,13 @@ async function renderMissions(){
     try{if(a==='del'){
         const ts=tasks.filter(t=>meta(t).mission===n&&t.state==='open');const tn=new Set(tasks.filter(t=>meta(t).mission===n).map(t=>t.number));
         const ps=S.issues.filter(i=>has(i,'post')&&i.state==='open'&&!has(i,'status:scheduled')&&tn.has(meta(i).task));
-        if(!confirm(`${codeN(n)} 미션을 삭제합니다. 남은 업무 ${ts.length}건${ps.length?`, 게시 결재 ${ps.length}건`:''}도 함께 지웁니다.`)){b.disabled=false;return;}
+        if(!await ask({cap:'DELETE',msg:`${codeN(n)} 미션을 삭제합니다. 남은 업무 ${ts.length}건${ps.length?`, 게시 결재 ${ps.length}건`:''}도 함께 지웁니다.`,ok:'삭제',danger:1})){b.disabled=false;return;}
         for(const x of [...ts,...ps,{number:n}])await gh(`/issues/${x.number}`,{method:'PATCH',body:{state:'closed',state_reason:'not_planned'}});
         const gone=new Set([n,...ts.map(t=>t.number),...ps.map(p=>p.number)]);S.issues=S.issues.filter(i=>!gone.has(i.number));
         toast(`${codeN(n)} 삭제했습니다`);renderMissions();renderApprovals();renderBoard();return;}
       if(a==='pause'){await gh(`/issues/${n}/labels`,{method:'POST',body:{labels:['paused']}});toast(`${codeN(n)} 일시정지 · 진행 중인 업무만 마치고 멈춥니다`);}
       else if(a==='resume'){await gh(`/issues/${n}/labels/paused`,{method:'DELETE'});toast(`${codeN(n)} 재개`);gh('/actions/workflows/engine.yml/dispatches',{method:'POST',body:{ref:'main'}}).catch(()=>{});}
-      else{const t=prompt('의견을 적어 주세요. 이 미션 담당 TOM이 반영합니다.');if(!t){b.disabled=false;return;}await gh(`/issues/${n}/comments`,{method:'POST',body:{body:t}});toast('의견을 남겼습니다');}
+      else{const t=await ask({cap:'COMMENT · '+codeN(n),msg:'담당 TOM이 반영합니다.',input:1,ph:'바꿀 점 · 추가할 점',ok:'보내기'});if(!t){b.disabled=false;return;}await gh(`/issues/${n}/comments`,{method:'POST',body:{body:t}});toast('의견을 남겼습니다');}
       setTimeout(sync,1200);}catch(err){toast('실패: '+err.message.slice(0,60));b.disabled=false;}});
   $('#mvNew').onclick=()=>openMission();$('#mvMeet').onclick=()=>$('#bMeet').click();
 }

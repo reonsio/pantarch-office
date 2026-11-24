@@ -31,7 +31,7 @@ button{font:inherit;color:inherit}
 .ph{height:28px;display:flex;justify-content:space-between;align-items:center;gap:6px;padding:0 8px;border-bottom:1px solid #3A2A1F;background:#271C15;flex:none}
 .btn{height:22px;display:flex;align-items:center;justify-content:center;font-size:11px;border:1px solid #4A3626;background:#2A1F17;color:#E9DAC2;cursor:pointer;padding:0 8px;white-space:nowrap}
 .btn:hover{border-color:#7A5A3E}
-.btn.pri{background:#D9A441;border-color:#D9A441;color:#1E150F;font-weight:600}
+.btn.pri{background:#D9A441;border-color:#D9A441;color:#1E150F;font-weight:600}.btn.pri.dng{background:#C0604F;border-color:#C0604F;color:#F4E8DA}#mAsk .fm{width:360px}input:focus,textarea:focus,select:focus{outline:none;border-color:#D9A441}
 .btn.on{background:#D9A441;border-color:#D9A441;color:#1E150F;font-weight:600}
 .btn:disabled{opacity:.45;cursor:default}
 .sbtn{height:18px;font-size:10px;padding:0 6px}
@@ -535,6 +535,14 @@ html.m #portfolio .ph.nw{flex-wrap:nowrap!important}
 <div class="row"><button class="btn" id="bKeyCancel">닫기</button><button class="btn pri" id="bKeySave">연결</button></div>
 </div></div></div>
 
+<div class="mask" id="mAsk"><div class="fm">
+<div class="ph"><span class="cap" id="askCap"></span></div>
+<div class="bd">
+<div class="mb" id="askMsg" style="display:block;padding:0;font-size:12px;color:#D8C6AE;line-height:1.6"></div>
+<label id="askL">의견<textarea id="askT" rows="4"></textarea></label>
+<div class="row"><button class="btn" id="askNo">취소</button><button class="btn pri" id="askOk">확인</button></div>
+</div></div></div>
+
 <div class="mask" id="mMission"><div class="fm">
 <div class="ph"><span class="cap" id="msCap">NEW MISSION</span></div>
 <div class="bd">
@@ -988,7 +996,7 @@ function renderFooter(){
 
 /* ---------- sync ---------- */
 let syncing=false;
-const APPVER='11241033';
+const APPVER='11241035';
 async function checkVer(){try{const r=await fetch('version.txt?t='+Date.now(),{cache:'no-store'});if(!r.ok)return;const v=(await r.text()).trim();
   if(v&&v!==APPVER&&sessionStorage.getItem('pv_reload')!==v){sessionStorage.setItem('pv_reload',v);location.replace(location.pathname+'?v='+v+location.hash);}}catch{}}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')checkVer();});/* 앱으로 돌아올 때마다 새 버전 확인 */
@@ -1019,6 +1027,12 @@ setInterval(()=>{if(S.team)renderRoster();},5000);
 document.addEventListener('visibilitychange',()=>{if(!document.hidden)sync();});
 
 /* ---------- actions ---------- */
+/* 브라우저 기본 창 대신 오피스 모양 그대로 묻는 창. 글을 받으면 문자열, 확인만이면 true, 취소면 null */
+function ask(o){return new Promise(res=>{const m=$('#mAsk'),t=$('#askT');$('#askCap').textContent=o.cap||'CONFIRM';$('#askMsg').textContent=o.msg||'';$('#askMsg').style.display=o.msg?'block':'none';
+  $('#askL').style.display=o.input?'':'none';t.value='';t.placeholder=o.ph||'';$('#askOk').textContent=o.ok||'확인';$('#askOk').classList.toggle('dng',!!o.danger);
+  const done=v=>{m.classList.remove('show');res(v);};$('#askNo').onclick=()=>done(null);
+  $('#askOk').onclick=()=>{if(o.input){const v=t.value.trim();if(!v){t.focus();return;}done(v);}else done(true);};
+  m.classList.add('show');if(o.input)setTimeout(()=>t.focus(),50);});}
 function toast(t){const e=$('#toast');e.textContent=t;e.classList.add('show');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('show'),2600);}
 function showKey(msg){$('#eKey').textContent=msg||'';$('#mKey').classList.add('show');setTimeout(()=>$('#iKey').focus(),50);}
 $('#bKey').onclick=()=>showKey('');
@@ -1078,7 +1092,7 @@ $('#bSync').onclick=async()=>{const b=$('#bSync');if(b.disabled)return;b.disable
 function ctlIssue(){return S.issues.find(i=>has(i,'control')&&i.state==='open');}
 function isPaused(){const c=ctlIssue();try{return !!(c&&JSON.parse((/\{[\s\S]*\}/.exec(c.body||'')||['{}'])[0]).paused);}catch{return false;}}
 function renderWork(){const p=isPaused();const b=$('#bWork');b.classList.toggle('paused',p);b.innerHTML=p?'<i class="d" style="background:#E2704F"></i>근무 멈춤':'<i class="d" style="background:#7DB79A"></i>근무 중';b.title=p?'누르면 근무를 다시 시작합니다':'누르면 새 업무 착수를 멈춥니다(결재·채용은 계속 처리)';}
-$('#bWork').onclick=async()=>{const p=!isPaused();if(p&&!confirm('근무를 멈출까요? 진행 중인 업무만 마치고 새 업무·회의는 시작하지 않습니다. 결재 처리는 계속됩니다.'))return;
+$('#bWork').onclick=async()=>{const p=!isPaused();if(p&&!await ask({cap:'PAUSE',msg:'근무를 멈출까요? 진행 중인 업무만 마치고 새 업무·회의는 시작하지 않습니다. 결재 처리는 계속됩니다.',ok:'멈추기'}))return;
   const body=JSON.stringify({paused:p,by:'owen',at:new Date().toISOString()});const c=ctlIssue();
   try{if(c)await gh(`/issues/${c.number}`,{method:'PATCH',body:{body}});else await gh('/issues',{method:'POST',body:{title:'근무 상태',body,labels:['control']}});
     if(!p)gh('/actions/workflows/engine.yml/dispatches',{method:'POST',body:{ref:'main'}}).catch(()=>{});
@@ -1118,8 +1132,8 @@ fit();
 try{navigator.storage&&navigator.storage.persist&&navigator.storage.persist();}catch{}
 if(TOKEN) sync(); else showKey('');
 </script>
-<script src="portfolio.js?v=11241033"></script>
-<script src="views.js?v=11241033"></script>
-<script src="chat.js?v=11241033"></script>
+<script src="portfolio.js?v=11241035"></script>
+<script src="views.js?v=11241035"></script>
+<script src="chat.js?v=11241035"></script>
 </body>
 </html>

@@ -137,7 +137,7 @@ function pQueue(body,b){
     <div>${st==='REVIEW'?`<div class="b3"><button class="btn pri" data-act="승인">게시 승인</button><button class="btn" data-act="">의견</button><button class="btn" data-act="기각">기각</button></div>`:(st==='APPROVED'||st==='SCHEDULED')?`<div class="b3" style="grid-template-columns:repeat(2,1fr)"><button class="btn pri" data-act="지금 올리기">지금 올리기</button>${m.pub_error?'<button class="btn" data-act="다시">다시 시도</button>':'<button class="btn" data-act="기각">취소</button>'}</div>${m.pub_error?`<div style="font-size:11px;color:#E2704F;margin-top:3px">${esc(m.pub_error)}</div>`:''}`:'<span class="mu" style="font-size:11px">—</span>'}</div></div>`;}).join('')||'<div class="empty">게시물 없음</div>'}</div>`;
   body.querySelectorAll('[data-pv2]').forEach(el=>el.onclick=()=>preview(b,el.dataset.pv2));
   body.querySelectorAll('[data-act]').forEach(btn=>btn.onclick=async()=>{const n=+btn.closest('[data-n]').dataset.n;let txt=btn.dataset.act;
-    if(!txt){txt=prompt('의견을 적어 주세요. LILY가 반영해서 다시 만듭니다.');if(!txt)return;}
+    if(!txt){txt=await ask({cap:'COMMENT',msg:'LILY가 반영해서 다시 만듭니다.',input:1,ph:'바꿀 점 · 추가할 점',ok:'보내기'});if(!txt)return;}
     btn.disabled=true;try{await gh(`/issues/${n}/comments`,{method:'POST',body:{body:txt}});toast(`${codeN(n)} 처리했습니다`);setTimeout(sync,1500);}catch(e){toast('실패: '+e.message.slice(0,60));btn.disabled=false;}});
   $('#pNew').onclick=()=>openComposer(b,null);lazy(body);
 }
